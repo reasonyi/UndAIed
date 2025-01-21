@@ -29,8 +29,11 @@ function Header(){
                 <li className="mr-6">
                     <Link to={"/log/4"}>4번 log로</Link>
                 </li>
-                <li>
+                <li className="mr-6">
                     <button onClick={onBoardClick}>board로</button>
+                </li>
+                <li className="mr-6">
+                    <Link to={"/write"}>게시글작성으로</Link>
                 </li>
             </ul>
         </header>
