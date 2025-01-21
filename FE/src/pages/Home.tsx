@@ -1,7 +1,6 @@
 import { useOutletContext } from "react-router-dom";
 import LoggedInHome from "../components/LoggedInHome";
 import LoggedOutHome from "../components/LoggedOutHome";
-import Header from "../components/Header";
 
 interface OuletContextType {
     isLoggedIn: boolean,

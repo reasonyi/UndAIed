@@ -10,6 +10,7 @@ import BoardDetails from "../pages/BoardDetails";
 import Board from "../pages/Board";
 import User from "../pages/User";
 import Log from "../pages/Log";
+import BoardWrite from "../pages/BoardWrite";
 
 const router = createBrowserRouter([
     {
@@ -48,6 +49,10 @@ const router = createBrowserRouter([
             {
                 path: "/board",
                 element: <Board />
+            },
+            {
+                path: "/write",
+                element: <BoardWrite />
             },
             {
                 path: "/user/:userId",
