@@ -1,4 +1,6 @@
 import {useForm} from "react-hook-form";
+import { useRecoilValue } from "recoil";
+import { userState } from "../store/userState";
 
 interface IForm {
     title: string;
@@ -9,8 +11,9 @@ function BoardWrite(){
     //user정보 가져오기
     //register는 첫번째 인자를 자동으로 html의 name로 할당하고, 이를 트리거한다.
     const {register, watch, handleSubmit, formState :{errors}} = useForm<IForm>();
-
     console.log(watch())
+
+    const userInfo = useRecoilValue(userState)
 
     const boardSubmit = (data:any) => {
         console.log(data);
@@ -19,6 +22,7 @@ function BoardWrite(){
     return (
         <>
             <h1>BoardWrite page</h1>
+            <h1>유저 토큰: {userInfo.token}</h1>
             <form onSubmit={handleSubmit(boardSubmit)}>
                 <input type="text"
                     {...register("title",
