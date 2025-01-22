@@ -1,5 +1,6 @@
 import { Outlet } from "react-router-dom"
 import Header from "./components/Header"
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 
 function App() {
   const isLoggedIn = true
@@ -8,6 +9,7 @@ function App() {
     <>
       <Header />
       <Outlet context={ {isLoggedIn} } />
+      <ReactQueryDevtools initialIsOpen={false} />
     </>
   )
 }
