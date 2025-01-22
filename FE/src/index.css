@@ -1,3 +1,29 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --primary-black: rgb(7, 7, 10);
+}
+
+.header-style {
+  color: #eeeeee;
+  justify-content: space-between;
+}
+.header-bottom-style {
+  background-color: rgb(98, 98, 103);
+  width: 100%;
+  height: 1px;
+}
+
+.primary-bg-black {
+  background-color: var(--primary-black);
+}
+
+.primary-bg-white {
+  background-color: #eeeeee;
+}
+
+.border-outline-gray {
+  border-color: rgb(98, 98, 103);
+}
