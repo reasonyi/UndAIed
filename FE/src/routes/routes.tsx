@@ -7,7 +7,7 @@ import GameRooms from "../pages/GameRooms";
 import GameLobby from "../pages/GameLobby";
 import GameChats from "../pages/GameChats";
 import BoardDetails from "../pages/BoardDetails";
-import Board from "../pages/Board";
+import Board from "../pages/Board/Board";
 import User from "../pages/User";
 import Log from "../pages/Log";
 import BoardWrite from "../pages/BoardWrite";
