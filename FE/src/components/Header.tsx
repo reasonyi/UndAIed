@@ -5,7 +5,7 @@ interface IHeaderProps {
   scrollRatio: number;
 }
 
-const Header: React.FC<IHeaderProps> = ({ scrollRatio }) => {
+function Header({ scrollRatio }: IHeaderProps) {
   const [scrollTop, setScrollTop] = useState(0);
 
   const handleScroll = (event: React.UIEvent<HTMLDivElement>) => {
@@ -62,6 +62,6 @@ const Header: React.FC<IHeaderProps> = ({ scrollRatio }) => {
       ></div>
     </header>
   );
-};
+}
 
 export default Header;

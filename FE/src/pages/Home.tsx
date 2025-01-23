@@ -13,30 +13,42 @@ interface OuletContextType {
 function Home() {
   const { isLoggedIn } = useOutletContext<OuletContextType>();
 
-  const [scrollX, setScrollX] = useState(0);
+  const [offset, setOffset] = useState(0);
+  const [scrollRatio, setScrollRatio] = useState(0);
 
   // 스크롤 감지 핸들러
   useEffect(() => {
-    const handleScroll = () => {
-      setScrollX(window.scrollY); // 스크롤 Y 값을 X 좌표 이동으로 사용
+    const onScroll = () => {
+      const docHeight = document.documentElement.scrollHeight; // 전체 문서 높이
+      const winHeight = window.innerHeight; // 뷰포트 높이
+      const totalScrollableHeight = docHeight - winHeight; // 스크롤 가능한 전체 높이
+      setOffset(window.scrollY);
+      setScrollRatio(
+        window.scrollY === 0
+          ? 0
+          : (window.scrollY / totalScrollableHeight) * 100
+      );
     };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    // clean up code
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  console.log(offset);
+  console.log(scrollRatio);
+
   return (
-    <>
-      <Header scrollRatio={30} />
+    <div className="">
+      <Header scrollRatio={scrollRatio} />
       <HeaderTemp />
-      <div className="w-screen min-h-[calc(100vh-3.5rem)] primary-bg-black">
+      <div className="on-scroll w-screen min-h-[calc(100vh-3.5rem)] primary-bg-black">
         <div className="w-[1px] h-[400vh]"></div>
       </div>
       {/* <div className="login-div">
           {isLoggedIn ? <LoggedInHome /> : <LoggedOutHome />}
         </div>
         <footer className="w-full"></footer> */}
-    </>
+    </div>
   );
 }
 
