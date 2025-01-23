@@ -13,11 +13,14 @@ html::-webkit-scrollbar {
   display: none; /* 크롬, 사파리, 오페라 등 웹킷 엔진 */
 }
 .chat-container {
-  @apply [&::-webkit-scrollbar]:w-2
-  [&::-webkit-scrollbar-track]:bg-gray-100
-  [&::-webkit-scrollbar-thumb]:bg-gray-300
-  dark:[&::-webkit-scrollbar-track]:bg-neutral-700
-  dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500;
+  @apply [&::-webkit-scrollbar]:w-1
+  [&::-webkit-scrollbar-track]:bg-[#09122C]
+  [&::-webkit-scrollbar-thumb]:bg-[#872341];
+}
+
+.background-gradient {
+  background: linear-gradient(0deg, rgb(9, 9, 11), transparent),
+    radial-gradient(circle at 30% 20%, rgba(237, 71, 71, 0.351), transparent);
 }
 
 .header-style {
