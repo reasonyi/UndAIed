@@ -24,8 +24,8 @@ public class Users {
     private String nickname;
     private Boolean sex;
 
-    @Enumerated(EnumType.STRING)
     @NotNull
+    @Enumerated(EnumType.STRING)
     private ProviderType provider;
     @NotNull
     private String providerId;
@@ -42,6 +42,9 @@ public class Users {
     private LocalDateTime lastLogin;
     private Integer totalWin;
     private Integer totalLose;
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private RoleType roleType;
 
     @Builder
     public Users(
@@ -61,5 +64,6 @@ public class Users {
         this.updatedAt = LocalDateTime.now();
         this.totalWin = 0;
         this.totalLose = 0;
+        this.roleType = RoleType.USER;
     }
 }
