@@ -59,5 +59,7 @@ public class Users {
         this.isDeleted = false;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
+        this.totalWin = 0;
+        this.totalLose = 0;
     }
 }
