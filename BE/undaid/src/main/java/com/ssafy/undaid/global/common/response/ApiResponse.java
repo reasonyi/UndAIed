@@ -1,5 +1,6 @@
 package com.ssafy.undaid.global.common.response;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.ssafy.undaid.global.common.exception.ErrorCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import java.time.format.DateTimeFormatter;
 @ToString
 @RequiredArgsConstructor
 @Getter
+@JsonPropertyOrder({"timeStamp", "isSuccess", "status", "message"})
 public class ApiResponse {
 
     private final String timeStamp = LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME);
