@@ -56,11 +56,13 @@
 // export default BoardWrite;
 import { useRef } from "react";
 import { atom, useRecoilState } from "recoil";
+import { Link, useLocation } from "react-router-dom";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import bugReportImage from "../assets/board/bugReport.png";
 
 import Banner from "./Board/components/Banner";
+import Header from "../components/Header";
 
 const editorState = atom({
   key: "editorContent",
@@ -83,6 +85,8 @@ const formats = [
 function BoardWrite() {
   const [content, setContent] = useRecoilState(editorState);
   const quillRef = useRef<ReactQuill>(null);
+  const location = useLocation();
+  const prevPath = location.state?.from || "/board";
 
   const modules = {
     toolbar: [
@@ -97,6 +101,8 @@ function BoardWrite() {
   const handleSubmit = async () => {
     try {
       const postData = { content };
+      const token = localStorage.getItem("token");
+
       console.log("Posted:", postData);
     } catch (error) {
       console.error("Error:", error);
@@ -105,33 +111,45 @@ function BoardWrite() {
 
   return (
     <>
+      <Header scrollRatio={100} />
+      <div className="h-14"></div>
       <Banner bannerImage={bugReportImage} category="write" />
       <div className="max-w-4xl mx-auto p-4">
-        <div>자유게시판</div>
-        <div className="mb-4">
+        <div className="mb-4 border-t-2 border-t-black ">
           <input
             type="text"
             placeholder="제목을 입력하세요"
-            className="w-full p-2 border border-gray-300 rounded"
+            className="focus:outline-none w-full py-2 px-4 border border-gray-300"
           />
         </div>
 
-        <ReactQuill
-          ref={quillRef}
-          theme="snow"
-          value={content}
-          onChange={setContent}
-          modules={modules}
-          formats={formats}
-          className="h-96 mb-12"
-        />
+        <div>
+          <ReactQuill
+            placeholder="내용을 입력하세요"
+            ref={quillRef}
+            theme="snow"
+            value={content}
+            onChange={setContent}
+            modules={modules}
+            formats={formats}
+            className="h-96 mb-12 border-t-black border-t-4"
+          />
+        </div>
 
-        <button
-          onClick={handleSubmit}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-        >
-          작성완료
-        </button>
+        <div className="flex justify-center pt-4">
+          <button
+            onClick={handleSubmit}
+            className="mx-1.5 px-9 py-2 bg-[#000000c0] text-white hover:bg-black border border-black"
+          >
+            확인
+          </button>
+          <Link
+            to={prevPath}
+            className="mx-1.5 px-9 py-2 bg-white border border-transparent text-black hover:border hover:border-black"
+          >
+            취소
+          </Link>
+        </div>
       </div>
     </>
   );
