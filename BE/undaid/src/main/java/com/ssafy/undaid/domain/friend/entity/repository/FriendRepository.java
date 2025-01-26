@@ -37,5 +37,10 @@ public interface FriendRepository extends JpaRepository<Friends, Integer> {
     )
     List<FriendResponseDto> findPendingByUserId(@Param("userId") Integer userId);
 
-
+    // 특정 친구 목록(한 개) 조회
+    @Query("SELECT f FROM Friends f WHERE " +
+            "(f.user.userId = :userId AND f.friendUser.userId = :friendId) OR " +
+            "(f.user.userId = :friendId AND f.friendUser.userId = :userId)"
+    )
+    Friends findByUserIdAndFriendId(@Param("userId") Integer userId, @Param("friendId") Integer friendId);
 }

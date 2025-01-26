@@ -55,4 +55,8 @@ public class Friends {
         this.updatedAt = updatedAt;
     }
 
+    public void updateStatus(FriendshipStatus status) {
+        this.status = status;
+    }
+
 }
