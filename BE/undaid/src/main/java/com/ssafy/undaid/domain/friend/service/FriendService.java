@@ -1,5 +1,6 @@
 package com.ssafy.undaid.domain.friend.service;
 
+import com.ssafy.undaid.domain.friend.dto.request.DeleteFriendRequestDto;
 import com.ssafy.undaid.domain.friend.dto.request.UpdateFriendRequestDto;
 import com.ssafy.undaid.domain.friend.dto.response.FriendResponseDto;
 import com.ssafy.undaid.domain.friend.dto.response.UpdateFriendResponseDto;
@@ -39,6 +40,13 @@ public class FriendService {
                 .userId(updatedFriend.getUser().getUserId())
                 .friendId(updatedFriend.getFriendUser().getUserId())
                 .build();
+    }
+
+    public void deleteFriend(DeleteFriendRequestDto deleteFriendRequestDto) {
+        Friends friend = friendRepository.findByUserIdAndFriendId(deleteFriendRequestDto.getUserId(), deleteFriendRequestDto.getFriendId());
+
+        friendRepository.delete(friend);
+
     }
 
 }
