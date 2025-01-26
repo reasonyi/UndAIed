@@ -1,6 +1,6 @@
-import { Category } from "../../../types/board";
+import { BannerProps } from "../../../types/board";
 
-function CategoryNav({ category }: Category) {
+function CategoryNav({ category }: BannerProps) {
   return (
     <ul className="w-full max-w-[1260px] mx-auto flex flex-col sm:flex-row mt-10 h-14">
       <li

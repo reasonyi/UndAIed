@@ -1,7 +1,3 @@
-export interface Category {
-  category: string;
-}
-
 export interface Post {
   boardId: number;
   title: string;
@@ -31,4 +27,14 @@ export interface PaginationProps {
   startPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
+}
+
+export interface Category {
+  category: string;
+}
+
+export type CategoryType = "bugreport" | "notice" | "write";
+export interface BannerProps {
+  category: CategoryType;
+  bannerImage?: string;
 }

@@ -7,7 +7,6 @@ function App() {
 
   return (
     <>
-      <Header />
       <Outlet context={{ isLoggedIn }} />
       <ReactQueryDevtools initialIsOpen={false} />
     </>

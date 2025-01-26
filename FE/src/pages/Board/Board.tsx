@@ -1,11 +1,14 @@
 import { useParams } from "react-router";
 import { useRecoilState } from "recoil";
 import { currentPageState } from "../../store/board/boardState";
+import boardBanner from "../../assets/board/upscalingBoard.png";
+import { CategoryType } from "../../types/board";
 
 import Banner from "./components/Banner";
 import CategoryNav from "./components/CategoryNav";
 import PostList from "./components/PostList";
 import Pagination from "./components/Pagination";
+import Header from "../../components/Header";
 
 function Board() {
   const testData = [
@@ -337,7 +340,12 @@ function Board() {
     },
   ];
 
-  const { category = "notice" } = useParams();
+  const { category: paramCategory = "notice" } = useParams();
+  const category: CategoryType = ["bugreport", "notice", "write"].includes(
+    paramCategory
+  )
+    ? (paramCategory as CategoryType)
+    : "notice";
   const filterData = testData.filter((data) => data.category === category);
 
   //pagenation 변수들
@@ -377,7 +385,8 @@ function Board() {
 
   return (
     <>
-      <Banner category={category} />
+      <Header scrollRatio={30} />
+      <Banner category={category} bannerImage={boardBanner} />
       <CategoryNav category={category} />
       <PostList
         currentPosts={currentPosts}
