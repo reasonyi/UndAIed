@@ -85,4 +85,15 @@ public class JwtTokenProvider {
             return false;
         }
     }
+
+    public int getUserIdFromToken(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(secretKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        return Integer.parseInt(claims.get("userId").toString());
+    }
+
 }
