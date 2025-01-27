@@ -1,6 +1,7 @@
 package com.ssafy.undaid.global.common.exception;
 
 import com.ssafy.undaid.global.common.response.HttpStatusCode;
+import io.jsonwebtoken.ExpiredJwtException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
@@ -20,7 +21,10 @@ public enum ErrorCode {
 
     USER_NOT_FOUND(HttpStatusCode.BAD_REQUEST.getStatus(), "유저를 찾을 수 없습니다."),
     TOKEN_VALIDATION_FAILED(HttpStatusCode.BAD_REQUEST.getStatus(), "토큰 인증에 실패했습니다."),
-    UNAUTHORIZED_TOKEN(HttpStatus.UNAUTHORIZED.value(), "인증되지 않은 토큰입니다.")
+    UNAUTHORIZED_TOKEN(HttpStatusCode.UNAUTHORIZED.getStatus(), "인증되지 않은 토큰입니다."),
+    EXPIRED_TOKEN(HttpStatusCode.UNAUTHORIZED.getStatus(), "만료된 토큰입니다."),
+
+    INVALID_USER_ID_FORMAT(HttpStatusCode.BAD_REQUEST.getStatus(), "토큰에서 userId 파싱에 실패했습니다.")
     ;
 
     private final int httpStatus;
