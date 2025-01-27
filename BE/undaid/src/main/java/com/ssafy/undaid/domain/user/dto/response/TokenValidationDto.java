@@ -1,4 +1,4 @@
-package com.ssafy.undaid.domain.user.dto;
+package com.ssafy.undaid.domain.user.dto.response;
 
 import com.ssafy.undaid.global.common.response.HttpStatusCode;
 import lombok.Getter;

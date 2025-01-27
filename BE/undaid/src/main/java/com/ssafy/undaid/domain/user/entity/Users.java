@@ -19,8 +19,10 @@ public class Users {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int userId;
     @NotNull
+    @Column(length = 50)
     private String email;
     @NotNull
+    @Column(length = 50)
     private String nickname;
     private Boolean sex;
 
