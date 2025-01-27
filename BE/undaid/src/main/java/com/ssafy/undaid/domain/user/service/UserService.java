@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.ssafy.undaid.global.common.exception.ErrorCode.TOKEN_VALIDATION_FAILED;
 import static com.ssafy.undaid.global.common.exception.ErrorCode.USER_NOT_FOUND;
 
 
@@ -94,7 +95,7 @@ public class UserService{
         List<GameParticipants> participants = gameParticipantsRepository.findDistinctByUserUserId(userId);
         List<Games> games = null;
 
-        if(!participants.isEmpty()) {
+        if (!participants.isEmpty()) {
             games = participants
                     .stream()
                     .map(GameParticipants::getGame)
@@ -112,17 +113,20 @@ public class UserService{
                         .toList()
                 : Collections.emptyList();
 
+        // age와 sex가 null일 경우 기본값 처리
+        Integer age = user.getAge() != null ? user.getAge() : 0; // 기본값 0으로 설정
+        boolean sex = user.getSex() != null ? user.getSex() : true; // 기본값 "Unknown"으로 설정
+
         return UserProfileResponseDto.builder()
                 .nickname(user.getNickname())
                 .profileImage(user.getProfileImage())
                 .avatar(user.getAvatar())
-                .sex(user.getSex())
-                .age(user.getAge())
+                .sex(sex)
+                .age(age)
                 .totalWin(user.getTotalWin())
                 .totalLose(user.getTotalLose())
                 .game(dtoList)
                 .build();
-
     }
 
 //    public UpdateProfileRequestDto updateProfile(UpdateProfileRequestDto updateProfileRequestDto) {
