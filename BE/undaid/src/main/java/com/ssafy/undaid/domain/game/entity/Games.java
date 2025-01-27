@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 public class Games {
 
     @Id
+    @Column(name = "game_id")
     private int gameId;
 
     @Column(length = 50)
