@@ -12,7 +12,7 @@ import org.hibernate.annotations.OnDeleteAction;
 @Entity
 @Getter @Setter
 @NoArgsConstructor
-@Table(name = "games")
+@Table(name = "game_participants")
 public class GameParticipants {
 
     @Id
