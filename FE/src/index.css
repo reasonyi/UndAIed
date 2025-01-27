@@ -12,6 +12,9 @@
 html::-webkit-scrollbar {
   display: none; /* 크롬, 사파리, 오페라 등 웹킷 엔진 */
 }
+input {
+  outline: none;
+}
 .chat-container {
   @apply [&::-webkit-scrollbar]:w-1
   [&::-webkit-scrollbar-track]:bg-[#4c4e4f]
