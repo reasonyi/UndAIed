@@ -88,13 +88,13 @@ public class JwtTokenProvider {
 
     public int getUserIdFromToken(String token) {
         try {
-            Claims claims = Jwts.parserBuilder()
+            Claims claims = Jwts.parser()
                     .setSigningKey(secretKey)
-                    .build()
                     .parseClaimsJws(token)
                     .getBody();
 
-            return Integer.parseInt(claims.get("userId").toString());
+            // userId 클레임 값 추출
+            return (int) claims.get("userId");
         } catch (ExpiredJwtException e) {
             throw new BaseException(EXPIRED_TOKEN);             // 만료된 토큰
         } catch (JwtException e) {
