@@ -39,7 +39,7 @@ adminApi.interceptors.request.use((config) => {
 });
 
 export const boardApi = {
-  getPosts: (page: number = 1) => api.get("", { params: { page } }),
+  getPosts: () => api.get(""),
   getPost: (id: number) => api.get(`${id}`),
   createPost: (data: BoardRequest) => api.post("", data),
   updatePost: (id: number, data: Partial<BoardRequest>) => api.put(`${id}`),

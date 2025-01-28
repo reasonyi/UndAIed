@@ -9,6 +9,7 @@ import CategoryNav from "./components/CategoryNav";
 import PostList from "./components/PostList";
 import Pagination from "./components/Pagination";
 import Header from "../../components/Header";
+import { useGetPosts } from "../../hooks/useBoard";
 
 function Board() {
   const testData = [
@@ -339,8 +340,9 @@ function Board() {
       updateAt: "2024-01-30T13:15:00",
     },
   ];
-
+  const { data: posts = [] } = useGetPosts(); //나중에 api 들어오면 연동
   const { category: paramCategory = "notice" } = useParams();
+
   const category: CategoryType = ["bugreport", "notice", "write"].includes(
     paramCategory
   )
@@ -370,18 +372,6 @@ function Board() {
       day: "2-digit",
     }).format(date);
   };
-
-  // const movePrevGroup = () => {
-  //   if (startPage > 1) {
-  //     movePage(startPage - 1);
-  //   }
-  // };
-
-  // const moveNextGroup = () => {
-  //   if (endPage < totalPages) {
-  //     movePage(endPage + 1);
-  //   }
-  // };
 
   return (
     <>

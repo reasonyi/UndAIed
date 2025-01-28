@@ -4,6 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import bugReportImage from "../assets/board/bugReport.png";
+import { boardApi, AdminBoardApi } from "../api/board/boardApi";
 
 import Banner from "./Board/components/Banner";
 import Header from "../components/Header";
@@ -42,15 +43,9 @@ function BoardWrite() {
     ],
   };
 
-  const handleSubmit = async () => {
-    try {
-      const postData = { content };
-      const token = localStorage.getItem("token");
-
-      console.log("Posted:", postData);
-    } catch (error) {
-      console.error("Error:", error);
-    }
+  //여기서? 아니면 글쓰기 버튼 노출 / 비노출로 관리자, 일반유저 글쓰기 관리리
+  const handleSubmit = () => {
+    boardApi.createPost;
   };
 
   return (
