@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { BannerProps } from "../../../types/board";
 
 function CategoryNav({ category }: BannerProps) {
@@ -10,9 +11,9 @@ function CategoryNav({ category }: BannerProps) {
             : "text-[#868686]"
         } flex items-center w-full sm:w-1/2`}
       >
-        <a className="w-full text-center" href="/board/notice">
+        <Link to="/board/notice" className="w-full text-center">
           공지사항
-        </a>
+        </Link>
       </li>
       <li
         className={`${
@@ -21,9 +22,9 @@ function CategoryNav({ category }: BannerProps) {
           category !== "bugreport" ? "text-[#868686]" : ""
         }`}
       >
-        <a className="w-full text-center" href="/board/bugreport">
+        <Link to="/board/bugreport" className="w-full text-center">
           버그리포트
-        </a>
+        </Link>
       </li>
     </ul>
   );
