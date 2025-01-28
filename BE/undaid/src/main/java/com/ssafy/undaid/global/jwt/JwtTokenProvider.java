@@ -1,7 +1,8 @@
 package com.ssafy.undaid.global.jwt;
 
 import com.ssafy.undaid.domain.user.entity.RoleType;
-import io.jsonwebtoken.Jws;
+import com.ssafy.undaid.global.common.exception.BaseException;
+import io.jsonwebtoken.*;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -9,14 +10,13 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Value;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.Claims;
 import org.springframework.util.StringUtils;
 
 import java.util.Base64;
 import java.util.Collections;
 import java.util.Date;
+
+import static com.ssafy.undaid.global.common.exception.ErrorCode.*;
 
 @RequiredArgsConstructor
 @Component
@@ -85,4 +85,23 @@ public class JwtTokenProvider {
             return false;
         }
     }
+
+    public int getUserIdFromToken(String token) {
+        try {
+            Claims claims = Jwts.parser()
+                    .setSigningKey(secretKey)
+                    .parseClaimsJws(token)
+                    .getBody();
+
+            // userId 클레임 값 추출
+            return (int) claims.get("userId");
+        } catch (ExpiredJwtException e) {
+            throw new BaseException(EXPIRED_TOKEN);             // 만료된 토큰
+        } catch (JwtException e) {
+            throw new BaseException(UNAUTHORIZED_TOKEN);        // 유효하지 않은 토큰
+        } catch (NumberFormatException e) {
+            throw new BaseException(INVALID_USER_ID_FORMAT);    // userId 파싱 실패
+        }
+    }
+
 }
