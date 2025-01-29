@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class FriendRequestListResponseDto {
+    private int friendshipId;
     private int userId;
     private String nickname;
-    private LocalDateTime createdAt;
 }

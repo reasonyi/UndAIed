@@ -29,9 +29,9 @@ public interface FriendRepository extends JpaRepository<Friends, Integer> {
     // 친구 요청 조회
     // friendId가 사용자이면서 status = 'PENDING'인 friends 목록
     @Query("SELECT new com.ssafy.undaid.domain.friend.dto.response.FriendRequestListResponseDto(" +
+            "f.friendshipId, " +
             "f.user.userId, " +
-            "f.user.nickname, " +
-            "f.createdAt)" +
+            "f.user.nickname) " +
             "FROM Friends f WHERE " +
             "f.friendUser.userId = :userId AND " +
             "f.status = com.ssafy.undaid.domain.friend.entity.FriendshipStatus.PENDING"
