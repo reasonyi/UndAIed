@@ -46,6 +46,17 @@ public class FriendService {
         Users user = userService.getUserById(userId);   // 친구 요청을 보낸 사용자
         Users friendUser = userService.getUserByNickname(createFriendRequestDto.getNickname()); // 친구 요청을 받은 사용자
 
+        Friends friendship = friendRepository.findByUserIdAndFriendId(user.getUserId(), friendUser.getUserId());
+        if ( friendship != null) {
+            // 차단인 경우
+            if (friendship.getStatus() == FriendshipStatus.BLOCKED) {
+                throw new BaseException(ErrorCode.USER_NOT_FOUND);
+            } else {
+                // 이미 친구이거나 친구 요청을 보낸 경우
+                throw new BaseException(ErrorCode.FRIENDSHIP_ALREADY_REQUESTED);
+            }
+        }
+
         Friends friend = Friends.builder()
                 .status(FriendshipStatus.PENDING)
                 .user(user)

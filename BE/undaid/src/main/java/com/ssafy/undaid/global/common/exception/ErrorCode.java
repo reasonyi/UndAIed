@@ -4,7 +4,6 @@ import com.ssafy.undaid.global.common.response.HttpStatusCode;
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.springframework.http.HttpStatus;
 
 @Getter
 @AllArgsConstructor
@@ -24,8 +23,10 @@ public enum ErrorCode {
     UNAUTHORIZED_TOKEN(HttpStatusCode.UNAUTHORIZED.getStatus(), "인증되지 않은 토큰입니다."),
     EXPIRED_TOKEN(HttpStatusCode.UNAUTHORIZED.getStatus(), "만료된 토큰입니다."),
 
-    INVALID_USER_ID_FORMAT(HttpStatusCode.BAD_REQUEST.getStatus(), "토큰에서 userId 파싱에 실패했습니다.")
-    ;
+    INVALID_USER_ID_FORMAT(HttpStatusCode.BAD_REQUEST.getStatus(), "토큰에서 userId 파싱에 실패했습니다."),
+
+    FRIENDSHIP_ALREADY_REQUESTED(HttpStatusCode.BAD_REQUEST.getStatus(), "이미 친구이거나 친구 요청을 보냈습니다.");
+
 
     private final int httpStatus;
     private final String message;
