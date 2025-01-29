@@ -132,4 +132,21 @@ public class UserService{
 //    public UpdateProfileRequestDto updateProfile(UpdateProfileRequestDto updateProfileRequestDto) {
 //
 //    }
+
+
+
+    // =============== 친구 추가를 위해 추가할 내용
+    public Users getUserByNickname(String nickname) {
+        Users user = userRepository.findByNickname(nickname)
+                .orElseThrow(()-> new BaseException(USER_NOT_FOUND));
+        return user;
+    }
+
+    public Users getUserById(int userId) {
+        Users user = userRepository.findById(userId)
+                .orElseThrow(()-> new BaseException(USER_NOT_FOUND));
+        return user;
+    }
+
+
 }

@@ -1,5 +1,6 @@
 package com.ssafy.undaid.domain.friend.controller;
 
+import com.ssafy.undaid.domain.friend.dto.request.CreateFriendRequestDto;
 import com.ssafy.undaid.domain.friend.dto.request.DeleteFriendRequestDto;
 import com.ssafy.undaid.domain.friend.dto.request.UpdateFriendRequestDto;
 import com.ssafy.undaid.domain.friend.dto.response.FriendResponseDto;
@@ -8,6 +9,7 @@ import com.ssafy.undaid.domain.friend.service.FriendService;
 import com.ssafy.undaid.global.common.response.ApiDataResponse;
 import com.ssafy.undaid.global.common.response.ApiResponse;
 import com.ssafy.undaid.global.common.response.HttpStatusCode;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,6 +36,13 @@ public class FriendController {
             @RequestParam int userId) {
         List<FriendResponseDto> friendRequestsList = friendService.getFriendRequestsList(userId);
         return ApiDataResponse.of(HttpStatusCode.OK, friendRequestsList, "친구 요청 목록 조회 성공");
+    }
+
+    // 친구 요청
+    @PostMapping("/")
+    public ApiResponse createFriend(HttpServletRequest request, @RequestBody CreateFriendRequestDto createFriendRequestDto) {
+        friendService.createFriend(request, createFriendRequestDto);
+        return ApiResponse.of(HttpStatusCode.OK, "친구 요청을 보냈습니다.");
     }
 
     // 친구 요청 변경 (수락/거절)
