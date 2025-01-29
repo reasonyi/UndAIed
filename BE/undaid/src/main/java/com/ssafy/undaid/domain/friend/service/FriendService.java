@@ -3,6 +3,7 @@ package com.ssafy.undaid.domain.friend.service;
 import com.ssafy.undaid.domain.friend.dto.request.CreateFriendRequestDto;
 import com.ssafy.undaid.domain.friend.dto.request.DeleteFriendRequestDto;
 import com.ssafy.undaid.domain.friend.dto.request.UpdateFriendRequestDto;
+import com.ssafy.undaid.domain.friend.dto.response.FriendRequestListResponseDto;
 import com.ssafy.undaid.domain.friend.dto.response.FriendResponseDto;
 import com.ssafy.undaid.domain.friend.dto.response.UpdateFriendResponseDto;
 import com.ssafy.undaid.domain.friend.entity.Friends;
@@ -34,15 +35,19 @@ public class FriendService {
         return friendRepository.findByUserId(userId);
     }
 
-    public List<FriendResponseDto> getFriendRequestsList(int userId) {
+    public List<FriendRequestListResponseDto> getFriendRequestsList(HttpServletRequest request) {
+        String token = jwtTokenProvider.resolveToken(request);
+        if(token == null) throw new BaseException(ErrorCode.UNAUTHORIZED_TOKEN);
+        int userId = jwtTokenProvider.getUserIdFromToken(token);
+
         return friendRepository.findPendingByUserId(userId);
     }
 
     public void createFriend(HttpServletRequest request, CreateFriendRequestDto createFriendRequestDto) {
         String token = jwtTokenProvider.resolveToken(request);
         if(token == null) throw new BaseException(ErrorCode.UNAUTHORIZED_TOKEN);
-
         int userId = jwtTokenProvider.getUserIdFromToken(token);
+
         Users user = userService.getUserById(userId);   // 친구 요청을 보낸 사용자
         Users friendUser = userService.getUserByNickname(createFriendRequestDto.getNickname()); // 친구 요청을 받은 사용자
 

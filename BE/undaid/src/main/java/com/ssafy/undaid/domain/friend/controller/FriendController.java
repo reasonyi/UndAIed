@@ -3,6 +3,7 @@ package com.ssafy.undaid.domain.friend.controller;
 import com.ssafy.undaid.domain.friend.dto.request.CreateFriendRequestDto;
 import com.ssafy.undaid.domain.friend.dto.request.DeleteFriendRequestDto;
 import com.ssafy.undaid.domain.friend.dto.request.UpdateFriendRequestDto;
+import com.ssafy.undaid.domain.friend.dto.response.FriendRequestListResponseDto;
 import com.ssafy.undaid.domain.friend.dto.response.FriendResponseDto;
 import com.ssafy.undaid.domain.friend.dto.response.UpdateFriendResponseDto;
 import com.ssafy.undaid.domain.friend.service.FriendService;
@@ -32,10 +33,10 @@ public class FriendController {
 
     // 친구 요청 목록 가져오기
     @GetMapping({"/request"})
-    public ApiDataResponse<List<FriendResponseDto>> getFriendRequestsList(
-            @RequestParam int userId) {
-        List<FriendResponseDto> friendRequestsList = friendService.getFriendRequestsList(userId);
-        return ApiDataResponse.of(HttpStatusCode.OK, friendRequestsList, "친구 요청 목록 조회 성공");
+    public ApiDataResponse<List<FriendRequestListResponseDto>> getFriendRequestsList(
+            HttpServletRequest request) {
+        List<FriendRequestListResponseDto> responseDtoList = friendService.getFriendRequestsList(request);
+        return ApiDataResponse.of(HttpStatusCode.OK, responseDtoList, "친구 요청 목록 조회 성공");
     }
 
     // 친구 요청
