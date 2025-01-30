@@ -11,7 +11,9 @@ import com.ssafy.undaid.global.common.response.HttpStatusCode;
 import com.ssafy.undaid.global.jwt.JwtTokenProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,19 +38,15 @@ public class UserController {
 
     // 회원 프로필 조회
     @GetMapping
-    public ApiDataResponse<?> getUserInfo(HttpServletRequest request) {
-        String token = jwtTokenProvider.resolveToken(request);  // Bearer 토큰에서 JWT 추출
-        if (token == null) {
-            throw new BaseException(UNAUTHORIZED_TOKEN);
-        }
-        int userId = jwtTokenProvider.getUserIdFromToken(token);
+    public ApiDataResponse<?> getUserInfo() {
+        Integer userId = (Integer) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         UserProfileResponseDto responseDto = userService.getUserProfile(userId);
         return ApiDataResponse.of(HttpStatusCode.OK, responseDto, "프로필 조회 성공");
     }
 
 //    // 회원 프로필 업데이트
 //    @PatchMapping("/profile")
-//    public ApiResponse updateProfile(@RequestBody UpdateProfileRequestDto updateProfileRequestDto) {
+//    public ApiResponse updateProfile(@RequestBody UpdateProfileRequestDto updateProfileRequestDto, Authentication authentication) {
 //
 //    }
 
