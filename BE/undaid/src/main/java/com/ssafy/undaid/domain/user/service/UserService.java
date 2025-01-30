@@ -124,16 +124,12 @@ public class UserService{
                         .toList()
                 : Collections.emptyList();
 
-        // age와 sex가 null일 경우 기본값 처리
-        Integer age = user.getAge() != null ? user.getAge() : 0; // 기본값 0으로 설정
-        boolean sex = user.getSex() != null ? user.getSex() : true; // 기본값 "Unknown"으로 설정
-
         return UserProfileResponseDto.builder()
                 .nickname(user.getNickname())
                 .profileImage(user.getProfileImage())
                 .avatar(user.getAvatar())
-                .sex(sex)
-                .age(age)
+                .sex(user.getSex())
+                .age(user.getAge())
                 .totalWin(user.getTotalWin())
                 .totalLose(user.getTotalLose())
                 .game(dtoList)

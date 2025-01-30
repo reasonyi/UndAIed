@@ -27,7 +27,6 @@ import static com.ssafy.undaid.global.common.exception.ErrorCode.UNAUTHORIZED_TO
 public class UserController {
 
     private final UserService userService;
-    private final JwtTokenProvider jwtTokenProvider;
 
     // 회원가입 또는 로그인
     @PostMapping

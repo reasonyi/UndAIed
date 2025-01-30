@@ -67,6 +67,8 @@ public class Users {
         this.totalWin = 0;
         this.totalLose = 0;
         this.roleType = RoleType.USER;
+        this.sex = true;
+        this.age = 0;
     }
 
     public void updateProfile(Integer profileImage, Integer avatar, Boolean sex, Integer age, String nickname) {
