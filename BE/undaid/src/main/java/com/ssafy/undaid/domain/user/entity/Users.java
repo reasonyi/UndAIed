@@ -87,4 +87,8 @@ public class Users {
         }
         this.updatedAt = LocalDateTime.now();
     }
+
+    public void deleteUser() {
+        isDeleted = true;
+    }
 }
