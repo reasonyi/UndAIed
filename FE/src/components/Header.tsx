@@ -22,7 +22,7 @@ function Header({ scrollRatio }: IHeaderProps) {
   return (
     <header
       onScroll={handleScroll}
-      className="flex flex-col header-style w-screen h-14 fixed primary-bg-black"
+      className="flex flex-col header-style w-screen h-14 fixed primary-bg-black z-40"
     >
       <div></div>
       <ul className="flex ">
