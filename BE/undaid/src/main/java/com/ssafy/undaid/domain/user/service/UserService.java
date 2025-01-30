@@ -139,7 +139,13 @@ public class UserService{
                 .build();
     }
 
-//    public UpdateProfileRequestDto updateProfile(UpdateProfileRequestDto updateProfileRequestDto, int userId) {
-//
-//    }
+    @Transactional
+    public UserProfileResponseDto updateProfile(UpdateProfileRequestDto requestDto, int userId) {
+        Users user = userRepository.findById(userId)
+                .orElseThrow(() -> new BaseException(USER_NOT_FOUND));
+
+        user.updateProfile(requestDto.getProfileImage(), requestDto.getAvatar(), requestDto.isSex(), requestDto.getAge(), requestDto.getNickname());
+
+        return getUserProfile(userId);
+    }
 }

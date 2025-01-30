@@ -44,12 +44,12 @@ public class UserController {
         return ApiDataResponse.of(HttpStatusCode.OK, responseDto, "프로필 조회 성공");
     }
 
-//    // 회원 프로필 업데이트
-//    @PatchMapping("/profile")
-//    public ApiResponse updateProfile(@RequestBody UpdateProfileRequestDto updateProfileRequestDto, Authentication authentication) {
-//
-//    }
-
-
+    // 회원 프로필 업데이트
+    @PatchMapping("/profile")
+    public ApiResponse updateProfile(@RequestBody UpdateProfileRequestDto updateProfileRequestDto) {
+        Integer userId = (Integer) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UserProfileResponseDto responseDto = userService.updateProfile(updateProfileRequestDto, userId);
+        return ApiDataResponse.of(HttpStatusCode.OK, responseDto, "프로필이 수정되었습니다.");
+    }
 
 }
