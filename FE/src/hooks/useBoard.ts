@@ -1,8 +1,15 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { boardApi, BoardRequest, AdminBoardApi } from "../api/board/boardApi";
-import { Post } from "../types/board";
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  QueryClient,
+  useInfiniteQuery,
+} from "@tanstack/react-query";
+import { boardApi, AdminBoardApi } from "../api/board/boardApi";
+import { BoardRequest, Post, UpdatePostParams } from "../types/board";
 
 //all list
+
 export const useGetPosts = () => {
   return useQuery({
     queryKey: ["posts"],
@@ -37,6 +44,34 @@ export const useCreatePost = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["posts"] });
+    },
+  });
+};
+
+export const useUpdatePost = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }: UpdatePostParams) =>
+      boardApi.updatePost(id, data),
+
+    onSuccess: (_, { id }) => {
+      // 수정 성공 시 해당 게시글의 캐시를 무효화
+      queryClient.invalidateQueries({ queryKey: ["posts", id] });
+      // 게시글 목록 캐시도 무효화 (필요한 경우)
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+    },
+  });
+};
+
+const useDeletePost = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (postId: number) => boardApi.deletePost(postId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      console.log("삭제 완료");
     },
   });
 };
