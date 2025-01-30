@@ -75,10 +75,9 @@ public class UserService{
             tokenValidationDto.setMessage("회원가입 성공");
         }
 
-        Users user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new BaseException(USER_NOT_FOUND));
-        if (user.getIsDeleted()) {
-            throw new BaseException(DELETED_USER);  // 유저가 탈퇴한 경우 다시 회원가입 및 로그인 할 수 없음.
+        Users user = userRepository.findByEmail(email);
+        if (user == null) {
+            throw new BaseException(USER_NOT_FOUND);
         }
 
         String jwtToken = login(user);
@@ -149,19 +148,4 @@ public class UserService{
 
         return getUserProfile(userId);
     }
-
-    // 로그아웃 시 리프레시 토큰 삭제
-    @Transactional
-    public void signout(String refreshToken) {
-        // RefreshToken 삭제만 수행
-//        redisTemplate.delete(refreshToken);
-    }
-
-    // 회원 탈퇴
-    public void deleteUser(int userId) {
-        Users user = userRepository.findById(userId)
-                .orElseThrow(() -> new BaseException(USER_NOT_FOUND));
-        user.deleteUser();
-    }
-
 }
