@@ -1,10 +1,12 @@
 package com.ssafy.undaid.global.common.response;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.Getter;
 import lombok.ToString;
 
 @ToString
 @Getter
+@JsonPropertyOrder({"timeStamp", "isSuccess", "status", "message", "data"})
 public class ApiDataResponse<T> extends ApiResponse{
 
     private final T data;
