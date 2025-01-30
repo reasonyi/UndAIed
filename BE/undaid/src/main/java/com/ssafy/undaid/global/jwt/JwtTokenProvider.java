@@ -58,8 +58,8 @@ public class JwtTokenProvider {
 
     public Authentication getAuthentication(String token) {
         Claims claims = getClaims(token);
-        String email = claims.getSubject();
-        return new UsernamePasswordAuthenticationToken(email, "", Collections.emptyList());
+        Integer userId = claims.get("userId", Integer.class);  // userId를 principal로 사용
+        return new UsernamePasswordAuthenticationToken(userId, "", Collections.emptyList());
     }
 
     public Claims getClaims(String token) {
