@@ -1,10 +1,5 @@
 import axios from "axios";
-
-export interface BoardRequest {
-  title: string;
-  content: string;
-  category: "0" | "1";
-}
+import { BoardRequest } from "../../types/board";
 
 const api = axios.create({
   baseURL: "/api/v1/board",

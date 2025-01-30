@@ -38,3 +38,13 @@ export interface BannerProps {
   category: CategoryType;
   bannerImage?: string;
 }
+
+export interface BoardRequest {
+  title: string;
+  content: string;
+  category: "0" | "1";
+}
+export interface UpdatePostParams {
+  id: number;
+  data: Partial<BoardRequest>;
+}
