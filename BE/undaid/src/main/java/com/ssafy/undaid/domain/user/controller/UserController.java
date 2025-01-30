@@ -37,7 +37,7 @@ public class UserController {
     }
 
     // 회원 프로필 조회
-    @GetMapping
+    @GetMapping("/profile")
     public ApiDataResponse<?> getUserInfo() {
         Integer userId = (Integer) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         UserProfileResponseDto responseDto = userService.getUserProfile(userId);
@@ -51,5 +51,7 @@ public class UserController {
         UserProfileResponseDto responseDto = userService.updateProfile(updateProfileRequestDto, userId);
         return ApiDataResponse.of(HttpStatusCode.OK, responseDto, "프로필이 수정되었습니다.");
     }
+
+
 
 }
