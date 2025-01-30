@@ -161,6 +161,7 @@ public class UserService{
     public void deleteUser(int userId) {
         Users user = userRepository.findById(userId)
                 .orElseThrow(() -> new BaseException(USER_NOT_FOUND));
+        signout("로그아웃 로직 만들겠습니다.");
         user.deleteUser();
     }
 
