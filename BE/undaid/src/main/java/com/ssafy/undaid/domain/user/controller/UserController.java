@@ -59,6 +59,12 @@ public class UserController {
         return ApiResponse.of(HttpStatusCode.OK, "로그아웃이 완료되었습니다.");
     }
 
-
+    // 회원 탈퇴
+    @DeleteMapping
+    public ApiResponse deleteUser() {
+        Integer userId = (Integer) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        userService.deleteUser(userId);
+        return ApiResponse.of(HttpStatusCode.OK, "회원탈퇴가 완료되었습니다.");
+    }
 
 }
