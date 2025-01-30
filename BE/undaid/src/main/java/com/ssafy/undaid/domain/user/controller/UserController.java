@@ -53,11 +53,12 @@ public class UserController {
     }
 
     // 로그아웃
-    @GetMapping("logout")
-    public ApiResponse logout() {
-        userService.logout("리프레시 토큰을 넣기 위한 로직 필요");
+    @GetMapping("/signout")
+    public ApiResponse signOut() {
+        userService.signout("리프레시 토큰을 넣기 위한 로직 필요");
         return ApiResponse.of(HttpStatusCode.OK, "로그아웃이 완료되었습니다.");
     }
+
 
 
 }
