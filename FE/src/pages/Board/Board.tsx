@@ -1,9 +1,16 @@
 import { useParams } from "react-router";
-import boardImage from "../../assets/board.jpg";
 import { useRecoilState } from "recoil";
-import { currentPageState } from "../../store/boardState";
-import leftArrow from "../../assets/icon/left.svg";
-import rightArrow from "../../assets/icon/right.svg";
+import { currentPageState } from "../../store/board/boardState";
+import boardBanner from "../../assets/board/upscalingBoard.png";
+import { CategoryType } from "../../types/board";
+
+import Banner from "./components/Banner";
+import CategoryNav from "./components/CategoryNav";
+import PostList from "./components/PostList";
+import Pagination from "./components/Pagination";
+import Header from "../../components/Header";
+import { useGetPosts } from "../../hooks/useBoard";
+
 function Board() {
   const testData = [
     {
@@ -333,8 +340,14 @@ function Board() {
       updateAt: "2024-01-30T13:15:00",
     },
   ];
+  const { data: posts = [] } = useGetPosts(); //나중에 api 들어오면 연동
+  const { category: paramCategory = "notice" } = useParams();
 
-  const { category = "notice" } = useParams();
+  const category: CategoryType = ["bugreport", "notice", "write"].includes(
+    paramCategory
+  )
+    ? (paramCategory as CategoryType)
+    : "notice";
   const filterData = testData.filter((data) => data.category === category);
 
   //pagenation 변수들
@@ -346,36 +359,10 @@ function Board() {
     currentPage * postPerPage
   );
 
-  const pageGroupSize = 10;
+  const pageGroupSize = 5;
   const currentGroup = Math.ceil(currentPage / pageGroupSize);
   const startPage = (currentGroup - 1) * pageGroupSize + 1;
   const endPage = Math.min(currentGroup * pageGroupSize, totalPages);
-
-  const movePage = (page: number) => {
-    setCurrentPage((prev) => (prev = page));
-  };
-
-  const movePrevPage = () => {
-    setCurrentPage((prev) => Math.max(prev - 1, 1));
-    console.log(currentPage);
-  };
-
-  const moveNextPage = () => {
-    setCurrentPage((prev) => prev + 1);
-    console.log(currentPage);
-  };
-
-  // const movePrevGroup = () => {
-  //   if (startPage > 1) {
-  //     movePage(startPage - 1);
-  //   }
-  // };
-
-  // const moveNextGroup = () => {
-  //   if (endPage < totalPages) {
-  //     movePage(endPage + 1);
-  //   }
-  // };
 
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
@@ -388,122 +375,22 @@ function Board() {
 
   return (
     <>
-      {/* ----------------------게시판 배너 ------------------------ */}
-      <div
-        className="border w-full h-[370px] bg-[#c73838] bg-cover bg-no-repeat relative"
-        style={{
-          backgroundImage: `url(${boardImage})`,
-          backgroundSize: "cover",
-          backgroundPosition: "50% 60%",
-        }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-r from-black via-transparent to-black">
-          <div className="relative ml-[17%] z-10 h-full flex flex-col justify-center items-left text-white">
-            <div className="text-5xl">
-              {category === "bugreport" ? "버그리포트" : "공지사항"}
-            </div>
-          </div>
-        </div>
-      </div>
-      {/* ----------------------- 카테고리 네비게이션 --------------------------- */}
-      <ul className="w-full max-w-[1260px] mx-auto flex flex-col sm:flex-row mt-10 h-14">
-        <li
-          className={`${
-            category === "notice"
-              ? " border border-x-black border-t-black"
-              : "text-[#868686]"
-          } flex items-center w-full sm:w-1/2`}
-        >
-          <a className="w-full text-center" href="/board/notice">
-            공지사항
-          </a>
-        </li>
-        <li
-          className={`${
-            category === "bugreport"
-              ? "border border-x-black border-t-black"
-              : ""
-          } flex items-center w-full sm:w-1/2  ${
-            category !== "bugreport" ? "text-[#868686]" : ""
-          }`}
-        >
-          <a className="w-full text-center" href="/board/bugreport">
-            버그리포트
-          </a>
-        </li>
-      </ul>
-
-      {/* ------------------------- 게시글 리스트 --------------------------------- */}
-
-      <main className="w-full max-w-[1260px] mx-auto">
-        <div className="bg-white overflow-x-auto ">
-          <table className="w-full min-w-[768px]">
-            <thead className="border-t-2 border-t-black bg-[#ededed27]">
-              <tr className="border-b">
-                <th className="py-4 px-6 text-center w-[10%]">공지</th>
-                <th className="py-4 px-6 text-left w-[55%] min-w-[200px]">
-                  제목
-                </th>
-                <th className="py-4 px-6 text-center w-[7%]">조회수</th>
-                <th className="py-4 px-6 text-center w-[13%]">게시일</th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentPosts.map((post, index) => (
-                <tr
-                  key={index}
-                  className="border-b transition-colors hover:bg-gray-50"
-                >
-                  <td className="py-4 px-6 sm:px-6 text-center whitespace-nowrap">
-                    {(currentPage - 1) * postPerPage + index + 1}
-                  </td>
-                  <td className="py-4 px-6 sm:px-6 truncate">{post.title}</td>
-                  <td className="py-4 sm:px-6 text-center whitespace-nowrap ">
-                    {post.viewCnt + " view"}
-                  </td>
-                  <td className="py-4 px-4 sm:px-6 text-center whitespace-nowrap">
-                    {formatDate(post.createAt)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </main>
-
-      {/*------------------------ 페이징 처리 ---------------------- */}
-      <div className="flex justify-center mt-12 mb-44 ">
-        <div className="flex gap-2">
-          <button
-            onClick={movePrevPage}
-            className="px-3 py-3 border-[#00000026] border hover:border-black"
-            disabled={currentPage === 1}
-          >
-            <img src={leftArrow} alt="left"></img>
-          </button>
-
-          {Array.from({ length: endPage - startPage + 1 }, (_, i) => (
-            <button
-              key={startPage + i}
-              onClick={() => movePage(startPage + i)}
-              className={`px-4 py-3  text-black hover:bg-[#323232] hover:text-white ${
-                currentPage === startPage + i
-                  ? "bg-black text-white pointer-events: none"
-                  : ""
-              }`}
-            >
-              {startPage + i}
-            </button>
-          ))}
-          <button
-            onClick={moveNextPage}
-            className="px-3 py-3 border-[#00000026] border hover:border-black "
-            disabled={currentPage === totalPages}
-          >
-            <img src={rightArrow} alt="left"></img>
-          </button>
-        </div>
-      </div>
+      <Header scrollRatio={30} />
+      <Banner category={category} bannerImage={boardBanner} />
+      <CategoryNav category={category} />
+      <PostList
+        currentPosts={currentPosts}
+        currentPage={currentPage}
+        postPerPage={postPerPage}
+        formatDate={formatDate}
+      />
+      <Pagination
+        currentPage={currentPage}
+        endPage={endPage}
+        startPage={startPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
     </>
   );
 }
