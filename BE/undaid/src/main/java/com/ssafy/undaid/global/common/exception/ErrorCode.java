@@ -19,6 +19,8 @@ public enum ErrorCode {
     NOT_AUTHENTICATED(HttpStatusCode.UNAUTHORIZED.getStatus(), "등록된 인증 정보가 없습니다."),
 
     USER_NOT_FOUND(HttpStatusCode.BAD_REQUEST.getStatus(), "유저를 찾을 수 없습니다."),
+
+    JWT_CREATION_FAILED(HttpStatusCode.INTERNAL_SERVER_ERROR.getStatus(), "JWT 토큰 생성에 실패했습니다."),
     TOKEN_VALIDATION_FAILED(HttpStatusCode.BAD_REQUEST.getStatus(), "토큰 인증에 실패했습니다."),
     UNAUTHORIZED_TOKEN(HttpStatusCode.UNAUTHORIZED.getStatus(), "인증되지 않은 토큰입니다."),
     EXPIRED_TOKEN(HttpStatusCode.UNAUTHORIZED.getStatus(), "만료된 토큰입니다."),

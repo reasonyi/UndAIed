@@ -23,8 +23,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.ssafy.undaid.global.common.exception.ErrorCode.TOKEN_VALIDATION_FAILED;
-import static com.ssafy.undaid.global.common.exception.ErrorCode.USER_NOT_FOUND;
+import static com.ssafy.undaid.global.common.exception.ErrorCode.*;
 
 
 @Service
@@ -59,6 +58,10 @@ public class UserService{
     public TokenValidationDto tokenValidate(String token) {
         JsonNode node = oAuth2Service.extractJsonNode(token);
 
+        if (node == null || !node.has("email")) {
+            throw new BaseException(TOKEN_VALIDATION_FAILED);
+        }
+
         String email = node.get("email").asText();
 
         TokenValidationDto tokenValidationDto = new TokenValidationDto();
@@ -73,7 +76,14 @@ public class UserService{
         }
 
         Users user = userRepository.findByEmail(email);
+        if (user == null) {
+            throw new BaseException(USER_NOT_FOUND);
+        }
+
         String jwtToken = login(user);
+        if (jwtToken == null || jwtToken.isBlank()) {
+            throw new BaseException(JWT_CREATION_FAILED);
+        }
 
         UserLoginResponseDto userLoginResponseDto = UserLoginResponseDto.builder()
                 .token(jwtToken)
@@ -129,7 +139,7 @@ public class UserService{
                 .build();
     }
 
-//    public UpdateProfileRequestDto updateProfile(UpdateProfileRequestDto updateProfileRequestDto) {
+//    public UpdateProfileRequestDto updateProfile(UpdateProfileRequestDto updateProfileRequestDto, int userId) {
 //
 //    }
 
