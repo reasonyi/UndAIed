@@ -1,16 +1,14 @@
-package com.ssafy.undaid.domain.friend.dto.response;
+package com.ssafy.undaid.domain.friend.dto.request;
 
 import com.ssafy.undaid.domain.friend.entity.FriendshipStatus;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class FriendResponseDto {
+public class FriendUpdateStatusRequestDto {
     private FriendshipStatus status;
     private Integer userId;
     private Integer friendId;

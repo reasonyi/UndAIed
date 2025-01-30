@@ -5,14 +5,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class FriendRequestListResponseDto {
-    private int friendshipId;
-    private int userId;
-    private String nickname;
+    private Integer friendshipId;
+    private Integer friendId;
+    private String friendNickname;
 }

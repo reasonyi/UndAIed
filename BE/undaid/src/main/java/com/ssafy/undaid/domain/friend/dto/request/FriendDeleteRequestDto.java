@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateFriendRequestDto {
-    private String nickname;
+public class FriendDeleteRequestDto {
+    Integer userId;
+    Integer friendId;
 }

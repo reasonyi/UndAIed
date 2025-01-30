@@ -12,9 +12,9 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UpdateFriendResponseDto {
+public class FriendUpdateResponseDto {
     private FriendshipStatus status;
     private LocalDateTime updatedAt;
-    private int userId;
-    private int friendId;
+    private Integer userId;
+    private Integer friendId;
 }
