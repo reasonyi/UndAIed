@@ -46,12 +46,18 @@ public class UserController {
 
     // 회원 프로필 업데이트
     @PatchMapping("/profile")
-    public ApiResponse updateProfile(@RequestBody UpdateProfileRequestDto updateProfileRequestDto) {
+    public ApiDataResponse updateProfile(@RequestBody UpdateProfileRequestDto updateProfileRequestDto) {
         Integer userId = (Integer) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         UserProfileResponseDto responseDto = userService.updateProfile(updateProfileRequestDto, userId);
         return ApiDataResponse.of(HttpStatusCode.OK, responseDto, "프로필이 수정되었습니다.");
     }
 
+    // 로그아웃
+    @GetMapping("logout")
+    public ApiResponse logout() {
+        userService.logout("리프레시 토큰을 넣기 위한 로직 필요");
+        return ApiResponse.of(HttpStatusCode.OK, "로그아웃이 완료되었습니다.");
+    }
 
 
 }

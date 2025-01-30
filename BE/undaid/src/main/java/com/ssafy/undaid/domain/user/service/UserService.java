@@ -148,4 +148,13 @@ public class UserService{
 
         return getUserProfile(userId);
     }
+
+    // 로그아웃 시 리프레시 토큰 삭제
+    @Transactional
+    public void logout(String refreshToken) {
+        // RefreshToken 삭제만 수행
+//        redisTemplate.delete(refreshToken);
+    }
+
+
 }
