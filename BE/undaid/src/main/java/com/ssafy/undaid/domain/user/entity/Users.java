@@ -67,5 +67,30 @@ public class Users {
         this.totalWin = 0;
         this.totalLose = 0;
         this.roleType = RoleType.USER;
+        this.sex = true;
+        this.age = 0;
+    }
+
+    public void updateProfile(Integer profileImage, Integer avatar, Boolean sex, Integer age, String nickname) {
+        if (profileImage != null) {
+            this.profileImage = profileImage;
+        }
+        if (avatar != null) {
+            this.avatar = avatar;
+        }
+        if (sex != null) {
+            this.sex = sex;
+        }
+        if (age != null) {
+            this.age = age;
+        }
+        if(nickname != null) {
+            this.nickname = nickname;
+        }
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void deleteUser() {
+        isDeleted = true;
     }
 }

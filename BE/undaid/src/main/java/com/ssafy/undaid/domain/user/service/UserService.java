@@ -56,11 +56,7 @@ public class UserService{
     }
 
     public TokenValidationDto tokenValidate(String token) {
-        JsonNode node = oAuth2Service.extractJsonNode(token);
-
-        if (node == null || !node.has("email")) {
-            throw new BaseException(TOKEN_VALIDATION_FAILED);
-        }
+        JsonNode node = oAuth2Service.extractJsonNode(token);   // 필수 필드 검증 여기서 하고있음
 
         String email = node.get("email").asText();
 
@@ -75,9 +71,10 @@ public class UserService{
             tokenValidationDto.setMessage("회원가입 성공");
         }
 
-        Users user = userRepository.findByEmail(email);
-        if (user == null) {
-            throw new BaseException(USER_NOT_FOUND);
+        Users user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new BaseException(USER_NOT_FOUND));
+        if (user.getIsDeleted()) {
+            throw new BaseException(DELETED_USER);  // 유저가 탈퇴한 경우 다시 회원가입 및 로그인 할 수 없음.
         }
 
         String jwtToken = login(user);
@@ -123,27 +120,17 @@ public class UserService{
                         .toList()
                 : Collections.emptyList();
 
-        // age와 sex가 null일 경우 기본값 처리
-        Integer age = user.getAge() != null ? user.getAge() : 0; // 기본값 0으로 설정
-        boolean sex = user.getSex() != null ? user.getSex() : true; // 기본값 "Unknown"으로 설정
-
         return UserProfileResponseDto.builder()
                 .nickname(user.getNickname())
                 .profileImage(user.getProfileImage())
                 .avatar(user.getAvatar())
-                .sex(sex)
-                .age(age)
+                .sex(user.getSex())
+                .age(user.getAge())
                 .totalWin(user.getTotalWin())
                 .totalLose(user.getTotalLose())
                 .game(dtoList)
                 .build();
     }
-
-//    public UpdateProfileRequestDto updateProfile(UpdateProfileRequestDto updateProfileRequestDto, int userId) {
-//
-//    }
-
-
 
     // =============== 친구 추가를 위해 추가할 내용
     public Users getUserByNickname(String nickname) {
@@ -158,5 +145,29 @@ public class UserService{
         return user;
     }
 
+    @Transactional
+    public UserProfileResponseDto updateProfile(UpdateProfileRequestDto requestDto, int userId) {
+        Users user = userRepository.findById(userId)
+                .orElseThrow(() -> new BaseException(USER_NOT_FOUND));
+
+        user.updateProfile(requestDto.getProfileImage(), requestDto.getAvatar(), requestDto.isSex(), requestDto.getAge(), requestDto.getNickname());
+
+        return getUserProfile(userId);
+    }
+
+    // 로그아웃 시 리프레시 토큰 삭제
+    @Transactional
+    public void signout(String refreshToken) {
+        // RefreshToken 삭제만 수행
+//        redisTemplate.delete(refreshToken);
+    }
+
+    // 회원 탈퇴
+    public void deleteUser(int userId) {
+        Users user = userRepository.findById(userId)
+                .orElseThrow(() -> new BaseException(USER_NOT_FOUND));
+        signout("로그아웃 로직 만들겠습니다.");
+        user.deleteUser();
+    }
 
 }

@@ -10,7 +10,8 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<Users, Integer> {
 
     boolean existsByEmail(String email);
-    Users findByEmail(String email);
+    Optional<Users> findByEmail(String email);
+    Optional<Users> findById(int id);
 
 
     // =============== 친구 추가를 위해 추가할 내용
