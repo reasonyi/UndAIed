@@ -23,7 +23,7 @@ public class FriendController {
     private final FriendService friendService;
 
     // 친구 목록 가져오기
-    @GetMapping("/")
+    @GetMapping
     public ApiDataResponse<List<FriendResponseDto>> getFriends(
             @AuthenticationPrincipal Integer userId) {
         System.out.println(userId);
@@ -40,7 +40,7 @@ public class FriendController {
     }
 
     // 친구 요청
-    @PostMapping("/")
+    @PostMapping
     public ApiResponse createFriend(
             @AuthenticationPrincipal Integer userId,
             @RequestBody FriendCreateRequestDto friendCreateRequestDto) {
