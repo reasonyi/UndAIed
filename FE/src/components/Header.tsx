@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import React, { useState } from "react";
+import Logo from "../assets/svg-icon/game_logo.svg";
 
 interface IHeaderProps {
   scrollRatio: number;
@@ -25,32 +26,34 @@ function Header({ scrollRatio }: IHeaderProps) {
       className="flex flex-col header-style w-screen h-14 fixed primary-bg-black z-40"
     >
       <div></div>
-      <ul className="flex ">
-        <li className="mr-6">
-          <Link to={"/"}>Home으로</Link>
+      <ul className="flex items-center">
+        <li className="ml-12 mr-4">
+          <Link to={"/"}>
+            <img src={Logo} />
+          </Link>
         </li>
-        <li className="mr-6">
+        <li className="ml-4 mr-1 font-semibold">
           <Link to={"/policy"}>Policy로</Link>
         </li>
-        <li className="mr-6">
+        <li className="ml-4 mr-1 font-semibold">
           <Link to={"/gamerooms"}>Game rooms으로</Link>
         </li>
-        <li className="mr-6">
+        <li className="ml-4 mr-1 font-semibold">
           <Link to={"/gamelobby/1"}>1번 gamelobby로</Link>
         </li>
-        <li className="mr-6">
+        <li className="ml-4 mr-1 font-semibold">
           <Link to={"/gamechats/2"}>2번 game chats로</Link>
         </li>
-        <li className="mr-6">
+        <li className="ml-4 mr-1 font-semibold">
           <Link to={"/user/3"}>3번 user로</Link>
         </li>
-        <li className="mr-6">
+        <li className="ml-4 mr-1 font-semibold">
           <Link to={"/log/4"}>4번 log로</Link>
         </li>
-        <li className="mr-6">
+        <li className="ml-4 mr-1 font-semibold">
           <button onClick={onBoardClick}>board로</button>
         </li>
-        <li className="mr-6">
+        <li className="ml-4 mr-1 font-semibold">
           <Link to={"/write"}>게시글작성으로</Link>
         </li>
       </ul>

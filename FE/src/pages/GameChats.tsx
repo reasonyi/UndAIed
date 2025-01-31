@@ -19,6 +19,10 @@ interface IMessage {
 function GameChats() {
   const { number } = useParams();
 
+  //클리아언트 소켓 선언
+  const socket = new WebSocket(`ws://${window.location.host}`);
+  console.log(socket);
+
   const playerName = [
     "익명1",
     "익명2",
@@ -58,6 +62,11 @@ function GameChats() {
     { id: 9, player: 2, text: "어쨋든 난 아님", isMine: true },
   ]);
 
+  const addMessage = (newMessage: IMessage) => {
+    //배열의 마지막 요소에서 서버 시간 비교를 통한 정렬 기능이 필요한가?
+    setMessages([...messages, newMessage]);
+  };
+
   return (
     <div className="bg-[#07070a]">
       <div className="background-gradient max-w-8xl mx-auto px-4 sm:px-4 md:px-6">
@@ -72,9 +81,8 @@ function GameChats() {
               {/* 메시지 리스트 영역 */}
               <div className="flex-1 p-4 md:p-6 xl:p-4">
                 {messages.map((msg: IMessage) => (
-                  <>
+                  <div key={msg.id}>
                     <div
-                      key={msg.id + "Name"}
                       className={`flex mb-1 items-center ${
                         msg.isMine ? "flex-row-reverse" : "justify-start"
                       }`}
@@ -89,7 +97,6 @@ function GameChats() {
                       </span>
                     </div>
                     <div
-                      key={msg.id}
                       // 내가 보낸 메시지면 오른쪽 정렬, 상대방 메시지면 왼쪽 정렬
                       className={`flex mb-4 ${
                         msg.isMine ? "justify-end" : "justify-start"
@@ -110,7 +117,7 @@ function GameChats() {
                         {msg.text}
                       </div>
                     </div>
-                  </>
+                  </div>
                 ))}
               </div>
               <div className="fixed z-20 right-[max(0px,calc(50%-45rem))] w-[30rem] py-4 px-2 hidden h-screen bg-black bg-opacity-20 xl:grid grid-cols-3 grid-rows-4 gap-4">

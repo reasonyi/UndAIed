@@ -12,6 +12,7 @@ import {
   faChevronRight,
 } from "@fortawesome/free-solid-svg-icons";
 import GoogleIcon from "../assets/svg-icon/google_logo.svg";
+import Logo from "../assets/svg-icon/game_logo.svg";
 
 interface OuletContextType {
   isLoggedIn: boolean;
@@ -154,12 +155,43 @@ function Home() {
           </div>
         </div>
       </div>
-      <div className="footer min-h-[calc(30vh)] primary-bg-black p-10 text-white">
-        <h1>UndAIed</h1>
-        <span>© SSAFY Korea Corp. & Daejeon 2nd Class B212</span>
-        <div>
-          <span></span>
-        </div>
+      <div className="footer min-h-[calc(30vh)] primary-bg-black p-9 text-white flex flex-col items-center">
+        <img src={Logo} alt="" className="mb-9" />
+        <span className="text-[#a1a1aa] text-xs mb-4">
+          © SSAFY Korea Corp. & Daejeon 2nd Class B212
+        </span>
+
+        <nav className="border-[#555555] border-t-2 w-[48rem]">
+          <ul className="flex space-x-6 text-gray-300 text-sm h-8 justify-center items-center">
+            <Link to={"/"} className="hover:text-white cursor-pointer">
+              계정정보
+            </Link>
+            <div className="h-4 w-[0.125rem] bg-[#555555]"></div>
+            <Link to={"/"} className="hover:text-white cursor-pointer">
+              계정활동
+            </Link>
+            <div className="h-4 w-[0.125rem] bg-[#555555]"></div>
+            <Link
+              to={"/policy"}
+              className="hover:text-white cursor-pointer font-bold"
+            >
+              개인정보처리방침
+            </Link>
+            <div className="h-4 w-[0.125rem] bg-[#555555]"></div>
+            <Link to={"/policy"} className="hover:text-white cursor-pointer">
+              이용약관
+            </Link>
+            <div className="h-4 w-[0.125rem] bg-[#555555]"></div>
+
+            <Link to={"/policy"} className="hover:text-white cursor-pointer">
+              운영정책
+            </Link>
+            <div className="h-4 w-[0.125rem] bg-[#555555]"></div>
+            <Link to={"/"} className="hover:text-white cursor-pointer">
+              회사소개
+            </Link>
+          </ul>
+        </nav>
       </div>
       {/* <div className="login-div">
           {isLoggedIn ? <LoggedInHome /> : <LoggedOutHome />}
