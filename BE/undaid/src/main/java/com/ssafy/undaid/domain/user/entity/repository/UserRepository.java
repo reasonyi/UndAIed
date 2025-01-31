@@ -13,4 +13,7 @@ public interface UserRepository extends JpaRepository<Users, Integer> {
     Optional<Users> findByEmail(String email);
     Optional<Users> findById(int id);
 
+
+    // =============== 친구 추가를 위해 추가할 내용
+    Optional<Users> findByNickname(String nickname);
 }
