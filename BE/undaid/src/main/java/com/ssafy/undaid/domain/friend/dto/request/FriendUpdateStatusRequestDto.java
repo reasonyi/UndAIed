@@ -10,6 +10,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class FriendUpdateStatusRequestDto {
     private FriendshipStatus status;
-    private Integer userId;
     private Integer friendId;
 }

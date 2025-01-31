@@ -15,14 +15,16 @@ public interface FriendRepository extends JpaRepository<Friends, Integer> {
 
     // 친구 목록 조회
     // userId 또는 friendId가 사용자이면서 status = 'ACCEPTED'인 friends 목록
-    @Query("SELECT new com.ssafy.undaid.domain.friend.dto.response.FriendResponseDto("+
-            "f.status, " +
-            "f.user.userId, " +
-            "f.friendUser.userId)" +
+    @Query("SELECT new com.ssafy.undaid.domain.friend.dto.response.FriendResponseDto( "+
+            "f.friendshipId, " +
+            "CASE WHEN f.user.userId = :userId THEN f.friendUser.userId ELSE f.user.userId END, " +
+            "CASE WHEN f.user.userId = :userId THEN f.friendUser.nickname ELSE f.user.nickname END, " +
+            "f.updatedAt) " +
             "FROM Friends f WHERE " +
             "(f.user.userId = :userId OR " +
             "f.friendUser.userId = :userId) " +
-            "AND f.status = com.ssafy.undaid.domain.friend.entity.FriendshipStatus.ACCEPTED"
+            "AND f.status = com.ssafy.undaid.domain.friend.entity.FriendshipStatus.ACCEPTED " +
+            "ORDER BY f.updatedAt "
     )
     List<FriendResponseDto> findByUserId(@Param("userId") Integer userId);
 
@@ -31,10 +33,12 @@ public interface FriendRepository extends JpaRepository<Friends, Integer> {
     @Query("SELECT new com.ssafy.undaid.domain.friend.dto.response.FriendRequestListResponseDto(" +
             "f.friendshipId, " +
             "f.user.userId, " +
-            "f.user.nickname) " +
+            "f.user.nickname, " +
+            "f.updatedAt) " +
             "FROM Friends f WHERE " +
             "f.friendUser.userId = :userId AND " +
-            "f.status = com.ssafy.undaid.domain.friend.entity.FriendshipStatus.PENDING"
+            "f.status = com.ssafy.undaid.domain.friend.entity.FriendshipStatus.PENDING " +
+            "ORDER BY f.updatedAt DESC "
     )
     List<FriendRequestListResponseDto> findPendingByUserId(@Param("userId") Integer userId);
 

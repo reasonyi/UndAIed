@@ -1,5 +1,6 @@
 package com.ssafy.undaid.domain.friend.entity;
 
+import com.ssafy.undaid.domain.friend.dto.response.FriendResponseDto;
 import com.ssafy.undaid.domain.user.entity.Users;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -59,4 +60,21 @@ public class Friends {
         this.status = status;
     }
 
+    public void updateDirection(Users newUser, Users newFriendUser) {
+        this.user = newUser;
+        this.friendUser = newFriendUser;
+    }
+
+    public FriendResponseDto toResponseDto(Integer userId) {
+        // 토큰 userId와 친구 목록의 userId가 같으면 friendUser 정보 반환, 아니면 user 정보 반환
+        Users friendInfo = user.getUserId() == userId ? friendUser : user;
+
+        FriendResponseDto dto = FriendResponseDto.builder()
+                .friendshipId(friendshipId)
+                .friendId(friendInfo.getUserId())
+                .friendNickname(friendInfo.getNickname())
+                .build();
+
+        return dto;
+    }
 }
