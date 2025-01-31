@@ -56,11 +56,7 @@ public class UserService{
     }
 
     public TokenValidationDto tokenValidate(String token) {
-        JsonNode node = oAuth2Service.extractJsonNode(token);
-
-        if (node == null || !node.has("email")) {
-            throw new BaseException(TOKEN_VALIDATION_FAILED);
-        }
+        JsonNode node = oAuth2Service.extractJsonNode(token);   // 필수 필드 검증 여기서 하고있음
 
         String email = node.get("email").asText();
 
