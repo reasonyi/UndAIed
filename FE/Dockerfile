@@ -1,0 +1,15 @@
+FROM node:22
+
+WORKDIR /app
+
+COPY ./package.json /app/package.json
+
+COPY ./package-lock.json /app/package.json
+
+RUN npm install
+
+COPY . /app
+
+EXPOSE 5173
+
+CMD ["npm", "run", "dev"]
