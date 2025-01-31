@@ -8,6 +8,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
@@ -15,6 +18,7 @@ import org.springframework.util.StringUtils;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 import static com.ssafy.undaid.global.common.exception.ErrorCode.*;
 
@@ -59,7 +63,10 @@ public class JwtTokenProvider {
     public Authentication getAuthentication(String token) {
         Claims claims = getClaims(token);
         Integer userId = claims.get("userId", Integer.class);  // userId를 principal로 사용
-        return new UsernamePasswordAuthenticationToken(userId, "", Collections.emptyList());
+        String role = claims.get("roles", String.class); // "ROLE_ADMIN" 또는 "ROLE_USER"
+
+        List<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority(role));
+        return new UsernamePasswordAuthenticationToken(userId, "", authorities);
     }
 
     public Claims getClaims(String token) {
@@ -103,5 +110,7 @@ public class JwtTokenProvider {
             throw new BaseException(INVALID_USER_ID_FORMAT);    // userId 파싱 실패
         }
     }
+
+
 
 }
