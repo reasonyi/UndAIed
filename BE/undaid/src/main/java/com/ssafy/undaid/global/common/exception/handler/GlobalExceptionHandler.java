@@ -1,4 +1,4 @@
-package com.ssafy.undaid.global.config;
+package com.ssafy.undaid.global.common.exception.handler;
 
 import com.ssafy.undaid.global.common.exception.BaseException;
 import com.ssafy.undaid.global.common.exception.ErrorCode;
