@@ -4,22 +4,14 @@ import com.ssafy.undaid.domain.user.dto.request.UpdateProfileRequestDto;
 import com.ssafy.undaid.domain.user.dto.response.TokenValidationDto;
 import com.ssafy.undaid.domain.user.dto.response.UserProfileResponseDto;
 import com.ssafy.undaid.domain.user.service.UserService;
-import com.ssafy.undaid.global.common.exception.BaseException;
 import com.ssafy.undaid.global.common.response.ApiDataResponse;
 import com.ssafy.undaid.global.common.response.ApiResponse;
 import com.ssafy.undaid.global.common.response.HttpStatusCode;
-import com.ssafy.undaid.global.jwt.JwtTokenProvider;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
-
-import static com.ssafy.undaid.global.common.exception.ErrorCode.UNAUTHORIZED_TOKEN;
 
 @RequiredArgsConstructor
 @RestController

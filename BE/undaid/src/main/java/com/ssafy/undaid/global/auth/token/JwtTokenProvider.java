@@ -1,4 +1,4 @@
-package com.ssafy.undaid.global.jwt;
+package com.ssafy.undaid.global.auth.token;
 
 import com.ssafy.undaid.domain.user.entity.RoleType;
 import com.ssafy.undaid.global.common.exception.BaseException;

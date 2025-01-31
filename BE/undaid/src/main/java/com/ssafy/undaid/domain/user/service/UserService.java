@@ -13,15 +13,14 @@ import com.ssafy.undaid.domain.user.entity.Users;
 import com.ssafy.undaid.domain.user.entity.repository.UserRepository;
 import com.ssafy.undaid.global.common.exception.BaseException;
 import com.ssafy.undaid.global.common.response.HttpStatusCode;
-import com.ssafy.undaid.global.oauth.service.OAuth2Service;
-import com.ssafy.undaid.global.jwt.JwtTokenProvider;
+import com.ssafy.undaid.global.auth.service.OAuth2Service;
+import com.ssafy.undaid.global.auth.token.JwtTokenProvider;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.ssafy.undaid.global.common.exception.ErrorCode.*;
 

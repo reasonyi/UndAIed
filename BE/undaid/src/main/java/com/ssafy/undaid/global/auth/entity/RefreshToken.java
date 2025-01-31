@@ -1,4 +1,4 @@
-package com.ssafy.undaid.global.jwt;
+package com.ssafy.undaid.global.auth.entity;
 
 import jakarta.persistence.Id;
 import lombok.Getter;

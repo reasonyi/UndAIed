@@ -1,4 +1,4 @@
-package com.ssafy.undaid.global.jwt;
+package com.ssafy.undaid.global.auth.token;
 
 import com.ssafy.undaid.global.common.exception.BaseException;
 import jakarta.servlet.FilterChain;

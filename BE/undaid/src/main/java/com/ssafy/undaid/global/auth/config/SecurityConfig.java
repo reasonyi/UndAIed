@@ -1,7 +1,7 @@
-package com.ssafy.undaid.global.config;
+package com.ssafy.undaid.global.auth.config;
 
-import com.ssafy.undaid.global.jwt.JwtAuthenticationFilter;
-import com.ssafy.undaid.global.jwt.JwtTokenProvider;
+import com.ssafy.undaid.global.auth.token.JwtAuthenticationFilter;
+import com.ssafy.undaid.global.auth.token.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
