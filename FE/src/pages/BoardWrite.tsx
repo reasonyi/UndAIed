@@ -1,11 +1,11 @@
 import { useRef } from "react";
 import { atom, useRecoilState } from "recoil";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import { useForm, Controller, FieldValues } from "react-hook-form";
 import bugReportImage from "../assets/board/bugReport.png";
-import { boardApi, AdminBoardApi } from "../api/board/boardApi";
-
+import { boardApi } from "../api/board/boardApi";
 import Banner from "./Board/components/Banner";
 import Header from "../components/Header";
 
@@ -27,10 +27,16 @@ const formats = [
   "image",
 ];
 
+interface FormInputs {
+  title: string;
+  content: string;
+}
+
 function BoardWrite() {
   const [content, setContent] = useRecoilState(editorState);
   const quillRef = useRef<ReactQuill>(null);
   const location = useLocation();
+  const navigate = useNavigate();
   const prevPath = location.state?.from || "/board";
 
   const modules = {
@@ -43,9 +49,32 @@ function BoardWrite() {
     ],
   };
 
-  //여기서? 아니면 글쓰기 버튼 노출 / 비노출로 관리자, 일반유저 글쓰기 관리리
-  const handleSubmit = () => {
-    boardApi.createPost;
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormInputs>();
+
+  // HTML 컨텐츠가 실제로 비어있는지 확인하는 함수
+  const isEmptyHtml = (html: string) => {
+    // HTML 태그를 제거하고 공백을 제거한 후 길이가 0인지 확인
+    const text = html.replace(/<(.|\n)*?>/g, "").trim();
+    return text.length === 0;
+  };
+
+  const onSubmit = async (data: any) => {
+    try {
+      // 내용이 비어있는지 확인
+      if (isEmptyHtml(data.content)) {
+        throw new Error("내용을 입력하세요.");
+      }
+
+      await boardApi.createPost(data);
+      navigate(prevPath);
+    } catch (error) {
+      console.error("Error creating post:", error);
+      // 에러 메시지를 사용자에게 표시하는 로직 추가 가능
+    }
   };
 
   return (
@@ -54,41 +83,73 @@ function BoardWrite() {
       <div className="h-14"></div>
       <Banner bannerImage={bugReportImage} category="write" />
       <div className="max-w-4xl mx-auto p-4">
-        <div className="mb-4 border-t-2 border-t-black ">
-          <input
-            type="text"
-            placeholder="제목을 입력하세요"
-            className="focus:outline-none w-full py-2 px-4 border border-gray-300"
-          />
-        </div>
-
-        <div>
-          <ReactQuill
-            placeholder="내용을 입력하세요"
-            ref={quillRef}
-            theme="snow"
-            value={content}
-            onChange={setContent}
-            modules={modules}
-            formats={formats}
-            className="h-96 mb-12 border-t-black border-t-4"
-          />
-        </div>
-
-        <div className="flex justify-center pt-4">
-          <button
-            onClick={handleSubmit}
-            className="mx-1.5 px-9 py-2 bg-[#000000c0] text-white hover:bg-black border border-black"
-          >
-            확인
-          </button>
-          <Link
-            to={prevPath}
-            className="mx-1.5 px-9 py-2 bg-white border border-transparent text-black hover:border hover:border-black"
-          >
-            취소
-          </Link>
-        </div>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="mb-4 border-t-2 border-t-black">
+            <Controller
+              name="title"
+              control={control}
+              defaultValue=""
+              rules={{ required: "제목을 입력하세요." }}
+              render={({ field }) => (
+                <input
+                  {...field}
+                  type="text"
+                  placeholder="제목을 입력하세요"
+                  className="focus:outline-none w-full py-2 px-4 border border-gray-300"
+                />
+              )}
+            />
+            {errors.title && typeof errors.title.message === "string" && (
+              <p className="text-red-500">{errors.title.message}</p>
+            )}
+          </div>
+          <div>
+            <Controller
+              name="content"
+              control={control}
+              defaultValue=""
+              rules={{
+                required: "내용을 입력하세요.",
+                validate: {
+                  notEmpty: (value) =>
+                    !isEmptyHtml(value) || "내용을 입력하세요.",
+                },
+              }}
+              render={({ field }) => (
+                <ReactQuill
+                  {...field}
+                  placeholder="내용을 입력하세요"
+                  ref={quillRef}
+                  theme="snow"
+                  modules={modules}
+                  formats={formats}
+                  className="h-96 mb-12 border-t-black border-t-4"
+                  onChange={(value) => {
+                    field.onChange(value);
+                    setContent(value);
+                  }}
+                />
+              )}
+            />
+            {errors.content && typeof errors.content.message === "string" && (
+              <p className="text-red-500">{errors.content.message}</p>
+            )}
+          </div>
+          <div className="flex justify-center pt-4">
+            <button
+              type="submit"
+              className="mx-1.5 px-9 py-2 bg-[#000000c0] text-white hover:bg-black border border-black"
+            >
+              확인
+            </button>
+            <Link
+              to={prevPath}
+              className="mx-1.5 px-9 py-2 bg-white border border-transparent text-black hover:border hover:border-black"
+            >
+              취소
+            </Link>
+          </div>
+        </form>
       </div>
     </>
   );
