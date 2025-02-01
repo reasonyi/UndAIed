@@ -3,7 +3,7 @@ import App from "../App";
 import NotFound from "../pages/NotFound";
 import Home from "../pages/Home";
 import Policy from "../pages/Policy";
-import GameRooms from "../pages/GameRooms";
+import GameRooms from "../pages/GameRooms/GameRooms";
 import GameLobby from "../pages/GameLobby";
 import GameChats from "../pages/GameChats";
 import BoardDetails from "../pages/BoardDetails";
