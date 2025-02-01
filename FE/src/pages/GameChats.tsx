@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import PlayerIcon1 from "../assets/player-icon/player-icon-1.svg";
 import PlayerIcon2 from "../assets/player-icon/player-icon-2.svg";
@@ -8,6 +8,9 @@ import PlayerIcon5 from "../assets/player-icon/player-icon-5.svg";
 import PlayerIcon6 from "../assets/player-icon/player-icon-1.svg";
 import PlayerIcon7 from "../assets/player-icon/player-icon-2.svg";
 import PlayerIcon8 from "../assets/player-icon/player-icon-3.svg";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
+import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 
 interface IMessage {
   id: number;
@@ -18,6 +21,10 @@ interface IMessage {
 
 function GameChats() {
   const { number } = useParams();
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  //아이콘
+  const paperPlane: IconDefinition = faPaperPlane;
 
   //클리아언트 소켓 선언
   const socket = new WebSocket(`ws://${window.location.host}`);
@@ -67,19 +74,27 @@ function GameChats() {
     setMessages([...messages, newMessage]);
   };
 
+  useEffect(() => {
+    // 새로운 메시지가 추가될 때 스크롤을 아래로 이동
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  console.log(scrollRef);
   return (
     <div className="bg-[#07070a]">
-      <div className="background-gradient max-w-8xl mx-auto px-4 sm:px-4 md:px-6">
-        <div className="hidden lg:block fixed z-20 inset-0 left-[max(0px,calc(50%-45rem))] right-auto w-[21rem] pb-10 pt-6 pl-6 pr-4">
+      <div className="background-gradient max-w-[90rem] mx-auto px-4 sm:px-4 md:px-6">
+        <div className="hidden lg:block fixed z-20 inset-0 left-[max(0px,calc(50%-45rem))] right-auto w-[21rem] pb-10 pt-6 pl-6 pr-4 bg-black bg-opacity-40 shadow-[0px_0px_16px_rgba(255,255,255,0.25)] border-r-2 border-solid border-r-[rgba(255,255,255,0.35)]">
           <div className="w-full text-base flex justify-center items-center text-[white] bg-[rgb(7,7,10)] px-1.5 py-1 border-2 border-solid border-[#B4B4B4]">
             No. 001 방 제목
           </div>
         </div>
-        <div className="lg:pl-[21rem]">
-          <div className="max-w-3xl mx-auto xl:max-w-none xl:ml-0 xl:mr-[28.5rem]">
+        <div className="lg:pl-[19.5rem]">
+          <div className="max-w-3xl mx-auto xl:max-w-none xl:ml-0 xl:mr-[32rem]">
             <div className="chat-container flex flex-col h-screen overflow-auto">
               {/* 메시지 리스트 영역 */}
-              <div className="flex-1 p-4 md:p-6 xl:p-4">
+              <div ref={scrollRef} className="flex-1 px-4 pt-4">
                 {messages.map((msg: IMessage) => (
                   <div key={msg.id}>
                     <div
@@ -103,7 +118,7 @@ function GameChats() {
                       }`}
                     >
                       <div
-                        className={`max-w-[70%] py-2 px-3 text-sm bg-[rgb(9,9,11)] text-[#eeeeee] border-2 border-solid shadow-[0px_0px_14px_rgba(255,255,255,0.25)] ${
+                        className={`max-w-[70%] py-2 px-3 text-sm bg-[rgb(9,9,11)] text-[#dddddd] border-2 border-solid shadow-[0px_0px_14px_rgba(255,255,255,0.25)] ${
                           msg.isMine
                             ? "rounded-b-lg rounded-tl-lg"
                             : "rounded-b-lg rounded-tr-lg"
@@ -119,10 +134,29 @@ function GameChats() {
                     </div>
                   </div>
                 ))}
+                <div className="chat-input-temp h-[4.5rem] w-full"></div>
+                <div className="chat-input fixed h-10 bottom-4 w-[calc(90rem-21rem-33.5rem-2rem)]">
+                  <form
+                    className="w-full h-full bg-[#07070a4d] focus-within:bg-neutral-900 rounded-lg shadow-lg border-2 border-solid border-[#555555] px-4 flex items-center text-sm"
+                    action=""
+                  >
+                    <input
+                      className="bg-transparent text-[#848484] focus:text-[#dddddd] w-full"
+                      placeholder="채팅 입력하기"
+                      type="text"
+                    />
+                    <div className="bg-[#848484] w-[1px] h-6"></div>
+                    <button className="w-6 h-6 ml-2">
+                      <FontAwesomeIcon
+                        icon={paperPlane}
+                        className="text-[#848484]"
+                      />
+                    </button>
+                  </form>
+                </div>
               </div>
-              <div className="fixed z-20 right-[max(0px,calc(50%-45rem))] w-[30rem] py-4 px-2 hidden h-screen bg-black bg-opacity-20 xl:grid grid-cols-3 grid-rows-4 gap-4">
-                <div className="col-span-3">1</div>
-                <div className="row-start-2 px-2 py-1">
+              <div className="fixed z-20 right-[max(0px,calc(50%-45rem))] w-[33.5rem] py-6 px-3 hidden h-screen bg-black bg-opacity-40 xl:grid grid-cols-3 grid-rows-4 gap-4 shadow-[0px_0px_16px_rgba(255,255,255,0.25)]  border-solid border-l-[rgba(255,255,255,0.35)]">
+                <div className="row-start-1 px-2 py-1">
                   <div className="shadow-[0px_0px_16px_rgba(255,255,255,0.25)] border-2 border-solid border-[rgba(255,255,255,0.35)] w-full h-full hover:border-[rgba(255,0,0,0.5)] hover:shadow-[0px_0px_16px_rgba(255,0,0,0.45)]">
                     {/* <div className="hover:shadow-[0px_0px_16px_rgba(255,0,0,0.45)] w-full h-full hover:animate-ping text-white"></div> */}
                     <div className="flex justify-center items-center px-4 pt-1 pb-3">
@@ -133,7 +167,7 @@ function GameChats() {
                     <div></div>
                   </div>
                 </div>
-                <div className="row-start-2 px-2 py-1">
+                <div className="row-start-1 px-2 py-1">
                   <div className="shadow-[0px_0px_16px_rgba(255,255,255,0.25)] border-2 border-solid border-[rgba(255,255,255,0.35)] w-full h-full hover:border-[rgba(255,255,255,0.5)] hover:shadow-[0px_0px_16px_rgba(255,255,255,0.45)]">
                     <div className="flex justify-center items-center px-4 pt-1 pb-3">
                       <img className="filter brightness-75" src={PlayerIcon2} />
@@ -141,7 +175,7 @@ function GameChats() {
                     <div></div>
                   </div>
                 </div>
-                <div className="row-start-2 px-2 py-1">
+                <div className="row-start-1 px-2 py-1">
                   <div className="shadow-[0px_0px_16px_rgba(255,255,255,0.25)] border-2 border-solid border-[rgba(255,255,255,0.35)] w-full h-full hover:border-[rgba(255,255,255,0.5)] hover:shadow-[0px_0px_16px_rgba(255,255,255,0.45)]">
                     <div className="flex justify-center items-center px-4 pt-1 pb-3">
                       <img className="filter brightness-75" src={PlayerIcon3} />
@@ -149,7 +183,7 @@ function GameChats() {
                     <div></div>
                   </div>
                 </div>
-                <div className="row-start-3 px-2 py-1">
+                <div className="row-start-2 px-2 py-1">
                   <div className="shadow-[0px_0px_16px_rgba(255,255,255,0.25)] border-2 border-solid border-[rgba(255,255,255,0.35)] w-full h-full hover:border-[rgba(255,255,255,0.5)] hover:shadow-[0px_0px_16px_rgba(255,255,255,0.45)]">
                     <div className="flex justify-center items-center px-4 pt-1 pb-3">
                       <img className="filter brightness-75" src={PlayerIcon4} />
@@ -157,7 +191,7 @@ function GameChats() {
                     <div></div>
                   </div>
                 </div>
-                <div className="row-start-3 px-2 py-1">
+                <div className="row-start-2 px-2 py-1">
                   <div className="shadow-[0px_0px_16px_rgba(255,255,255,0.25)] border-2 border-solid border-[rgba(255,255,255,0.35)] w-full h-full hover:border-[rgba(255,255,255,0.5)] hover:shadow-[0px_0px_16px_rgba(255,255,255,0.45)]">
                     <div className="flex justify-center items-center px-4 pt-1 pb-3">
                       <img className="filter brightness-75" src={PlayerIcon5} />
@@ -165,7 +199,7 @@ function GameChats() {
                     <div></div>
                   </div>
                 </div>
-                <div className="row-start-3 px-2 py-1">
+                <div className="row-start-2 px-2 py-1">
                   <div className="shadow-[0px_0px_16px_rgba(255,255,255,0.25)] border-2 border-solid border-[rgba(255,255,255,0.35)] w-full h-full hover:border-[rgba(255,255,255,0.5)] hover:shadow-[0px_0px_16px_rgba(255,255,255,0.45)]">
                     <div className="flex justify-center items-center px-4 pt-1 pb-3">
                       <img className="filter brightness-75" src={PlayerIcon6} />
@@ -173,7 +207,7 @@ function GameChats() {
                     <div></div>
                   </div>
                 </div>
-                <div className="row-start-4 px-2 py-1">
+                <div className="row-start-3 px-2 py-1">
                   <div className="shadow-[0px_0px_16px_rgba(255,255,255,0.25)] border-2 border-solid border-[rgba(255,255,255,0.35)] w-full h-full hover:border-[rgba(255,255,255,0.5)] hover:shadow-[0px_0px_16px_rgba(255,255,255,0.45)]">
                     <div className="flex justify-center items-center px-4 pt-1 pb-3">
                       <img className="filter brightness-75" src={PlayerIcon7} />
@@ -181,7 +215,7 @@ function GameChats() {
                     <div></div>
                   </div>
                 </div>
-                <div className="row-start-4 px-2 py-1">
+                <div className="row-start-3 px-2 py-1">
                   <div className="shadow-[0px_0px_16px_rgba(255,255,255,0.25)] border-2 border-solid border-[rgba(255,255,255,0.35)] w-full h-full hover:border-[rgba(255,255,255,0.5)] hover:shadow-[0px_0px_16px_rgba(255,255,255,0.45)]">
                     <div className="flex justify-center items-center px-4 pt-1 pb-3">
                       <img className="filter brightness-75" src={PlayerIcon8} />
@@ -189,7 +223,8 @@ function GameChats() {
                     <div></div>
                   </div>
                 </div>
-                <div className="row-start-4">10</div>
+                <div className="row-start-3">10</div>
+                <div className="col-span-3 text-white">시스템 로그</div>
               </div>
             </div>
           </div>
