@@ -337,3 +337,20 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+
+# Nginx
+nginx/
+!nginx/conf.d/.gitkeep
+
+# SSL related
+*.pem
+*.crt
+*.key
+*.csr
+ssl/
+certificates/
+
+# Logs
+*.log
+logs/
