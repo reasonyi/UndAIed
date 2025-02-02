@@ -5,7 +5,7 @@ import Home from "../pages/Home";
 import Policy from "../pages/Policy";
 import GameRooms from "../pages/GameRooms";
 import GameLobby from "../pages/GameLobby";
-import GameChats from "../pages/GameChats";
+import GameChats from "../pages/GameChats/GameChats";
 import BoardDetails from "../pages/BoardDetails";
 import Board from "../pages/Board/Board";
 import User from "../pages/User";
