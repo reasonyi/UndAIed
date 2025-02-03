@@ -47,7 +47,7 @@ function GameChats() {
   const checkToSlot: IconDefinition = faCheckToSlot;
 
   //클리아언트 소켓 선언
-  const socket = new WebSocket(`ws://${window.location.host}`);
+  const socket = new WebSocket(`wss://${window.location.host}`);
   console.log(socket);
 
   //
