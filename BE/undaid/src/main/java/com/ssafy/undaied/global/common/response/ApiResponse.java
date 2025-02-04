@@ -30,6 +30,6 @@ public class ApiResponse {
     }
 
     public static ApiResponse of(ErrorCode errorCode) {
-        return new ApiResponse(false, errorCode.getHttpStatus(), errorCode.getMessage());
+        return new ApiResponse(false, errorCode.getStatus(), errorCode.getMessage());
     }
 }
