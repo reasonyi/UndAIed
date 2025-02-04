@@ -1,16 +1,17 @@
-import { Outlet } from "react-router-dom";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import Header from "./components/Header";
+import { Outlet } from "react-router-dom"
+import Header from "./components/Header"
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 
 function App() {
-  const isLoggedIn = true;
+  const isLoggedIn = true
 
   return (
     <>
-      <Outlet context={{ isLoggedIn }} />
+      <Header />
+      <Outlet context={ {isLoggedIn} } />
       <ReactQueryDevtools initialIsOpen={false} />
     </>
-  );
+  )
 }
 
-export default App;
+export default App
