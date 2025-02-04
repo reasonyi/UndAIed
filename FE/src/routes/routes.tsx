@@ -1,7 +1,7 @@
 import { createBrowserRouter } from "react-router-dom";
 import App from "../App";
 import NotFound from "../pages/NotFound";
-import Home from "../pages/Home";
+import Home from "../pages/Home/Home";
 import Policy from "../pages/Policy";
 import GameRooms from "../pages/GameRooms";
 import GameLobby from "../pages/GameLobby";
