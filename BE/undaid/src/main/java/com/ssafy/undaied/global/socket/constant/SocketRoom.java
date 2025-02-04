@@ -1,4 +1,4 @@
-package com.ssafy.undaied.global.socket.dto;
+package com.ssafy.undaied.global.socket.constant;
 
 // 상수 관리 클래스
 public class SocketRoom {

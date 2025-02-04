@@ -13,8 +13,8 @@ import com.corundumstudio.socketio.listener.DisconnectListener;
 import lombok.extern.slf4j.Slf4j;
 
 import static com.ssafy.undaied.global.common.exception.ErrorCode.*;
-import static com.ssafy.undaied.global.socket.dto.SocketRoom.GAME_ROOM_PREFIX;
-import static com.ssafy.undaied.global.socket.dto.SocketRoom.LOBBY_ROOM;
+import static com.ssafy.undaied.global.socket.constant.SocketRoom.GAME_ROOM_PREFIX;
+import static com.ssafy.undaied.global.socket.constant.SocketRoom.LOBBY_ROOM;
 
 /**
  * SocketIOController.
