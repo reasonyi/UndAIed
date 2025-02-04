@@ -32,7 +32,7 @@ services:
     restart: always
 
   backend:
-    build: ./BE/undaied
+    build: ./BE/undaid
     ports:
       - "8080:8080"
     depends_on:
