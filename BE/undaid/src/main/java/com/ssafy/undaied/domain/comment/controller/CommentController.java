@@ -30,7 +30,7 @@ public class CommentController {
     @GetMapping("/{boardId}/comment")
     public ApiDataResponse<Page<CommentListResponseDto>> getComments(
             @PathVariable Integer boardId,
-            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
         Page<CommentListResponseDto> comments = commentService.getComments(boardId, pageable);
         return new ApiDataResponse<>(HttpStatusCode.OK, comments, null);
