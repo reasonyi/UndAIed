@@ -49,7 +49,7 @@ public class BoardController {
 
     // 게시글 목록 조회
     @GetMapping("/board")
-    public ApiDataResponse<?> getAllBoards(@PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+    public ApiDataResponse<?> getAllBoards(@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         Page<BoardListResponseDto> result = boardService.getAllBoards(pageable);
         return new ApiDataResponse<>(HttpStatusCode.OK, result,null);
     }
