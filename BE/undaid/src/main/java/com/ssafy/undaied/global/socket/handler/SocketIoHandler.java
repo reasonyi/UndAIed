@@ -3,6 +3,7 @@ package com.ssafy.undaied.global.socket.handler;
 import com.corundumstudio.socketio.SocketIOClient;
 import com.ssafy.undaied.global.auth.token.JwtTokenProvider;
 import com.ssafy.undaied.global.common.exception.BaseException;
+import com.ssafy.undaied.global.common.exception.handler.SocketExceptionUtil;
 import com.ssafy.undaied.global.common.response.ApiResponse;
 import org.springframework.stereotype.Component;
 
@@ -64,7 +65,7 @@ public class SocketIoHandler {
                 System.out.println("Client authenticated - userId: " + userId + ", sessionId: " + client.getSessionId() + " joined lobby");
 
             } catch (Exception e) {
-                handleSocketIoException(client, new BaseException(SOCKET_CONNECTION_FAILED));
+                SocketExceptionUtil.handleSocketException(client,  new BaseException(SOCKET_CONNECTION_FAILED));
             }
         };
     }
@@ -87,14 +88,5 @@ public class SocketIoHandler {
             System.out.println("Client disconnected - userId: " + userId + ", sessionId: " + client.getSessionId());
             client.disconnect();
         };
-    }
-
-    private void handleSocketIoException(SocketIOClient client, BaseException e) {
-        ApiResponse errorResponse = ApiResponse.of(e.getErrorCode());
-        // 클라이언트에게 에러 응답 전송
-        client.sendEvent("error", errorResponse);
-//        log.error("Socket authentication failed: {} - {}",
-//                e.getErrorCode().getHttpStatus(), e.getErrorCode().getMessage());
-        client.disconnect();
     }
 }
