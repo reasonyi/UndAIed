@@ -1,3 +1,74 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+* {
+  box-sizing: border-box;
+}
+:root {
+  --primary-black: rgb(7, 7, 10);
+}
+
+html::-webkit-scrollbar {
+  display: none; /* 크롬, 사파리, 오페라 등 웹킷 엔진 */
+}
+input {
+  outline: none;
+}
+.chat-container {
+  @apply [&::-webkit-scrollbar]:w-1
+  [&::-webkit-scrollbar-track]:bg-[#4c4e4f]
+  [&::-webkit-scrollbar-thumb]:bg-[#c5c5c77a];
+}
+
+.background-gradient {
+  background: linear-gradient(0deg, rgb(9, 9, 11), transparent),
+    radial-gradient(circle at 20% 20%, rgba(237, 71, 71, 0.351), transparent);
+}
+
+.header-style {
+  color: #eeeeee;
+  justify-content: space-between;
+}
+.header-bottom-style {
+  background-color: rgb(98, 98, 103);
+  width: 100%;
+  height: 1px;
+}
+
+.primary-bg-black {
+  background-color: var(--primary-black);
+}
+
+.primary-bg-white {
+  background-color: #eeeeee;
+}
+
+.border-outline-gray {
+  border-color: rgb(98, 98, 103);
+}
+
+/* 홈 */
+.board-container {
+  flex: 1;
+  border-top: 1px solid rgb(187, 187, 187);
+}
+.board-content {
+  display: flex;
+  font-size: 14px;
+  padding: 6px 4px;
+  border-bottom: 1px solid rgb(187, 187, 187);
+}
+.board-content:hover {
+  background-color: #8723410a;
+}
+.board-content-title {
+  flex: 3;
+  display: flex;
+  justify-content: flex-start;
+}
+.board-content-date {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
