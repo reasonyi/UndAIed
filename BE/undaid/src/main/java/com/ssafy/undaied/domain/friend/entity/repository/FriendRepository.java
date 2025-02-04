@@ -1,6 +1,5 @@
 package com.ssafy.undaied.domain.friend.entity.repository;
 
-import com.ssafy.undaied.domain.friend.dto.response.FriendRequestListResponseDto;
 import com.ssafy.undaied.domain.friend.dto.response.FriendResponseDto;
 import com.ssafy.undaied.domain.friend.entity.Friends;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -30,7 +29,7 @@ public interface FriendRepository extends JpaRepository<Friends, Integer> {
 
     // 친구 요청 조회
     // friendId가 사용자이면서 status = 'PENDING'인 friends 목록
-    @Query("SELECT new com.ssafy.undaied.domain.friend.dto.response.FriendRequestListResponseDto(" +
+    @Query("SELECT new com.ssafy.undaied.domain.friend.dto.response.FriendResponseDto(" +
             "f.friendshipId, " +
             "f.user.userId, " +
             "f.user.nickname, " +
@@ -40,7 +39,7 @@ public interface FriendRepository extends JpaRepository<Friends, Integer> {
             "f.status = com.ssafy.undaied.domain.friend.entity.FriendshipStatus.PENDING " +
             "ORDER BY f.updatedAt DESC "
     )
-    List<FriendRequestListResponseDto> findPendingByUserId(@Param("userId") Integer userId);
+    List<FriendResponseDto> findPendingByUserId(@Param("userId") Integer userId);
 
     // 특정 친구 목록(한 개) 조회
     @Query("SELECT f FROM Friends f WHERE " +

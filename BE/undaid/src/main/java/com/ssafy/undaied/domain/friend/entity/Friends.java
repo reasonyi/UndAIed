@@ -17,7 +17,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "friends")
-@EntityListeners(AuditingEntityListener.class)
 public class Friends {
 
     @Id
@@ -30,11 +29,9 @@ public class Friends {
     private FriendshipStatus status;
 
     @Column(name = "created_at", nullable = false, updatable = false)
-    @CreatedDate
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
-    @LastModifiedDate
     private LocalDateTime updatedAt;
 
     @ManyToOne(fetch = FetchType.EAGER)
@@ -46,18 +43,18 @@ public class Friends {
     private Users friendUser;
 
     @Builder
-    public Friends(Integer friendshipId, Users user, Users friendUser,
-                   FriendshipStatus status, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public Friends(Integer friendshipId, Users user, Users friendUser, FriendshipStatus status) {
         this.friendshipId = friendshipId;
         this.user = user;
         this.friendUser = friendUser;
         this.status = status;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 
     public void updateStatus(FriendshipStatus status) {
         this.status = status;
+        this.updatedAt = LocalDateTime.now();
     }
 
     public void updateDirection(Users newUser, Users newFriendUser) {

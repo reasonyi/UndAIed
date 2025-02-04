@@ -2,9 +2,7 @@ package com.ssafy.undaied.domain.friend.service;
 
 import com.ssafy.undaied.domain.friend.dto.request.FriendCreateRequestDto;
 import com.ssafy.undaied.domain.friend.dto.request.FriendUpdateStatusRequestDto;
-import com.ssafy.undaied.domain.friend.dto.response.FriendRequestListResponseDto;
 import com.ssafy.undaied.domain.friend.dto.response.FriendResponseDto;
-import com.ssafy.undaied.domain.friend.dto.response.FriendUpdateResponseDto;
 import com.ssafy.undaied.domain.friend.entity.Friends;
 import com.ssafy.undaied.domain.friend.entity.FriendshipStatus;
 import com.ssafy.undaied.domain.friend.entity.repository.FriendRepository;
@@ -27,11 +25,10 @@ public class FriendService {
     private final UserService userService;
 
     public List<FriendResponseDto> getFriendsList(Integer userId) {
-        System.out.println(userId);
         return friendRepository.findByUserId(userId);
     }
 
-    public List<FriendRequestListResponseDto> getFriendRequestsList(Integer userId) {
+    public List<FriendResponseDto> getFriendRequestsList(Integer userId) {
         return friendRepository.findPendingByUserId(userId);
     }
 
@@ -64,20 +61,11 @@ public class FriendService {
         friendRepository.save(friend);
     }
 
-    public FriendUpdateResponseDto updateFriendStatus(
+    public void updateFriendStatus(
             Integer userId, FriendUpdateStatusRequestDto friendUpdateStatusRequestDto) {
         Friends friendship = friendRepository.findByUserIdAndFriendId(userId, friendUpdateStatusRequestDto.getFriendId());
 
         friendship.updateStatus(friendUpdateStatusRequestDto.getStatus());
-
-        Friends updatedFriend = friendRepository.save(friendship);
-
-        return FriendUpdateResponseDto.builder()
-                .status(updatedFriend.getStatus())
-                .updatedAt(updatedFriend.getUpdatedAt())
-                .userId(updatedFriend.getUser().getUserId())
-                .friendId(updatedFriend.getFriendUser().getUserId())
-                .build();
     }
 
 }
