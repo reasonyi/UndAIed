@@ -8,6 +8,7 @@ import PlayerIcon5 from "../../assets/player-icon/player-icon-5.svg";
 import PlayerIcon6 from "../../assets/player-icon/player-icon-1.svg";
 import PlayerIcon7 from "../../assets/player-icon/player-icon-2.svg";
 import PlayerIcon8 from "../../assets/player-icon/player-icon-3.svg";
+import Sample from "../../assets/svg-icon/sample.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import {
@@ -17,12 +18,11 @@ import {
   faUserGroup,
   faDoorOpen,
   faCircleExclamation,
-  faRobot,
-  faNoteSticky,
-  faCheckToSlot,
 } from "@fortawesome/free-solid-svg-icons";
 import ChatBubble from "./components/ChatBuble";
 import SystemBubble from "./components/SystemBubble";
+import ReadyProfile from "./components/ReadyProfile";
+import { io, Socket } from "socket.io-client";
 
 interface IMessage {
   id: number;
@@ -31,7 +31,9 @@ interface IMessage {
   isMine: boolean; // true면 내가 보낸 메시지, false면 상대방 메시지
 }
 
-function GameChats() {
+const socket: Socket = io("http://localhost:3000");
+
+function GamePlay() {
   const { number } = useParams();
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
@@ -42,12 +44,7 @@ function GameChats() {
   const userGroup: IconDefinition = faUserGroup;
   const doorOpen: IconDefinition = faDoorOpen;
   const circleExclamation: IconDefinition = faCircleExclamation;
-  const robot: IconDefinition = faRobot;
-  const noteSticky: IconDefinition = faNoteSticky;
-  const checkToSlot: IconDefinition = faCheckToSlot;
 
-  //클리아언트 소켓 선언
-  const socket = new WebSocket(`wss://${window.location.host}`);
   console.log(socket);
 
   //
@@ -88,6 +85,24 @@ function GameChats() {
   const scrollToBottom = () => {
     scrollRef.current?.scrollIntoView({ block: "end" });
   };
+
+  //socket 시작작
+  //IMessage 형식으로 받아야 하나?
+  useEffect(() => {
+    socket.on(
+      "receive_system_message",
+      (id: number, player: number, message: string) => {
+        setMessages((prev) => [
+          ...prev,
+          { id, player, text: message, isMine: false },
+        ]);
+      }
+    );
+
+    return () => {
+      socket.off("message");
+    };
+  }, []);
 
   useEffect(() => {
     // 새로운 메시지가 추가될 때 스크롤을 아래로 이동
@@ -202,96 +217,28 @@ function GameChats() {
               </div>
               <div className="fixed z-20 right-[max(0px,calc(50%-45rem))] w-[33.5rem] py-6 px-3 hidden h-screen bg-black bg-opacity-40 xl:grid grid-cols-3 grid-rows-4 gap-4 shadow-[0px_0px_16px_rgba(255,255,255,0.25)]  border-solid border-l-[rgba(255,255,255,0.35)]">
                 <div className="row-start-1 px-2 py-1">
-                  <div className="shadow-[0px_0px_16px_rgba(255,255,255,0.25)] border-2 border-solid border-[rgba(255,255,255,0.35)] w-full h-full hover:border-[rgba(255,0,0,0.5)] hover:shadow-[0px_0px_16px_rgba(255,0,0,0.45)]">
-                    {/* <div className="hover:shadow-[0px_0px_16px_rgba(255,0,0,0.45)] w-full h-full hover:animate-ping text-white"></div> */}
-                    <div className="flex justify-center items-center px-4 py-1">
-                      {/* 죽었을 때 변화 이미지 */}
-                      {/* <img className="filter grayscale sepia brightness-75 contrast-125" src={PlayerIcon1} /> */}
-                      <img
-                        className="filter brightness-75 w-3/4 h-3/4"
-                        src={PlayerIcon1}
-                      />
-                    </div>
-                    <div className="flex w-full text-base font-bold justify-center text-[#cccccc] mb-1">
-                      익명1
-                    </div>
-                    <div className="flex w-full justify-center">
-                      <button>
-                        <FontAwesomeIcon
-                          icon={robot}
-                          className="text-[#cccccc] hover:text-white p-1 w-[1.25rem] h-[1.25rem] mb-2"
-                        />
-                      </button>
-                      <button>
-                        <FontAwesomeIcon
-                          icon={checkToSlot}
-                          className="text-[#cccccc] hover:text-white p-1 w-[1.25rem] h-[1.25rem] mx-3"
-                        />
-                      </button>
-                      <button>
-                        <FontAwesomeIcon
-                          icon={noteSticky}
-                          className="text-[#cccccc] hover:text-white p-1 w-[1.25rem] h-[1.25rem] mb-2"
-                        />
-                      </button>
-                    </div>
-                  </div>
+                  <ReadyProfile nickname="익명1" icon={PlayerIcon1} />
                 </div>
                 <div className="row-start-1 px-2 py-1">
-                  <div className="shadow-[0px_0px_16px_rgba(255,255,255,0.25)] border-2 border-solid border-[rgba(255,255,255,0.35)] w-full h-full hover:border-[rgba(255,255,255,0.5)] hover:shadow-[0px_0px_16px_rgba(255,255,255,0.45)]">
-                    <div className="flex justify-center items-center px-4 pt-1 pb-3">
-                      <img className="filter brightness-75" src={PlayerIcon2} />
-                    </div>
-                    <div></div>
-                  </div>
+                  <ReadyProfile nickname="익명2" icon={PlayerIcon2} />
                 </div>
                 <div className="row-start-1 px-2 py-1">
-                  <div className="shadow-[0px_0px_16px_rgba(255,255,255,0.25)] border-2 border-solid border-[rgba(255,255,255,0.35)] w-full h-full hover:border-[rgba(255,255,255,0.5)] hover:shadow-[0px_0px_16px_rgba(255,255,255,0.45)]">
-                    <div className="flex justify-center items-center px-4 pt-1 pb-3">
-                      <img className="filter brightness-75" src={PlayerIcon3} />
-                    </div>
-                    <div></div>
-                  </div>
+                  <ReadyProfile nickname="익명3" icon={PlayerIcon3} />
                 </div>
                 <div className="row-start-2 px-2 py-1">
-                  <div className="shadow-[0px_0px_16px_rgba(255,255,255,0.25)] border-2 border-solid border-[rgba(255,255,255,0.35)] w-full h-full hover:border-[rgba(255,255,255,0.5)] hover:shadow-[0px_0px_16px_rgba(255,255,255,0.45)]">
-                    <div className="flex justify-center items-center px-4 pt-1 pb-3">
-                      <img className="filter brightness-75" src={PlayerIcon4} />
-                    </div>
-                    <div></div>
-                  </div>
+                  <ReadyProfile nickname="익명4" icon={PlayerIcon4} />
                 </div>
                 <div className="row-start-2 px-2 py-1">
-                  <div className="shadow-[0px_0px_16px_rgba(255,255,255,0.25)] border-2 border-solid border-[rgba(255,255,255,0.35)] w-full h-full hover:border-[rgba(255,255,255,0.5)] hover:shadow-[0px_0px_16px_rgba(255,255,255,0.45)]">
-                    <div className="flex justify-center items-center px-4 pt-1 pb-3">
-                      <img className="filter brightness-75" src={PlayerIcon5} />
-                    </div>
-                    <div></div>
-                  </div>
+                  <ReadyProfile nickname="익명5" icon={PlayerIcon5} />
                 </div>
                 <div className="row-start-2 px-2 py-1">
-                  <div className="shadow-[0px_0px_16px_rgba(255,255,255,0.25)] border-2 border-solid border-[rgba(255,255,255,0.35)] w-full h-full hover:border-[rgba(255,255,255,0.5)] hover:shadow-[0px_0px_16px_rgba(255,255,255,0.45)]">
-                    <div className="flex justify-center items-center px-4 pt-1 pb-3">
-                      <img className="filter brightness-75" src={PlayerIcon6} />
-                    </div>
-                    <div></div>
-                  </div>
+                  <ReadyProfile nickname="익명6" icon={PlayerIcon6} />
                 </div>
                 <div className="row-start-3 px-2 py-1">
-                  <div className="shadow-[0px_0px_16px_rgba(255,255,255,0.25)] border-2 border-solid border-[rgba(255,255,255,0.35)] w-full h-full hover:border-[rgba(255,255,255,0.5)] hover:shadow-[0px_0px_16px_rgba(255,255,255,0.45)]">
-                    <div className="flex justify-center items-center px-4 pt-1 pb-3">
-                      <img className="filter brightness-75" src={PlayerIcon7} />
-                    </div>
-                    <div></div>
-                  </div>
+                  <ReadyProfile nickname="익명7" icon={PlayerIcon7} />
                 </div>
                 <div className="row-start-3 px-2 py-1">
-                  <div className="shadow-[0px_0px_16px_rgba(255,255,255,0.25)] border-2 border-solid border-[rgba(255,255,255,0.35)] w-full h-full hover:border-[rgba(255,255,255,0.5)] hover:shadow-[0px_0px_16px_rgba(255,255,255,0.45)]">
-                    <div className="flex justify-center items-center px-4 pt-1 pb-3">
-                      <img className="filter brightness-75" src={PlayerIcon8} />
-                    </div>
-                    <div></div>
-                  </div>
+                  <ReadyProfile nickname="익명8" icon={PlayerIcon8} />
                 </div>
                 <div className="row-start-3">10</div>
                 <div className="w-full text-base justify-center items-center bg-[rgb(7,7,10)] border-2 border-solid border-[#B4B4B4] col-span-3 text-white px-2 py-1">
@@ -306,4 +253,4 @@ function GameChats() {
   );
 }
 
-export default GameChats;
+export default GamePlay;
