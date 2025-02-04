@@ -47,28 +47,3 @@ input {
 .border-outline-gray {
   border-color: rgb(98, 98, 103);
 }
-
-/* 홈 */
-.board-container {
-  flex: 1;
-  border-top: 1px solid rgb(187, 187, 187);
-}
-.board-content {
-  display: flex;
-  font-size: 14px;
-  padding: 6px 4px;
-  border-bottom: 1px solid rgb(187, 187, 187);
-}
-.board-content:hover {
-  background-color: #8723410a;
-}
-.board-content-title {
-  flex: 3;
-  display: flex;
-  justify-content: flex-start;
-}
-.board-content-date {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-}

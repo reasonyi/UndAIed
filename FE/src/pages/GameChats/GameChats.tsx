@@ -162,7 +162,7 @@ function GameChats() {
           <div className="max-w-3xl mx-auto xl:max-w-none xl:ml-0 xl:mr-[32rem]">
             <div className="chat-container flex flex-col h-screen overflow-auto">
               {/* 메시지 리스트 영역 */}
-              <div className="flex-1 px-5 pt-4">
+              <div className="flex-1 px-4 pt-4">
                 {messages.map((msg: IMessage) => {
                   if (msg.player === 10) {
                     return <SystemBubble key={msg.id} message={msg} />;
