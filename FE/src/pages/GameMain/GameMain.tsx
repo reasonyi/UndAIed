@@ -1,12 +1,15 @@
-import logo from "../../assets/logo.png";
 import bgImg from "../../assets/game-rooms-background.png";
 import power from "../../assets/icon/power.png";
 import playerIcon from "../../assets/player-icon/player-icon-1.svg";
 import settingIcon from "../../assets/icon/setting.png";
 import bellIcon from "../../assets/icon/bell.svg";
 import friendsIcon from "../../assets/icon/friends.svg";
+import { useEffect, useRef } from "react";
+import { useRoomList } from "../../hooks/useGameMain";
+import { atom } from "recoil";
 
-function GameRooms() {
+import GameRoomList from "./GameRoomList";
+function GameMain() {
   const blockStyle =
     "bg-[#5349507a] border border-[#f74a5c]/60 backdrop-blur-[12.20px] text-[#fffbfb]  rounded-[5px]  transition-all duration-200 ";
   const blockHover =
@@ -21,7 +24,32 @@ function GameRooms() {
     memberCount: number;
   }
 
-  const dummyRoomData: RoomData[] = [
+  const fetchRooms: RoomData[] = [
+    {
+      id: 1,
+      title: "즐거운 파티게임방",
+      memberCount: 3,
+    },
+    {
+      id: 2,
+      title: "초보만 Welcome",
+      memberCount: 2,
+    },
+    {
+      id: 3,
+      title: "실력자만 오세요",
+      memberCount: 4,
+    },
+    {
+      id: 4,
+      title: "자유롭게 즐겨요~",
+      memberCount: 1,
+    },
+    {
+      id: 5,
+      title: "친목게임방",
+      memberCount: 2,
+    },
     {
       id: 1,
       title: "즐거운 파티게임방",
@@ -48,6 +76,55 @@ function GameRooms() {
       memberCount: 2,
     },
   ];
+
+  const observerOption = {
+    root: null,
+    threshold: 0.7,
+  };
+
+  // 무한스크롤 구현
+  const target = useRef<HTMLDivElement>(null);
+  // hasNextPage는 백엔드에서 구현해놔야 데이터가 일치함 만약 프론트에서 totalpage가 3이고 현재페이지가 3인데 방이 증가해서 백엔드의 totalpage가 4가 되었을때? 데이터가 불일치하는 문제가 있다
+  // 일단 api 부르고 체크하는 방법이 있지만 그렇게 한다면 일단 로딩이 한번 더 발생하기 때문에 손해
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useRoomList();
+  useEffect(() => {
+    const currentTarget = target.current;
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && hasNextPage) {
+        //보이고 다음페이지가 있으면
+        // fetchNextPage();
+      }
+    }, observerOption);
+
+    if (currentTarget) {
+      observer.observe(currentTarget);
+    }
+
+    return () => {
+      if (currentTarget) {
+        observer.unobserve(currentTarget);
+      }
+      observer.disconnect();
+    };
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  //--------------------------------웹소켓 구현--------------------
+  //type, atoms, hook
+  interface GameRoom {
+    id: string;
+    title: string;
+    players: number;
+    maxPlayers: number;
+    status: "waiting" | "playing";
+    createdAt: Date;
+  }
+
+  const gameRoomsState = atom<GameRoom[]>({
+    key: "gameRoomsState",
+    default: [],
+  });
+
   return (
     <div className="w-screen h-screen bg-black select-none">
       <div
@@ -58,7 +135,7 @@ function GameRooms() {
         <div className="relative z-10 ">
           {/* Header */}
           <header className="p-4 md:p-6  border-black flex justify-between items-center px-6">
-            <img src={logo} alt="로고" className="h-6" />
+            {/* <img src={logo} alt="로고" className="h-6" /> */}
             <button className="px-2 py-1 rounded-lg duration-300 hover:bg-[#f8376467] hover:border-[#f93c4f] hover:shadow-[#F74A5C]">
               <img src={power} alt="" />
             </button>
@@ -103,28 +180,7 @@ function GameRooms() {
                 방 만들기
               </button>
 
-              {/* 중앙 방 목록 영역 무한스크롤로 구현 예정*/}
-              <div className={`flex-1 p-7 ${blockStyle} bg-[#0000008f]`}>
-                <div className="h-8  grid md:grid-cols-[6rem,1fr,8rem] grid-cols-[4rem,1fr,5rem] px-2">
-                  <span>No.</span>
-                  <span>Title</span>
-                  <span className="text-right">인원수</span>
-                </div>
-                <ul className="space-y-2.5">
-                  {dummyRoomData.map((item) => (
-                    <li
-                      key={item.id}
-                      className={`h-8 bg-[#241818de] grid md:grid-cols-[6rem,1fr,8rem] grid-cols-[4rem,1fr,5rem] items-center px-2 ${blockStyle} ${blockHover} ${blockActive} cursor-pointer`}
-                    >
-                      <span className="ml-2">{item.id}</span>
-                      <span className="truncate">{item.title}</span>
-                      <span className="text-right mr-2">
-                        {item.memberCount} / 8
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              <GameRoomList />
 
               {/* 하단 채팅 영역 */}
               <div
@@ -163,4 +219,4 @@ function GameRooms() {
   );
 }
 
-export default GameRooms;
+export default GameMain;
