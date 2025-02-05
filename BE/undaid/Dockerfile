@@ -1,7 +1,10 @@
 # 빌드 스테이지
 FROM gradle:8.12.1-jdk17 AS build
+
 WORKDIR /home/gradle/src
+
 COPY --chown=gradle:gradle . .
+
 RUN gradle build -x test --no-daemon
 
 # 실행 스테이지
