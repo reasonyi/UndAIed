@@ -1,4 +1,4 @@
-package com.ssafy.undaied.global.socket.constant;
+package com.ssafy.undaied.socket.common.constant;
 
 public enum WebSocketMessageType {
 
