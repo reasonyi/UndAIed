@@ -1,7 +1,7 @@
 import { atom, useRecoilState } from "recoil";
 import { useEffect, useRef, useState } from "react";
-import { GameRoom } from "../../types/gameRoomInfo";
-import { gameMainState } from "../../store/gameMainState";
+import { GameRoom } from "../../../types/gameRoomInfo";
+import { gameMainState } from "../../../store/gameMainState";
 
 import GameRoomCard from "./GameRoomCard";
 

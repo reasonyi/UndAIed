@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { GameRoomCardProps } from "../../types/gameRoomInfo";
+import { GameRoomCardProps } from "../../../types/gameRoomInfo";
 
 const blockStyle =
   "bg-[#5349507a] border border-[#f74a5c]/60 backdrop-blur-[12.20px] text-[#fffbfb]  rounded-[5px]  transition-all duration-200 ";

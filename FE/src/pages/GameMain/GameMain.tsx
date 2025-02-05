@@ -8,7 +8,8 @@ import { useEffect, useRef } from "react";
 import { useRoomList } from "../../hooks/useGameMain";
 import { atom } from "recoil";
 
-import GameRoomList from "./GameRoomList";
+import GameRoomList from "./components/GameRoomList";
+import { Link } from "react-router-dom";
 function GameMain() {
   const blockStyle =
     "bg-[#5349507a] border border-[#f74a5c]/60 backdrop-blur-[12.20px] text-[#fffbfb]  rounded-[5px]  transition-all duration-200 ";
@@ -176,10 +177,11 @@ function GameMain() {
             {/* Main Content */}
             <div className="flex flex-col flex-1 gap-4 px-8 ">
               {/* 상단 영역 */}
-              <button className="w-32 justify-start px-6 py-2 bg-black border-2 border-[#bf8f5b] text-white rounded hover:bg-[#211b05] hover:border-[#dea569] hover:shadow-[0_0_10px_0] hover:shadow-[#f99f3e] active:border-[#906639] active:bg-black active:shadow-none duration-100 ">
-                방 만들기
-              </button>
-
+              <Link to="/createroom">
+                <button className="w-32 justify-start px-6 py-2 bg-black border-2 border-[#bf8f5b] text-white rounded hover:bg-[#211b05] hover:border-[#dea569] hover:shadow-[0_0_10px_0] hover:shadow-[#f99f3e] active:border-[#906639] active:bg-black active:shadow-none duration-100 ">
+                  방 만들기
+                </button>
+              </Link>
               <GameRoomList />
 
               {/* 하단 채팅 영역 */}
