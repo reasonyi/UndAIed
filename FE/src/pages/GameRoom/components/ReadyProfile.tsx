@@ -24,28 +24,9 @@ function ReadyProfile({ nickname, icon }: IReadyProfileProps) {
         <img className="filter brightness-75 w-3/4 h-3/4" src={icon} />
       </div>
       <div className="flex w-full text-base font-bold justify-center text-[#cccccc] mb-1">
-        {nickname}
+        익명이 아닌 닉
       </div>
-      <div className="flex w-full justify-center">
-        <button>
-          <FontAwesomeIcon
-            icon={robot}
-            className="text-[#cccccc] hover:text-white p-1 w-[1.25rem] h-[1.25rem] mb-2"
-          />
-        </button>
-        <button>
-          <FontAwesomeIcon
-            icon={checkToSlot}
-            className="text-[#cccccc] hover:text-white p-1 w-[1.25rem] h-[1.25rem] mx-3"
-          />
-        </button>
-        <button>
-          <FontAwesomeIcon
-            icon={noteSticky}
-            className="text-[#cccccc] hover:text-white p-1 w-[1.25rem] h-[1.25rem] mb-2"
-          />
-        </button>
-      </div>
+      <div className="flex w-full justify-center"></div>
     </div>
   );
 }
