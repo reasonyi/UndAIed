@@ -1,5 +1,6 @@
 services:
   nginx:
+    profiles: ["rls"]
     image: nginx:alpine
     ports:
       - "80:80"
@@ -9,58 +10,64 @@ services:
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
       - /etc/ssl/certs:/etc/ssl/certs:ro
-      - /var/log/nginx:/var/log/nginx
     depends_on:
       - frontend
       - ai
-      # - backend
+      - backend
     networks:
       - app_network
     restart: always
+    environment:
+      TZ: Asia/Seoul
 
   frontend:
+    profiles: ["dev", "rls"]
     build: ./FE
     expose:
       - "5173"
     volumes:
       - ./FE:/FE
       - /FE/node_modules
-    environment:
-      - NODE_ENV=development
     networks:
       - app_network
     restart: always
+    environment:
+      - TZ=Asia/Seoul
 
   backend:
+    profiles: ["dev", "rls"]
     build: ./BE/undaid
     ports:
       - "8080:8080"
     depends_on:
       - mysql
     environment:
-      # SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/undaied?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/undaied?useSSL=true&serverTimezone=UTC
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/undaied?useSSL=true&serverTimezone=Asia/Seoul
       SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
+      TZ: Asia/Seoul
     networks:
       - app_network
     restart: always
 
   ai:
+    profiles: ["dev", "rls"]
     build: ./AI
-    expose:
+    ports:
       - "8000"
     volumes:
       - ./AI:/app
     environment:
       - PYTHONPATH=/app
+      - TZ=Asia/Seoul
     networks:
       - app_network
     restart: always
     command: uvicorn app:app --host 0.0.0.0 --port 8000 --reload
 
   mysql:
+    profiles: ["dev", "rls"]
     image: mysql:8.0
     container_name: mysql
     ports:
