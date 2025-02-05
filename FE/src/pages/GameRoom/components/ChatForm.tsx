@@ -1,7 +1,8 @@
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useForm } from "react-hook-form";
+import { useForm, FieldErrors } from "react-hook-form";
+import { toast } from "sonner";
 
 interface IFormProps {
   playerNum: number;
@@ -19,7 +20,7 @@ function ChatForm({ playerNum }: IFormProps) {
     formState: { errors },
   } = useForm<IForm>();
 
-  const onChatSubmit = (data: IForm, e?: React.BaseSyntheticEvent) => {
+  const onValidSubmit = async (data: IForm, e?: React.BaseSyntheticEvent) => {
     //local storage에서 토큰 가져오기, player num 가져오기기
     //axios api 작성성
     e?.preventDefault();
@@ -41,10 +42,17 @@ function ChatForm({ playerNum }: IFormProps) {
     }
   };
 
+  const onInvalidSubmit = (errors: FieldErrors<IForm>) => {
+    if (errors.chat?.type === "required") {
+      // "빈 채팅을 입력할 수 없습니다" 에러 발생 시, 원하는 custom function 실행
+      toast.error(errors.chat.message);
+    }
+  };
+
   return (
     <form
       className="w-full h-full bg-[#07070a4d] focus-within:bg-neutral-900 rounded-lg shadow-lg border-2 border-solid border-[#555555] px-4 flex items-center text-sm"
-      onSubmit={handleSubmit(onChatSubmit)}
+      onSubmit={handleSubmit(onValidSubmit, onInvalidSubmit)}
       action=""
     >
       <input
@@ -63,7 +71,6 @@ function ChatForm({ playerNum }: IFormProps) {
       <button className="w-6 h-6 ml-2">
         <FontAwesomeIcon icon={paperPlane} className="text-[#848484]" />
       </button>
-      {errors.chat?.message ? errors.chat.message : <></>}
     </form>
   );
 }
