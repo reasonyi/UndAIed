@@ -155,7 +155,8 @@ ehthumbs.db
 Thumbs.db
 
 # Configuration
-/src/main/resources/application-secrets.properties
+/BE/undaied/src/main/resources/application-secrets.properties
+/BE/undaied/src/main/resources/application.properties
 .pypirc
 nginx/conf.d
 nginx/nginx.conf
