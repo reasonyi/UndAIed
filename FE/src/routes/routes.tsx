@@ -3,7 +3,7 @@ import App from "../App";
 import NotFound from "../pages/NotFound";
 import Home from "../pages/Home";
 import Policy from "../pages/Policy";
-import GameRooms from "../pages/GameRooms/GameRooms";
+import GameMain from "../pages/GameMain/GameMain";
 import GameLobby from "../pages/GameLobby";
 import GameChats from "../pages/GameChats";
 import BoardDetails from "../pages/BoardDetails";
@@ -28,8 +28,8 @@ const router = createBrowserRouter([
         element: <Policy />,
       },
       {
-        path: "/gamerooms",
-        element: <GameRooms />,
+        path: "/gamemain",
+        element: <GameMain />,
       },
       {
         path: "/gamelobby/:number",

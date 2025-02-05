@@ -33,7 +33,7 @@ function Header({ scrollRatio }: IHeaderProps) {
           <Link to={"/policy"}>Policy로</Link>
         </li>
         <li className="mr-6">
-          <Link to={"/gamerooms"}>Game rooms으로</Link>
+          <Link to={"/gamemain"}>Game rooms으로</Link>
         </li>
         <li className="mr-6">
           <Link to={"/gamelobby/1"}>1번 gamelobby로</Link>
