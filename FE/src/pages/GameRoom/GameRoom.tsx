@@ -24,6 +24,7 @@ import ReadyProfile from "./components/ReadyProfile";
 import EmptyProfile from "./components/EmptyProfile";
 import { io, Socket } from "socket.io-client";
 import ChatForm from "./components/ChatForm";
+import { useSocket } from "../../hooks/useSocket";
 
 interface IMessage {
   id: number;
@@ -39,11 +40,12 @@ interface IUser {
   imgNum: number;
 }
 
-const socket: Socket = io("http://localhost:3000");
-
 function GameRoom() {
   const { number } = useParams();
   const scrollRef = useRef<HTMLDivElement | null>(null);
+
+  //socket 훅 사용
+  const socket = useSocket();
 
   //아이콘
   const bell: IconDefinition = faBell;
