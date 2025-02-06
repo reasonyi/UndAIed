@@ -31,8 +31,9 @@ public enum EventType {
     // 게임 진행 밤
     SHOW_INFECTION_RESULT("infection:result"),
 
-    // 낮/밤 알림
-    UPDATE_STAGE("game:stage:update"),
+    // 스테이지 알림
+    START_STAGE("game:stage:start"),
+    END_STAGE("game:stage:end"),
 
     // 게임 종료
     SHOW_GAME_RESULT("game:result"),
