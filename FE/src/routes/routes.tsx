@@ -3,9 +3,9 @@ import App from "../App";
 import NotFound from "../pages/NotFound";
 import Home from "../pages/Home/Home";
 import Policy from "../pages/Policy";
-import GameRooms from "../pages/GameRooms";
-import GameLobby from "../pages/GameLobby";
-import GameChats from "../pages/GameChats/GameChats";
+import GameRoom from "../pages/GameRoom/GameRoom";
+import GamePlay from "../pages/GamePlay/GamePlay";
+import GameMain from "../pages/GameMain/GameMain";
 import BoardDetails from "../pages/BoardDetails";
 import Board from "../pages/Board/Board";
 import User from "../pages/User";
@@ -28,16 +28,16 @@ const router = createBrowserRouter([
         element: <Policy />,
       },
       {
-        path: "/gamerooms",
-        element: <GameRooms />,
+        path: "/gamemain",
+        element: <GameMain />,
       },
       {
-        path: "/gamelobby/:number",
-        element: <GameLobby />,
+        path: "/gameplay/:number",
+        element: <GamePlay />,
       },
       {
-        path: "/gamechats/:number",
-        element: <GameChats />,
+        path: "/gameroom/:number",
+        element: <GameRoom />,
       },
       {
         path: "/board/:category/:number",

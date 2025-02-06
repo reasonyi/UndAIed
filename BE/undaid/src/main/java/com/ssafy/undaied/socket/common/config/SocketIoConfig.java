@@ -1,4 +1,4 @@
-package com.ssafy.undaied.global.socket.config;
+package com.ssafy.undaied.socket.common.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

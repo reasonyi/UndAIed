@@ -5,7 +5,7 @@ import {
   QueryClient,
   useInfiniteQuery,
 } from "@tanstack/react-query";
-import { boardApi, AdminBoardApi } from "../api/board/boardApi";
+import { boardApi, AdminBoardApi } from "../api/boardApi";
 import { BoardRequest, Post, UpdatePostParams } from "../types/board";
 
 //all list
