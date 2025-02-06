@@ -3,6 +3,7 @@ package com.ssafy.undaied.socket.common.constant;
 public enum EventType {
 
     // 로비
+    CREATE_ROOM_AT_LOBBY("lobby:room:create"),
     CREATE_ROOM("room:create"),
     LIST_ROOMS("room:list"),
     ENTER_ROOM("room:enter"),
