@@ -16,7 +16,7 @@ interface IMessage {
 
 interface ChatBubbleProps {
   message: IMessage;
-  playerName: string[];
+  playerName: string | undefined;
 }
 
 function ChatBubble({ message, playerName }: ChatBubbleProps) {
@@ -46,7 +46,7 @@ function ChatBubble({ message, playerName }: ChatBubbleProps) {
           src={playerColor[message.player][3]}
           alt="player-icon"
         />
-        <span className="text-white">{playerName[message.player]}</span>
+        <span className="text-white">{playerName}</span>
       </div>
 
       {/* 말풍선(채팅) 영역 */}

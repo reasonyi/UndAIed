@@ -5,7 +5,6 @@ import settingIcon from "../../assets/icon/setting.png";
 import bellIcon from "../../assets/icon/bell.svg";
 import friendsIcon from "../../assets/icon/friends.svg";
 import { useEffect, useRef } from "react";
-import { useRoomList } from "../../hooks/useGameMain";
 import { atom } from "recoil";
 
 import GameRoomList from "./components/GameRoomList";
@@ -87,28 +86,28 @@ function GameMain() {
   const target = useRef<HTMLDivElement>(null);
   // hasNextPage는 백엔드에서 구현해놔야 데이터가 일치함 만약 프론트에서 totalpage가 3이고 현재페이지가 3인데 방이 증가해서 백엔드의 totalpage가 4가 되었을때? 데이터가 불일치하는 문제가 있다
   // 일단 api 부르고 체크하는 방법이 있지만 그렇게 한다면 일단 로딩이 한번 더 발생하기 때문에 손해
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useRoomList();
-  useEffect(() => {
-    const currentTarget = target.current;
-    const observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting && hasNextPage) {
-        //보이고 다음페이지가 있으면
-        // fetchNextPage();
-      }
-    }, observerOption);
+  // const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
+  //   useRoomList();
+  // useEffect(() => {
+  //   const currentTarget = target.current;
+  //   const observer = new IntersectionObserver((entries) => {
+  //     if (entries[0].isIntersecting && hasNextPage) {
+  //       //보이고 다음페이지가 있으면
+  //       // fetchNextPage();
+  //     }
+  //   }, observerOption);
 
-    if (currentTarget) {
-      observer.observe(currentTarget);
-    }
+  //   if (currentTarget) {
+  //     observer.observe(currentTarget);
+  //   }
 
-    return () => {
-      if (currentTarget) {
-        observer.unobserve(currentTarget);
-      }
-      observer.disconnect();
-    };
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+  //   return () => {
+  //     if (currentTarget) {
+  //       observer.unobserve(currentTarget);
+  //     }
+  //     observer.disconnect();
+  //   };
+  // }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   //--------------------------------웹소켓 구현--------------------
   //type, atoms, hook
