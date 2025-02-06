@@ -3,15 +3,17 @@ import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useForm, FieldErrors } from "react-hook-form";
 import { toast } from "sonner";
+import { Socket } from "socket.io-client";
 
 interface IFormProps {
   playerNum: number;
+  socket: Socket; // 부모에서 전달받을 소켓 인스턴스
 }
 interface IForm {
   chat: string;
 }
 
-function ChatForm({ playerNum }: IFormProps) {
+function ChatForm({ playerNum, socket }: IFormProps) {
   const paperPlane: IconDefinition = faPaperPlane;
   const {
     register,
@@ -26,13 +28,14 @@ function ChatForm({ playerNum }: IFormProps) {
     e?.preventDefault();
 
     try {
-      // 예시 API 호출 (axios 예시)
-      // const response = await axios.post("/api/chat", {
-      //   token: localStorage.getItem("token"),
-      //   playerNum,
-      //   chat: data.chat,
-      // });
-      // console.log(response.data);
+      // 1) 서버로 메시지 전송
+      // 서버에서도 "chat" 이벤트를 수신하여 모든 클라이언트에게 broadcast하도록 구현
+      const newMessage = {
+        id: Date.now(), // 간단히 임시 ID
+        player: playerNum,
+        text: data.chat,
+      };
+      socket.emit("chat", newMessage);
 
       // 메시지 전송 로직 성공 시 input 비우기
       resetField("chat");
@@ -66,6 +69,7 @@ function ChatForm({ playerNum }: IFormProps) {
         className="bg-transparent text-[#848484] focus:text-[#dddddd] w-full"
         placeholder="채팅 입력하기"
         type="text"
+        autoComplete="off"
       />
       <div className="bg-[#848484] w-[1px] h-6"></div>
       <button className="w-6 h-6 ml-2">

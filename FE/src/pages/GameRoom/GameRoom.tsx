@@ -12,7 +12,6 @@ import Sample from "../../assets/svg-icon/sample.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import {
-  faPaperPlane,
   faBell,
   faGear,
   faUserGroup,
@@ -22,8 +21,8 @@ import {
 import ChatBubble from "../GamePlay/components/ChatBuble";
 import SystemBubble from "../GamePlay/components/SystemBubble";
 import ReadyProfile from "./components/ReadyProfile";
-import { io, Socket } from "socket.io-client";
 import EmptyProfile from "./components/EmptyProfile";
+import { io, Socket } from "socket.io-client";
 import ChatForm from "./components/ChatForm";
 
 interface IMessage {
@@ -53,6 +52,9 @@ function GameRoom() {
   const doorOpen: IconDefinition = faDoorOpen;
   const circleExclamation: IconDefinition = faCircleExclamation;
 
+  // 현재 접속한 사용자(본인) playerNum 예시 (실제로는 로그인 정보나 URL 파라미터로 받는 등 구현 필요)
+  const currentPlayerNum = 1;
+
   console.log(socket);
 
   const [users, setUsers] = useState<IUser[]>([]);
@@ -75,7 +77,7 @@ function GameRoom() {
       (id: number, playerNum: number, name: string, token: string) => {
         setUsers((prev) => [
           ...prev,
-          { id: id, playerNum: playerNum, name: name, token: token, imgNum: 1 },
+          { id, playerNum, name, token, imgNum: 1 },
         ]);
       }
     );
@@ -83,9 +85,9 @@ function GameRoom() {
     return () => {
       socket.off("enter_room");
     };
-  }, [users]);
+  }, []);
 
-  //socket 시작작
+  //socket 시작
   //IMessage 형식으로 받아야 하나?
   useEffect(() => {
     socket.on(
@@ -102,6 +104,26 @@ function GameRoom() {
       socket.off("message");
     };
   }, []);
+
+  //채팅
+  useEffect(() => {
+    socket.on("chat", (data: { id: number; player: number; text: string }) => {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: data.id,
+          player: data.player,
+          text: data.text,
+          // 보낸 playerNum과 현재 사용자의 playerNum이 같으면 isMine = true
+          isMine: data.player === currentPlayerNum,
+        },
+      ]);
+    });
+
+    return () => {
+      socket.off("chat");
+    };
+  }, [currentPlayerNum]);
 
   useEffect(() => {
     // 새로운 메시지가 추가될 때 스크롤을 아래로 이동
@@ -195,7 +217,7 @@ function GameRoom() {
                   className="chat-input-temp h-[4.5rem] w-full"
                 ></div>
                 <div className="chat-input fixed h-10 bottom-4 w-[calc(90rem-21rem-33.5rem-2rem)]">
-                  <ChatForm playerNum={1} />
+                  <ChatForm playerNum={currentPlayerNum} socket={socket} />
                 </div>
               </div>
               <div className="fixed z-20 right-[max(0px,calc(50%-45rem))] w-[33.5rem] py-6 px-3 hidden h-screen bg-black bg-opacity-40 xl:grid grid-cols-3 grid-rows-4 gap-4 shadow-[0px_0px_16px_rgba(255,255,255,0.25)]  border-solid border-l-[rgba(255,255,255,0.35)]">
