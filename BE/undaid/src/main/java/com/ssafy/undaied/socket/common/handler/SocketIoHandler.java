@@ -31,7 +31,7 @@ public class SocketIoHandler {
 
 
     // 공통으로 사용할 사용자 검증 및 userId 가져오는 메서드
-    protected void validateUser(SocketIOClient client) {
+    public void validateUser(SocketIOClient client) {
         Integer userId = client.get("userId");
         if (userId == null) {
             throw new BaseException(NOT_AUTHENTICATED);
