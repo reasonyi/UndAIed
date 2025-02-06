@@ -251,3 +251,196 @@ cython_debug/
 
 # macOS
 .DS_Store
+
+
+
+
+##############################################
+
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Build and Distribution
+dist/
+dist-ssr/
+build/
+target/
+out/
+*.local
+/nbbuild/
+/nbdist/
+/.nb-gradle/
+
+# Node.js
+node_modules/
+jspm_packages/
+bower_components/
+web_modules/
+.npm
+.yarn/
+.yarn-integrity
+.pnp.*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+develop-eggs/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+.pytest_cache/
+.coverage
+.coverage.*
+.tox/
+.nox/
+.cache
+htmlcov/
+cover/
+.hypothesis/
+
+# Virtual Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+*/venv
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.iws
+*.iml
+*.ipr
+.project
+.classpath
+.settings/
+.springBeans
+.sts4-cache
+.spyderproject
+.spyproject
+.ropeproject
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Java
+*.class
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+.mtj.tmp/
+hs_err_pid*
+replay_pid*
+
+# Gradle
+.gradle
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# Documentation
+HELP.md
+/site
+docs/_build/
+
+# Cache and Temporary files
+.ruff_cache/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+cython_debug/
+.pdm.toml
+.pdm-python
+.pdm-build/
+__pypackages__/
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+.eslintcache
+.stylelintcache
+.dynamodb/
+.tern-port
+.vscode-test
+*.tsbuildinfo
+
+# Database
+db.sqlite3
+db.sqlite3-journal
+mysql_data/
+mysql/data/
+!mysql/init/
+!mysql/init/*.sql
+
+# System files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Configuration
+/BE/undaid/src/main/resources/application-secrets.properties
+/BE/undaid/src/main/resources/application.properties
+.pypirc
+nginx/conf.d
+nginx/nginx.conf
+!nginx/conf.d/.gitkeep
+
+# SSL Certificates
+*.pem
+*.crt
+*.key
+*.csr
+ssl/
+certificates/
+
+# Next.js / Nuxt.js
+.next
+.nuxt
+out
+
+# Framework specific
+.docusaurus
+.serverless/
+.fusebox/
+.cache
+.parcel-cache
+.temp
+**/.vitepress/dist
+**/.vitepress/cache
