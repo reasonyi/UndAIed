@@ -9,6 +9,7 @@ import { atom } from "recoil";
 
 import GameRoomList from "./components/GameRoomList";
 import { Link } from "react-router-dom";
+import GameHeader from "./components/GameHeader";
 function GameMain() {
   const blockStyle =
     "bg-[#5349507a] border border-[#f74a5c]/60 backdrop-blur-[12.20px] text-[#fffbfb]  rounded-[5px]  transition-all duration-200 ";
@@ -134,12 +135,7 @@ function GameMain() {
         <div className="absolute inset-0 bg-gradient-to-r from-black to-[#11223349] opacity-100 " />
         <div className="relative z-10 ">
           {/* Header */}
-          <header className="p-4 md:p-6  border-black flex justify-between items-center px-6">
-            {/* <img src={logo} alt="로고" className="h-6" /> */}
-            <button className="px-2 py-1 rounded-lg duration-300 hover:bg-[#f8376467] hover:border-[#f93c4f] hover:shadow-[#F74A5C]">
-              <img src={power} alt="" />
-            </button>
-          </header>
+          <GameHeader />
 
           <div className="md:flex md:h-screen md:max-h-[730px] md:m-12 md:mb-5 mb-5">
             {/* Aside */}
