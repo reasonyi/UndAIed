@@ -35,10 +35,10 @@ public class SocketDisconnectService {
      */
     private void handleRoomDisconnect(SocketIOClient client, Integer userId) {
         for (String room : client.getAllRooms()) {
-//            if (room.startsWith(GAME_ROOM_PREFIX)) {
-//                gameRoomService.leaveGameRoom(room);
-//            }
-            if (room.equals(LOBBY_ROOM)) {
+            if (room.startsWith(GAME_ROOM_PREFIX)) {
+                roomService.leaveGameRoom(client, room);
+            }
+            else if (room.equals(LOBBY_ROOM)) {
                 lobbyService.leaveLobby(client);
             }
             client.leaveRoom(room);
