@@ -1,5 +1,6 @@
 package com.ssafy.undaied.socket.common.handler;
 
+import com.corundumstudio.socketio.SocketIOClient;
 import com.ssafy.undaied.global.auth.token.JwtTokenProvider;
 import com.ssafy.undaied.global.common.exception.BaseException;
 import com.ssafy.undaied.socket.common.constant.EventType;

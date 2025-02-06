@@ -35,14 +35,14 @@ function Header({ scrollRatio }: IHeaderProps) {
         <li className="ml-4 mr-1 font-semibold">
           <Link to={"/policy"}>Policy로</Link>
         </li>
-        <li className="ml-4 mr-1 font-semibold">
-          <Link to={"/gamerooms"}>Game rooms으로</Link>
+        <li className="mr-6">
+          <Link to={"/game"}>Game rooms으로</Link>
         </li>
         <li className="ml-4 mr-1 font-semibold">
-          <Link to={"/gamelobby/1"}>1번 gamelobby로</Link>
+          <Link to={"/game/room/1"}>1번 gameroom로</Link>
         </li>
         <li className="ml-4 mr-1 font-semibold">
-          <Link to={"/gamechats/2"}>2번 game chats로</Link>
+          <Link to={"/game/play/2"}>2번 gameplay로</Link>
         </li>
         <li className="ml-4 mr-1 font-semibold">
           <Link to={"/user/3"}>3번 user로</Link>

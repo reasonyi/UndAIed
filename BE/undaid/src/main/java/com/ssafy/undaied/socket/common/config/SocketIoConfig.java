@@ -1,5 +1,7 @@
 package com.ssafy.undaied.socket.common.config;
 
+import com.corundumstudio.socketio.protocol.JacksonJsonSupport;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,6 +28,10 @@ public class SocketIoConfig {
         com.corundumstudio.socketio.Configuration config = new com.corundumstudio.socketio.Configuration();
         config.setHostname(hostname);
         config.setPort(port);
+
+        //LocalDateTime 직렬화 및 역직렬화 위한 설정
+        config.setJsonSupport(new JacksonJsonSupport(new JavaTimeModule()));
+
         return new SocketIOServer(config);
     }
 }
