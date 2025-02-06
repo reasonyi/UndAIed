@@ -1,5 +1,6 @@
 package com.ssafy.undaied.socket.common.handler;
 
+import com.corundumstudio.socketio.SocketIOClient;
 import com.ssafy.undaied.global.auth.token.JwtTokenProvider;
 import com.ssafy.undaied.global.common.exception.BaseException;
 import jakarta.annotation.PostConstruct;
@@ -27,6 +28,15 @@ public class SocketIoHandler {
     private final SocketIOServer server;
     private final JwtTokenProvider jwtTokenProvider;
     private final SocketExceptionHandler socketExceptionHandler;
+
+
+    // 공통으로 사용할 사용자 검증 및 userId 가져오는 메서드
+    protected void validateUser(SocketIOClient client) {
+        Integer userId = client.get("userId");
+        if (userId == null) {
+            throw new BaseException(NOT_AUTHENTICATED);
+        }
+    }
 
     /**
      * 소켓 이벤트 리스너 등록
