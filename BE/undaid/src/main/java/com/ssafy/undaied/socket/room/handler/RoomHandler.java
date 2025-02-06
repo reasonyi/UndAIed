@@ -35,7 +35,6 @@ public class RoomHandler {
                                 responseRoomData.getRoomId(),
                                 responseRoomData.getRoomTitle());
 
-                        client.leaveRoom(LOBBY_ROOM);
                         client.joinRoom(ROOM_KEY_PREFIX + responseRoomData.getRoomId());
 
                         client.sendEvent(CREATE_ROOM.getValue(), responseRoomData); // 방을 생성한 클라이언트에게 데이터 전송

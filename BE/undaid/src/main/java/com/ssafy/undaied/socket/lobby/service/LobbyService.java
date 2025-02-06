@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import static com.ssafy.undaied.socket.common.constant.SocketRoom.LOBBY_ROOM;
@@ -30,7 +31,9 @@ public class LobbyService {
     }
 
     public boolean isUserInLobby(SocketIOClient client) {
-        Set<String> rooms = client.getAllRooms();
+        Set<String> rooms = new HashSet<>(client.getAllRooms()); // 새로운 Set으로 복사
+        rooms.remove(""); // 빈 room 제거
+
         if (rooms.size() != 1 || !rooms.contains(LOBBY_ROOM)) {
             return false;
         }

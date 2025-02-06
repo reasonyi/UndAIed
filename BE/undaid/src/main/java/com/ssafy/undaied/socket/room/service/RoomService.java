@@ -24,7 +24,7 @@ import static com.ssafy.undaied.socket.common.constant.SocketRoom.*;
 @RequiredArgsConstructor
 public class RoomService {
 
-    private final RedisTemplate<String, Room> redisTemplate;
+    private final RedisTemplate<String, Object> jsonRedisTemplate;
     private final LobbyService lobbyService;
     private final UserRepository userRepository;
 
@@ -35,22 +35,22 @@ public class RoomService {
                 throw new BaseException(ErrorCode.CREATE_ROOM_FAILED);
             }
 
-            if (!Boolean.TRUE.equals(redisTemplate.hasKey(ROOM_SEQUENCE_KEY))) {
-                throw new BaseException(ErrorCode.CREATE_ROOM_FAILED);
-            }
-
-            lobbyService.leaveLobby(client);
-
-            Long roomId = redisTemplate.opsForValue().increment(ROOM_SEQUENCE_KEY);
-            log.info("Generated room ID: {}", roomId);
-
-            Object userIdObj = client.get("userId");
-            if (userIdObj == null) {
+            if (!Boolean.TRUE.equals(jsonRedisTemplate.hasKey(ROOM_SEQUENCE_KEY))) {
                 throw new BaseException(ErrorCode.CREATE_ROOM_FAILED);
             }
 
             // 유저가 로비에 있는지 확인
             if (!lobbyService.isUserInLobby(client)) {
+                throw new BaseException(ErrorCode.CREATE_ROOM_FAILED);
+            }
+
+            lobbyService.leaveLobby(client);
+
+            Long roomId = jsonRedisTemplate.opsForValue().increment(ROOM_SEQUENCE_KEY);
+            log.info("Generated room ID: {}", roomId);
+
+            Object userIdObj = client.get("userId");
+            if (userIdObj == null) {
                 throw new BaseException(ErrorCode.CREATE_ROOM_FAILED);
             }
 
@@ -86,7 +86,7 @@ public class RoomService {
                     .build();
 
             String key = ROOM_KEY_PREFIX + roomId;
-            redisTemplate.opsForValue().set(key, room);
+            jsonRedisTemplate.opsForValue().set(key, room);
             log.info("Room created - ID: {}, Title: {}", roomId, room.getRoomTitle());
 
             return RoomCreateResponseDto.builder()
@@ -103,6 +103,11 @@ public class RoomService {
             log.error("Unexpected error while creating room: {}", e.getMessage());
             throw new BaseException(ErrorCode.CREATE_ROOM_FAILED);
         }
+    }
+
+    public void leaveGameRoom(SocketIOClient client, String room) {
+        client.leaveRoom(room);
+        log.info("User {} (sessionId: {}) left gameRoom", client.get("userId"), client.getSessionId());
     }
 
 //    public RoomUser enterRoom(Long roomId, Integer userId, String nickname) {
