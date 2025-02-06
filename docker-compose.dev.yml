@@ -1,33 +1,11 @@
 services:
-  nginx:
-    profiles: ["rls"]
-    image: nginx:alpine
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/conf.d:/etc/nginx/conf.d:ro
-      - /etc/letsencrypt:/etc/letsencrypt:ro
-      - /etc/ssl/certs:/etc/ssl/certs:ro
-    depends_on:
-      - frontend
-      - ai
-      - backend
-    networks:
-      - app_network
-    restart: always
-    environment:
-      TZ: Asia/Seoul
-
   frontend:
-    profiles: ["dev", "rls"]
     build: ./FE
-    expose:
-      - "5173"
+    ports: # 개발환경
+      - "5173:5173"
     volumes:
-      - ./FE:/FE
-      - /FE/node_modules
+      - ./FE:/app
+      - /app/node_modules
     networks:
       - app_network
     restart: always
@@ -35,7 +13,6 @@ services:
       - TZ=Asia/Seoul
 
   backend:
-    profiles: ["dev", "rls"]
     build: ./BE/undaid
     ports:
       - "8080:8080"
@@ -52,10 +29,9 @@ services:
     restart: always
 
   ai:
-    profiles: ["dev", "rls"]
     build: ./AI
     ports:
-      - "8000"
+      - "8000:8000"
     volumes:
       - ./AI:/app
     environment:
@@ -67,7 +43,6 @@ services:
     command: uvicorn app:app --host 0.0.0.0 --port 8000 --reload
 
   mysql:
-    profiles: ["dev", "rls"]
     image: mysql:8.0
     container_name: mysql
     ports:
