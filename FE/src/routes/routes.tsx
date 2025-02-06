@@ -1,11 +1,11 @@
 import { createBrowserRouter } from "react-router-dom";
 import App from "../App";
 import NotFound from "../pages/NotFound";
-import Home from "../pages/Home";
+import Home from "../pages/Home/Home";
 import Policy from "../pages/Policy";
 import GameMain from "../pages/GameMain/GameMain";
 import GameLobby from "../pages/GameLobby";
-import GameChats from "../pages/GameChats";
+import GameChats from "../pages/GameChats/GameChats";
 import BoardDetails from "../pages/BoardDetails";
 import Board from "../pages/Board/Board";
 import User from "../pages/User";
