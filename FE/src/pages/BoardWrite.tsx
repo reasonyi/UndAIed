@@ -5,7 +5,7 @@ import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { useForm, Controller, FieldValues } from "react-hook-form";
 import bugReportImage from "../assets/board/bugReport.png";
-import { boardApi } from "../api/board/boardApi";
+import { boardApi } from "../api/boardApi";
 import Banner from "./Board/components/Banner";
 import Header from "../components/Header";
 
