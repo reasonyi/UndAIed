@@ -65,6 +65,9 @@ out/
 
 
 /src/main/resources/application-secrets.properties
+/BE/undaid/src/main/resources/application-secrets.properties
+/BE/undaid/src/main/resources/application.properties
+
 
 
 # Byte-compiled / optimized / DLL files
