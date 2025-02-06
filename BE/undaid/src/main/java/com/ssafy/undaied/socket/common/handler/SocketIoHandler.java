@@ -1,10 +1,9 @@
-package com.ssafy.undaied.global.socket.handler;
+package com.ssafy.undaied.socket.common.handler;
 
-import com.corundumstudio.socketio.SocketIOClient;
 import com.ssafy.undaied.global.auth.token.JwtTokenProvider;
 import com.ssafy.undaied.global.common.exception.BaseException;
-import com.ssafy.undaied.global.common.exception.handler.SocketExceptionUtil;
-import com.ssafy.undaied.global.common.response.ApiResponse;
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import com.corundumstudio.socketio.SocketIOServer;
@@ -14,30 +13,31 @@ import com.corundumstudio.socketio.listener.DisconnectListener;
 import lombok.extern.slf4j.Slf4j;
 
 import static com.ssafy.undaied.global.common.exception.ErrorCode.*;
-import static com.ssafy.undaied.global.socket.dto.SocketRoomConstant.GAME_ROOM_PREFIX;
-import static com.ssafy.undaied.global.socket.dto.SocketRoomConstant.LOBBY_ROOM;
+import static com.ssafy.undaied.socket.common.constant.SocketRoom.GAME_ROOM_PREFIX;
+import static com.ssafy.undaied.socket.common.constant.SocketRoom.LOBBY_ROOM;
 
 /**
  * SocketIOController.
  */
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class SocketIoHandler {
 
     private final SocketIOServer server;
     private final JwtTokenProvider jwtTokenProvider;
+    private final SocketExceptionHandler socketExceptionHandler;
 
     /**
      * 소켓 이벤트 리스너 등록
      */
-    public SocketIoHandler(SocketIOServer server, JwtTokenProvider jwtTokenProvider) {
-        this.server = server;
-        this.jwtTokenProvider = jwtTokenProvider;
-
+    @PostConstruct
+    private void init() {
         // 소켓 이벤트 리스너 등록
         server.addConnectListener(listenConnected());
         server.addDisconnectListener(listenDisconnected());
     }
+
 
     /**
      * 클라이언트 연결 리스너
@@ -65,7 +65,7 @@ public class SocketIoHandler {
                 System.out.println("Client authenticated - userId: " + userId + ", sessionId: " + client.getSessionId() + " joined lobby");
 
             } catch (Exception e) {
-                SocketExceptionUtil.handleSocketException(client,  new BaseException(SOCKET_CONNECTION_FAILED));
+                socketExceptionHandler.handleSocketException(client, new BaseException(SOCKET_CONNECTION_FAILED));
             }
         };
     }

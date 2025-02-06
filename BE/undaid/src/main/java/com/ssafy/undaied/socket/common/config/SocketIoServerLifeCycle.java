@@ -1,4 +1,4 @@
-package com.ssafy.undaied.global.websocket.config;
+package com.ssafy.undaied.socket.common.config;
 
 import org.springframework.stereotype.Component;
 

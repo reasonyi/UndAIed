@@ -1,5 +1,5 @@
 import axios from "axios";
-import { BoardRequest } from "../../types/board";
+import { BoardRequest } from "../types/board";
 
 const api = axios.create({
   baseURL: "/api/v1/board",

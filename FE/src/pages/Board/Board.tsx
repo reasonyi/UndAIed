@@ -1,6 +1,6 @@
 import { useParams } from "react-router";
 import { useRecoilState } from "recoil";
-import { currentPageState } from "../../store/board/boardState";
+import { currentPageState } from "../../store/boardState";
 import boardBanner from "../../assets/board/upscalingBoard.png";
 import { CategoryType } from "../../types/board";
 
