@@ -13,6 +13,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import GoogleIcon from "../../assets/svg-icon/google_logo.svg";
 import Logo from "../../assets/svg-icon/game_logo.svg";
+import InfoContainer from "./components/InfoContainer";
 
 interface OuletContextType {
   isLoggedIn: boolean;
@@ -100,23 +101,22 @@ function Home() {
                   }px))`,
                 }}
               >
-                <div className="h-full border-2 border-[#555555] rounded-xl p-8 grow min-w-[360px] w-[60vw] max-w-[600px] flex flex-col gap-4">
-                  <h1 className="text-3xl font-extrabold text-white mb-4">
-                    1.
-                  </h1>
-                  <h3 className="text-lg text-[#a1a1aa] font-normal mb-4">
-                    6명의 플레이어들과 한 방에서 게임을 시작합니다.
-                  </h3>
-                </div>
-                <div className="h-full border-2 border-[#555555] rounded-xl p-8 grow min-w-[360px] w-[60vw] max-w-[600px] flex flex-col gap-4">
-                  <h1 className="text-3xl font-extrabold text-white">2.</h1>
-                </div>
-                <div className="h-full border-2 border-[#555555] rounded-xl p-8 grow min-w-[360px] w-[60vw] max-w-[600px] flex flex-col gap-4">
-                  <h1 className="text-3xl font-extrabold text-white">3.</h1>
-                </div>
-                <div className="h-full border-2 border-[#555555] rounded-xl p-8 grow min-w-[360px] w-[60vw] max-w-[600px] flex flex-col gap-4">
-                  <h1 className="text-3xl font-extrabold text-white">4.</h1>
-                </div>
+                <InfoContainer
+                  title="1."
+                  context="6명의 플레이어들과 한 방에서 게임을 시작합니다."
+                />
+                <InfoContainer
+                  title="2."
+                  context="2명의 AI가 추가되어 8명이 실시간 채팅을 시작합니다다."
+                />
+                <InfoContainer
+                  title="3."
+                  context="주어진 퀴즈에 답변하고 자유 토론을 진행합니다다."
+                />
+                <InfoContainer
+                  title="4."
+                  context="가장 AI같은 플레이어에게 투표합니다."
+                />
               </div>
             </div>
             <div className="flex justify-center">
@@ -137,9 +137,9 @@ function Home() {
         </div>
       </div>
       <div className="flex justify-center bg-[#f7f7f7]">
-        <div className="relative white-container min-h-[calc(70vh-3.5rem)] py-10 flex md:pl-[calc(32rem)] lg:pl-[calc(40rem)]">
-          <div className="md:flex hidden w-[32rem] lg:w-[40rem] left-[max(0px,calc(50%-45rem))] absolute">
-            <div className="w-1/2 pr-4">
+        <div className="relative white-container min-h-[calc(70vh-3.5rem)] py-10 flex md:pl-[calc(32rem)] lg:pl-[calc(42rem)]">
+          <div className="md:flex hidden w-[32rem] lg:w-[42rem] left-[max(0px,calc(50%-45rem))] absolute">
+            <div className="w-1/2 pr-6">
               <Link to={"/board"} className="text-lg font-bold text-[#872341]">
                 공지사항{" "}
                 <FontAwesomeIcon
@@ -151,14 +151,18 @@ function Home() {
                 {boards.map((board: IBoard) => (
                   <Link className="" to="/">
                     <li className="board-content font-medium">
-                      <span className="board-content-title">{board.title}</span>
-                      <span className="board-content-date">{board.date}</span>
+                      <span className="board-content-title text-ellipsis">
+                        {board.title}
+                      </span>
+                      <span className="board-content-date text-ellipsis">
+                        {board.date}
+                      </span>
                     </li>
                   </Link>
                 ))}
               </ul>
             </div>
-            <div className="w-1/2 pr-4">
+            <div className="w-1/2 pr-6">
               <Link to={"/board"} className="text-lg font-bold text-[#872341]">
                 버그 제보{" "}
                 <FontAwesomeIcon

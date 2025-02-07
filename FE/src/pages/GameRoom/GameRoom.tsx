@@ -24,6 +24,7 @@ import ReadyProfile from "./components/ReadyProfile";
 import EmptyProfile from "./components/EmptyProfile";
 import { io, Socket } from "socket.io-client";
 import ChatForm from "./components/ChatForm";
+import { useSocket } from "../../hooks/useSocket";
 
 interface IMessage {
   id: number;
@@ -39,11 +40,12 @@ interface IUser {
   imgNum: number;
 }
 
-const socket: Socket = io("http://localhost:3000");
-
 function GameRoom() {
   const { number } = useParams();
   const scrollRef = useRef<HTMLDivElement | null>(null);
+
+  //socket 훅 사용
+  const socket = useSocket();
 
   //아이콘
   const bell: IconDefinition = faBell;
@@ -53,10 +55,18 @@ function GameRoom() {
   const circleExclamation: IconDefinition = faCircleExclamation;
 
   // 현재 접속한 사용자(본인) playerNum 예시 (실제로는 로그인 정보나 URL 파라미터로 받는 등 구현 필요)
-  const currentPlayerNum = 1;
 
   console.log(socket);
 
+  //플레이어 본인
+  const [playerInfo, setPlayerInfo] = useState<IUser | undefined>({
+    id: 999,
+    playerNum: 1,
+    name: "DummyUser",
+    token: "dummy-token-123",
+    imgNum: 1,
+  });
+  //방 참여자 전원
   const [users, setUsers] = useState<IUser[]>([]);
   const [messages, setMessages] = useState<IMessage[]>([]);
 
@@ -69,7 +79,7 @@ function GameRoom() {
     scrollRef.current?.scrollIntoView({ block: "end" });
   };
 
-  //user 참가자 변화화
+  //user 참가자 전원원 변화화
   useEffect(() => {
     socket.on(
       "enter_room",
@@ -115,7 +125,7 @@ function GameRoom() {
           player: data.player,
           text: data.text,
           // 보낸 playerNum과 현재 사용자의 playerNum이 같으면 isMine = true
-          isMine: data.player === currentPlayerNum,
+          isMine: data.player === playerInfo?.playerNum,
         },
       ]);
     });
@@ -123,7 +133,7 @@ function GameRoom() {
     return () => {
       socket.off("chat");
     };
-  }, [currentPlayerNum]);
+  }, [playerInfo?.playerNum]);
 
   useEffect(() => {
     // 새로운 메시지가 추가될 때 스크롤을 아래로 이동
@@ -217,7 +227,7 @@ function GameRoom() {
                   className="chat-input-temp h-[4.5rem] w-full"
                 ></div>
                 <div className="chat-input fixed h-10 bottom-4 w-[calc(90rem-21rem-33.5rem-2rem)]">
-                  <ChatForm playerNum={currentPlayerNum} socket={socket} />
+                  <ChatForm playerNum={playerInfo?.playerNum} socket={socket} />
                 </div>
               </div>
               <div className="fixed z-20 right-[max(0px,calc(50%-45rem))] w-[33.5rem] py-6 px-3 hidden h-screen bg-black bg-opacity-40 xl:grid grid-cols-3 grid-rows-4 gap-4 shadow-[0px_0px_16px_rgba(255,255,255,0.25)]  border-solid border-l-[rgba(255,255,255,0.35)]">

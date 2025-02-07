@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Socket } from "socket.io-client";
 
 interface IFormProps {
-  playerNum: number;
+  playerNum: number | undefined;
   socket: Socket; // 부모에서 전달받을 소켓 인스턴스
 }
 interface IForm {

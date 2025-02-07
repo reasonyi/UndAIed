@@ -43,7 +43,11 @@ function ChatBubble({ message, playerName }: ChatBubbleProps) {
       >
         <img
           className="w-6 h-6 mr-1"
-          src={playerColor[message.player][3]}
+          src={
+            playerColor[message.player]
+              ? playerColor[message.player][3]
+              : undefined
+          }
           alt="player-icon"
         />
         <span className="text-white">{playerName}</span>
