@@ -14,9 +14,9 @@ function GameRoomCard({ room }: GameRoomCardProps) {
       <li
         className={`h-8 bg-[#241818de] grid md:grid-cols-[6rem,1fr,8rem] grid-cols-[4rem,1fr,5rem] items-center px-2 ${blockStyle} ${blockHover} ${blockActive} cursor-pointer`}
       >
-        <span className="ml-2">{room.id}</span>
-        <span className="truncate">{room.title}</span>
-        <span className="text-right mr-2">{room.players} / 8</span>
+        <span className="ml-2">{room.roomId}</span>
+        <span className="truncate">{room.roomTitle}</span>
+        <span className="text-right mr-2">{room.currentPlayerNum} / 8</span>
       </li>
     </ul>
   );

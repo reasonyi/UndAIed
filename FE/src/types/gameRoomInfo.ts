@@ -1,12 +1,24 @@
 export interface GameRoom {
-  id: string;
-  title: string;
-  players: number;
-  maxPlayers: number;
-  status: "waiting" | "playing";
-  createdAt: Date;
+  roomId: number;
+  roomTitle: string;
+  isPrivate: boolean;
+  currentPlayerNum: number;
+  playing: boolean;
+}
+
+export interface GameRoomResponse {
+  rooms: GameRoom[];
+  totalPage: number;
 }
 
 export interface GameRoomCardProps {
   room: GameRoom;
+}
+
+export interface RoomState {
+  rooms: GameRoom[];
+  page: number;
+  loading: boolean;
+  hasMore: boolean;
+  totalPages: number;
 }
