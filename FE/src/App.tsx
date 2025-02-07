@@ -1,14 +1,11 @@
 import { Outlet } from "react-router-dom";
 import { Toaster } from "sonner";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-
 function App() {
-  const isLoggedIn = true;
-
   return (
     <>
       <Toaster />
-      <Outlet context={{ isLoggedIn }} />
+      <Outlet />
       <ReactQueryDevtools initialIsOpen={false} />
     </>
   );

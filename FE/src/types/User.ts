@@ -1,5 +1,8 @@
 export interface IUser {
-    id: string | null;
-    username: string;
-    token: string;
+  isLogin: boolean;
+  email: string;
+  token: string;
+  nickname: string;
+  totalWin: number;
+  totalLose: number;
 }

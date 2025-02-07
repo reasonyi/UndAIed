@@ -56,7 +56,7 @@ function ChatBubble({ message, playerName }: ChatBubbleProps) {
       {/* 말풍선(채팅) 영역 */}
       <div className={`flex mb-4 ${isMine ? "justify-end" : "justify-start"}`}>
         <div
-          className={`max-w-[70%] py-2 px-3 text-sm bg-[rgb(9,9,11)] text-[#dddddd] border-2 border-solid shadow-[0px_0px_14px_rgba(255,255,255,0.25)] ${
+          className={`max-w-[70%] py-2 px-3 text-sm bg-[rgb(9,9,11)] text-[#dddddd] border-2 border-solid shadow-[0px_0px_14px_rgba(255,255,255,0.25)] break-all ${
             isMine ? "rounded-b-lg rounded-tl-lg" : "rounded-b-lg rounded-tr-lg"
           }`}
           style={{
