@@ -38,6 +38,8 @@ services:
     build: ./BE/undaid
     expose:
       - "8080"
+      - "9090"
+      - "6379"
     depends_on:
       - mysql
     environment:
@@ -45,6 +47,8 @@ services:
       SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
+      SOCKETIO_SERVER_HOSTNAME: 0.0.0.0
+      SOCKETIO_SERVER_PORT: 9090
       TZ: Asia/Seoul
     networks:
       - app_network
@@ -84,9 +88,25 @@ services:
       - --default-time-zone=+09:00
     restart: always
 
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - app_network
+    command: redis-server --appendonly yes
+    restart: always
+    environment:
+      - TZ=Asia/Seoul
+    user: redis #
+    privileged: true #
+
 volumes:
   nginx_logs:
   mysql_data:
+  redis_data:
 
 networks:
   app_network:
