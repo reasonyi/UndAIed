@@ -32,7 +32,10 @@ public class SocketIoConfig {
         //LocalDateTime 직렬화 및 역직렬화 위한 설정
         config.setJsonSupport(new JacksonJsonSupport(new JavaTimeModule()));
 
-        return new SocketIOServer(config);
+        SocketIOServer server = new SocketIOServer(config);
+        server.removeAllListeners("error");  // 기본 에러 리스너 제거
+
+        return server;
     }
 }
 

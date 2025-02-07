@@ -32,7 +32,6 @@ public class SocketIoHandler {
     private final SocketAuthenticationService authenticationService;
     private final SocketDisconnectService disconnectService;
     private final LobbyService lobbyService;
-    private final SocketExceptionHandler socketExceptionHandler;
     private final GameStageHandler gameStageHandler;
     private final UserRepository userRepository;
 
@@ -60,7 +59,7 @@ public class SocketIoHandler {
                 // 로비 입장
                 lobbyService.joinLobby(client, userId);
             } catch (Exception e) {
-                socketExceptionHandler.handleSocketException(client, new BaseException(SOCKET_CONNECTION_FAILED));
+                throw new BaseException(SOCKET_CONNECTION_FAILED);
             }
         };
     }
@@ -73,7 +72,7 @@ public class SocketIoHandler {
             try {
                 disconnectService.handleDisconnect(client);
             } catch (Exception e) {
-                socketExceptionHandler.handleSocketException(client, new BaseException(SOCKET_EVENT_ERROR));
+                throw new BaseException(SOCKET_EVENT_ERROR);
             }
         };
     }
