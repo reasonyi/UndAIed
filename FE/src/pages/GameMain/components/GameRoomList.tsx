@@ -62,7 +62,7 @@ export const useGameRooms = () => {
 };
 
 // GameRooms 컴포넌트 수정
-function GameMain() {
+function GameRoomList() {
   const { rooms, loading, hasMore, fetchMoreRooms } = useGameRooms();
   const observerTarget = useRef<HTMLDivElement>(null);
 
@@ -134,4 +134,4 @@ function GameMain() {
   );
 }
 
-export default GameMain;
+export default GameRoomList;

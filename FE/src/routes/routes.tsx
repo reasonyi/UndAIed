@@ -13,6 +13,7 @@ import Log from "../pages/Log";
 import BoardWrite from "../pages/BoardWrite";
 import Friends from "../pages/Friends/Friends";
 import Game from "../pages/Game";
+import GameMyPage from "../pages/GameMyPage/GameMyPage";
 
 const router = createBrowserRouter([
   {
@@ -73,6 +74,14 @@ const router = createBrowserRouter([
       {
         path: "/friends",
         element: <Friends />,
+      },
+      {
+        path: "/gamemypage",
+        element: <GameMyPage />,
+      },
+      {
+        path: "/Game",
+        element: <Game />,
       },
     ],
     errorElement: <NotFound />,
