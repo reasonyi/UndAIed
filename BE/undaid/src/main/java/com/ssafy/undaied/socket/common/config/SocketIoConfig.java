@@ -28,6 +28,7 @@ public class SocketIoConfig {
         com.corundumstudio.socketio.Configuration config = new com.corundumstudio.socketio.Configuration();
         config.setHostname(hostname);
         config.setPort(port);
+        config.setOrigin("*");
 
         //LocalDateTime 직렬화 및 역직렬화 위한 설정
         config.setJsonSupport(new JacksonJsonSupport(new JavaTimeModule()));
