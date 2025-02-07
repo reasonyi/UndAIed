@@ -12,8 +12,8 @@ import User from "../pages/User";
 import Log from "../pages/Log";
 import BoardWrite from "../pages/BoardWrite";
 import Friends from "../pages/Friends/Friends";
-import GameMyPage from "../pages/GameMyPage/GameMyPage";
 import Game from "../pages/Game";
+import GameMyPage from "../pages/GameMyPage/GameMyPage";
 
 const router = createBrowserRouter([
   {
