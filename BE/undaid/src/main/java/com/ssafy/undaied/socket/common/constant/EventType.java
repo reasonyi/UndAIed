@@ -3,6 +3,7 @@ package com.ssafy.undaied.socket.common.constant;
 public enum EventType {
 
     // 로비
+    CREATE_ROOM_AT_LOBBY("lobby:room:create"),
     CREATE_ROOM("room:create"),
     LIST_ROOMS("room:list"),
     ENTER_ROOM("room:enter"),
@@ -31,8 +32,9 @@ public enum EventType {
     // 게임 진행 밤
     SHOW_INFECTION_RESULT("infection:result"),
 
-    // 낮/밤 알림
-    UPDATE_STAGE("game:stage:update"),
+    // 스테이지 알림
+    START_STAGE("game:stage:start"),
+    END_STAGE("game:stage:end"),
 
     // 게임 종료
     SHOW_GAME_RESULT("game:result"),

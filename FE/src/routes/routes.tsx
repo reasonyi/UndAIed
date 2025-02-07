@@ -12,6 +12,7 @@ import User from "../pages/User";
 import Log from "../pages/Log";
 import BoardWrite from "../pages/BoardWrite";
 import Friends from "../pages/Friends/Friends";
+import Game from "../pages/Game";
 
 const router = createBrowserRouter([
   {
@@ -28,16 +29,22 @@ const router = createBrowserRouter([
         element: <Policy />,
       },
       {
-        path: "/gamemain",
-        element: <GameMain />,
-      },
-      {
-        path: "/gameplay/:number",
-        element: <GamePlay />,
-      },
-      {
-        path: "/gameroom/:number",
-        element: <GameRoom />,
+        path: "/game",
+        element: <Game />,
+        children: [
+          {
+            path: "",
+            element: <GameMain />,
+          },
+          {
+            path: "room/:number",
+            element: <GameRoom />,
+          },
+          {
+            path: "play/:number",
+            element: <GamePlay />,
+          },
+        ],
       },
       {
         path: "/board/:category/:number",

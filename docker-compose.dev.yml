@@ -1,7 +1,7 @@
 services:
   frontend:
     build: ./FE
-    ports:
+    ports: # 개발환경
       - "5173:5173"
     volumes:
       - ./FE:/app
