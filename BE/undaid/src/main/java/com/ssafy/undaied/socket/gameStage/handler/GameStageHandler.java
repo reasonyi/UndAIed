@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 @RequiredArgsConstructor
@@ -21,6 +22,8 @@ public class GameStageHandler {
 //    핸들러 파일들 불러봐야됨
 //    private final SubjectDebateHandler subjectDebateHandler;
 
+    private final Map<Integer, StageType> currentStageMap = new ConcurrentHashMap<>();
+
     private static final Map<StageType, Integer> STAGE_DURATIONS = Map.of(
             StageType.SUBJECT_DEBATE, 2,  // 2분
             StageType.FREE_DEBATE, 2,     // 3분
@@ -32,6 +35,7 @@ public class GameStageHandler {
     }
 
     private void startStage(Integer userId, Integer gameId, StageType currentStage) {
+        saveCurrentStage(gameId, currentStage);
         // 스테이지 시작 알림 날려야 함
         handleNotifyStartStage(gameId, currentStage);
 
@@ -60,7 +64,7 @@ public class GameStageHandler {
     }
 
     private void handleNotifyStartStage(Integer gameId, StageType currentStage) {
-        server.getRoomOperations(String.valueOf(gameId)).sendEvent(EventType.START_STAGE.getValue(),
+        server.getRoomOperations(String.valueOf(gameId)).sendEvent(EventType.GAME_CHAT.getValue(),
                 Map.of("message", stageNotifyDto.notifyStartStage(currentStage)));
     }
 
@@ -88,10 +92,17 @@ public class GameStageHandler {
     }
 
     private void handleNotifyEndStage(Integer gameId, StageType currentStage) {
-        server.getRoomOperations(String.valueOf(gameId)).sendEvent(EventType.END_STAGE.getValue(),
+        server.getRoomOperations(String.valueOf(gameId)).sendEvent(EventType.GAME_CHAT.getValue(),
                 Map.of("message", stageNotifyDto.notifyEndStage(currentStage)));
     }
 
+    private void saveCurrentStage(Integer gameId, StageType currentStage) {
+        currentStageMap.put(gameId, currentStage);
+    }
+    private StageType getCurrentStage(Integer gameId) {
+        StageType currentStage = currentStageMap.get(gameId);
+        return currentStage;
+    }
     private StageType getNextStage(StageType currentStage) {
         return switch (currentStage) {
             case START -> StageType.DAY;    // NIGHT 추가 해줘야 됨
