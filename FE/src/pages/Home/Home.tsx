@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 
 import { Link, useOutletContext } from "react-router-dom";
-import LoggedInHome from "../../components/LoggedInHome";
-import LoggedOutHome from "../../components/LoggedOutHome";
 import Header from "../../components/Header";
 import HeaderTemp from "../../components/HeaderTemp";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -11,9 +9,13 @@ import {
   faChevronDown,
   faChevronRight,
 } from "@fortawesome/free-solid-svg-icons";
-import GoogleIcon from "../../assets/svg-icon/google_logo.svg";
 import Logo from "../../assets/svg-icon/game_logo.svg";
 import InfoContainer from "./components/InfoContainer";
+
+import { useRecoilValue } from "recoil";
+import { userState } from "../../store/userState";
+import LoginContainer from "./components/loginContainer";
+import LogoutContainer from "./components/logoutContainer";
 
 interface OuletContextType {
   isLoggedIn: boolean;
@@ -26,8 +28,6 @@ interface IBoard {
 }
 
 function Home() {
-  const { isLoggedIn } = useOutletContext<OuletContextType>();
-
   //fontawsome 타입 선언
   const downChervon: IconDefinition = faChevronDown;
   const rightChervon: IconDefinition = faChevronRight;
@@ -36,6 +36,8 @@ function Home() {
   const [scrollRatio, setScrollRatio] = useState(0);
   const INFO_VIEWPORT = 3;
   const [infoScrollRatio, setInfoScrollRatio] = useState(0);
+
+  const userInfo = useRecoilValue(userState);
 
   //게시글 관련련
   const [boards, setBoards] = useState<IBoard[]>([
@@ -137,8 +139,8 @@ function Home() {
         </div>
       </div>
       <div className="flex justify-center bg-[#f7f7f7]">
-        <div className="relative white-container min-h-[calc(70vh-3.5rem)] py-10 flex md:pl-[calc(32rem)] lg:pl-[calc(42rem)]">
-          <div className="md:flex hidden w-[32rem] lg:w-[42rem] left-[max(0px,calc(50%-45rem))] absolute">
+        <div className="relative white-container min-h-[calc(70vh-3.5rem)] py-10 flex md:pl-[calc(32rem+2rem)] lg:pl-[calc(42rem+2rem)]">
+          <div className="md:flex hidden w-[32rem] lg:w-[42rem] left-[max(0px,calc(50%-45rem))] absolute mr-[2rem]">
             <div className="w-1/2 pr-6">
               <Link to={"/board"} className="text-lg font-bold text-[#872341]">
                 공지사항{" "}
@@ -182,25 +184,11 @@ function Home() {
               </ul>
             </div>
           </div>
-          <div className="flex flex-col w-full items-center">
-            <button className="w-[22.5rem] h-[5.5rem] flex justify-center items-center mb-10 bg-black text-white font-mono border-2 border-[#872341] rounded-sm text-3xl font-semibold">
-              GAME START
-            </button>
-            <button className="w-[22.5rem] h-9 border border-[#dadce0] bg-white rounded-[20px] flex items-center justify-between px-3 mb-5">
-              <img src={GoogleIcon} alt="" />
-              <div className="text-[#3c4043] text-sm font-medium font-['Roboto']">
-                Google로 로그인
-              </div>
-              <div className="w-4 h-[1px]"></div>
-            </button>
-            <button className="w-[22.5rem] h-9 border border-[#dadce0] bg-white rounded-[20px] flex items-center justify-between px-3">
-              <div></div>
-              <div className="text-[#3c4043] text-sm font-medium font-['Roboto']">
-                가입하기
-              </div>
-              <div></div>
-            </button>
-          </div>
+          {userInfo.isLogin ? (
+            <LoginContainer userInfo={userInfo} />
+          ) : (
+            <LogoutContainer />
+          )}
         </div>
       </div>
       <div className="footer min-h-[calc(30vh)] primary-bg-black p-9 text-white flex flex-col items-center">

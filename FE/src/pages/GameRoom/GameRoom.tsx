@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import PlayerIcon1 from "../../assets/player-icon/player-icon-1.svg";
 import PlayerIcon2 from "../../assets/player-icon/player-icon-2.svg";
 import PlayerIcon3 from "../../assets/player-icon/player-icon-3.svg";
@@ -22,7 +22,6 @@ import ChatBubble from "../GamePlay/components/ChatBuble";
 import SystemBubble from "../GamePlay/components/SystemBubble";
 import ReadyProfile from "./components/ReadyProfile";
 import EmptyProfile from "./components/EmptyProfile";
-import { io, Socket } from "socket.io-client";
 import ChatForm from "./components/ChatForm";
 import { useSocket } from "../../hooks/useSocket";
 
@@ -43,6 +42,7 @@ interface IUser {
 function GameRoom() {
   const { number } = useParams();
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const navigate = useNavigate();
 
   //socket 훅 사용
   const socket = useSocket();
@@ -117,7 +117,7 @@ function GameRoom() {
 
   //채팅
   useEffect(() => {
-    socket.on("chat", (data: { id: number; player: number; text: string }) => {
+    socket.on("chat2", (data: { id: number; player: number; text: string }) => {
       setMessages((prev) => [
         ...prev,
         {
@@ -192,7 +192,11 @@ function GameRoom() {
                   className="text-white p-1 w-[1.25rem] h-[1.25rem]"
                 />
               </button>
-              <button>
+              <button
+                onClick={() => {
+                  navigate("/");
+                }}
+              >
                 <FontAwesomeIcon
                   icon={doorOpen}
                   className="text-white p-1 w-[1.25rem] h-[1.25rem]"
