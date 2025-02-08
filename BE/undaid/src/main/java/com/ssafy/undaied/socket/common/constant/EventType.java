@@ -16,8 +16,7 @@ public enum EventType {
     START_GAME("game:start"),
 
     // 게임진행(낮)
-    START_SUBJECT_DEBATE("debate:subject:start"),
-    START_FREE_DEBATE("debate:free:start"),
+    SEND_SUBJECT("send:subject"),
     GAME_CHAT("chat:game"),
 
     // 투표

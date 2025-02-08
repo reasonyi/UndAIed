@@ -2,6 +2,7 @@ package com.ssafy.undaied.socket.common.handler;
 
 import com.ssafy.undaied.global.common.exception.BaseException;
 import com.ssafy.undaied.socket.common.constant.EventType;
+import com.ssafy.undaied.socket.gameChat.handler.GameChatHandler;
 import com.ssafy.undaied.socket.gameStage.handler.GameStageHandler;
 import com.ssafy.undaied.domain.user.entity.Users;
 import com.ssafy.undaied.domain.user.entity.repository.UserRepository;
@@ -34,11 +35,14 @@ public class SocketIoHandler {
     private final LobbyService lobbyService;
     private final GameStageHandler gameStageHandler;
     private final UserRepository userRepository;
+    private final GameChatHandler gameChatHandler;
 
     @PostConstruct
     private void init() {
         server.addConnectListener(listenConnected());
         server.addDisconnectListener(listenDisconnected());
+        server.addListeners(gameChatHandler);
+
         addGameStartListeners();
     }
 
@@ -88,7 +92,7 @@ public class SocketIoHandler {
                     Integer gameId = 1; // 테스트를 위해 임시로 1로 지정
 //                            client.get("gameId");
                     client.joinRoom(String.valueOf(gameId));
-                    gameStageHandler.handleGameStart(userId, gameId);
+                    gameStageHandler.handleGameStart(userId, gameId, client);
                 });
     }
 
