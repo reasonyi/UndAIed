@@ -34,7 +34,7 @@ function GameSidebar() {
   }
   return (
     <aside
-      className={` mx-8 w-80 ${blockStyle}  flex-col items-center  bg-[#00000040] hidden md:flex`}
+      className={` mx-8 w-80 ${blockStyle}  flex-col items-center  bg-[#00000041] hidden md:flex`}
     >
       <div className="flex align-middle">
         <div className="w-32 h-32 mt-8 mb-3 flex items-center justify-center border border-[#f74a5c]/60">
