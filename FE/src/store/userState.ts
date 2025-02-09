@@ -4,7 +4,7 @@ import { IUser } from "../types/User";
 export const userState = atom<IUser>({
   key: "userState",
   default: {
-    isLogin: true,
+    isLogin: false,
     email: "email",
     token: "",
     nickname: "nickname",
