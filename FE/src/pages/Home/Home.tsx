@@ -14,8 +14,8 @@ import InfoContainer from "./components/InfoContainer";
 
 import { useRecoilValue } from "recoil";
 import { userState } from "../../store/userState";
-import LoginContainer from "./components/loginContainer";
-import LogoutContainer from "./components/logoutContainer";
+import LoginContainer from "./components/LoginContainer";
+import LogoutContainer from "./components/LogoutContainer";
 
 interface OuletContextType {
   isLoggedIn: boolean;
