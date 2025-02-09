@@ -54,6 +54,7 @@ public class SocketIoHandler {
             try {
                 // 클라이언트 인증
                 int userId = authenticationService.authenticateClient(client);
+                log.info("Authentication successful for user: {}", userId); // 추가됨
                 Users user = userRepository.findById(userId)
                                 .orElseThrow(() -> new BaseException(USER_NOT_FOUND));
 
@@ -62,8 +63,17 @@ public class SocketIoHandler {
 
                 // 로비 입장
                 lobbyService.joinLobby(client, userId);
+            // } catch (Exception e) {
+            //     throw new BaseException(SOCKET_CONNECTION_FAILED);
+            // }
+            } catch (BaseException e) {
+                log.error("Authentication failed: {}", e.getMessage());
+                client.sendEvent("error", e.getMessage());
+                client.disconnect();
             } catch (Exception e) {
-                throw new BaseException(SOCKET_CONNECTION_FAILED);
+                log.error("Unexpected error during connection: ", e);
+                client.sendEvent("error", "Connection failed");
+                client.disconnect();
             }
         };
     }
