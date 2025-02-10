@@ -25,8 +25,9 @@ public enum SocketErrorCode {
     LEAVE_ROOM_FAILED(4010,"방을 나갈 수 없습니다."),
     INVALID_ROOM_PASSWORD(4011, "비밀번호가 일치하지 않습니다."),
 
-    INVALID_PARTICIPANT_COUNT(4008, "참가자 수가 올바르지 않습니다.")
+    INVALID_PARTICIPANT_COUNT(4008, "참가자 수가 올바르지 않습니다."),
 
+    ROOM_CHAT_FAILED(4012, "채팅 전송에 실패했습니다.")
     ;
 
 
