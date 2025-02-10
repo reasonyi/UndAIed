@@ -1,6 +1,6 @@
-package com.ssafy.undaied.socket.gameStage.dto.response;
+package com.ssafy.undaied.socket.stage.dto.response;
 
-import com.ssafy.undaied.socket.gameStage.constant.StageType;
+import com.ssafy.undaied.socket.stage.constant.StageType;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

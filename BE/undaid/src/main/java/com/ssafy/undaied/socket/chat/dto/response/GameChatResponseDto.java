@@ -1,4 +1,4 @@
-package com.ssafy.undaied.socket.gameChat.dto.response;
+package com.ssafy.undaied.socket.chat.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
