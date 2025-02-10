@@ -32,26 +32,26 @@ public class GameInitService {
     private static final int TOTAL_NUMBERS = 8;
 
     //테스트 데이터. 나중에 지우려고 함.
-    @PostConstruct
-    public void initTestData() {
-        String roomKey = "room:456:participants";
-        redisTemplate.delete(roomKey);
-        redisTemplate.opsForSet().add(roomKey,
-                "1001", "1002", "1003", "1004", "1005", "1006");
+    // @PostConstruct
+    // public void initTestData() {
+    //     String roomKey = "room:456:participants";
+    //     redisTemplate.delete(roomKey);
+    //     redisTemplate.opsForSet().add(roomKey,
+    //             "1001", "1002", "1003", "1004", "1005", "1006");
 
-        log.info("Test data initialized - roomId: 456, participants: [1001, 1002, 1003, 1004, 1005, 1006]");
-        log.info("\n" +
-                "=== Postman 테스트 가이드 ===\n" +
-                "1. Socket.IO 이벤트명: game:init\n" +
-                "2. 테스트 데이터:\n" +
-                "   - roomId: 456\n" +
-                "   - userId: 1001~1006 중 하나\n" +
-                "3. 요청 형식:\n" +
-                "   {\n" +
-                "     \"roomId\": 456\n" +
-                "   }\n" +
-                "=========================");
-    }
+    //     log.info("Test data initialized - roomId: 456, participants: [1001, 1002, 1003, 1004, 1005, 1006]");
+    //     log.info("\n" +
+    //             "=== Postman 테스트 가이드 ===\n" +
+    //             "1. Socket.IO 이벤트명: game:init\n" +
+    //             "2. 테스트 데이터:\n" +
+    //             "   - roomId: 456\n" +
+    //             "   - userId: 1001~1006 중 하나\n" +
+    //             "3. 요청 형식:\n" +
+    //             "   {\n" +
+    //             "     \"roomId\": 456\n" +
+    //             "   }\n" +
+    //             "=========================");
+    // }
 
     public void startGame(SocketIOClient client, int roomId) throws SocketException {
         Integer userId = validateAuthentication(client);
