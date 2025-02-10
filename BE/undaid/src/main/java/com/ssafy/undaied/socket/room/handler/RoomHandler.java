@@ -46,6 +46,11 @@ public class RoomHandler {
                         RoomCreateResponseDto responseRoomData = roomService.createRoom(data, client);
                         log.info("Room created - ID: {}, Title: {}", responseRoomData.getRoomId(), responseRoomData.getRoomTitle());
 
+                        // 로비에 데이터 보내주기
+                        RoomCreatedAtLobbyReponseDto roomCreatedAtLobbyReponseDto = lobbyService.sendEventRoomCreate(responseRoomData, client);
+                        if(roomCreatedAtLobbyReponseDto != null) {
+                            server.getRoomOperations(LOBBY_ROOM).sendEvent(UPDATE_LOBBY.getValue(), roomCreatedAtLobbyReponseDto);
+                        }
 
                         // 방을 생성한 클라이언트에게 데이터 전송
                         if (ackRequest.isAckRequested()) {
