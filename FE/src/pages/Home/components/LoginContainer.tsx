@@ -1,12 +1,34 @@
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { IUser } from "../../../types/User";
 import PlayerIcon1 from "../../../assets/player-icon/player-icon-1.svg";
+import { userState } from "../../../store/userState";
+import { useSetRecoilState } from "recoil";
 
 interface ILoginContainer {
   userInfo: IUser;
 }
 
 function LoginContainer({ userInfo }: ILoginContainer) {
+  const navigate = useNavigate();
+  const setUser = useSetRecoilState(userState);
+
+  // 로그아웃 버튼 클릭 시 sessionStorage에서 userInfo 제거
+  const handleLogout = () => {
+    // sessionStorage.removeItem("userPersist");
+    // 또는 사용중인 key에 맞춰서 removeItem("userState") 등으로 변경
+    console.log("logout clicked!");
+    // 로그아웃 후 메인 페이지 등으로 이동
+    setUser({
+      isLogin: false,
+      token: "",
+      email: "",
+      nickname: "",
+      totalWin: 0,
+      totalLose: 0,
+    });
+    navigate("/");
+  };
+
   return (
     <div className="flex flex-col w-full items-center">
       <button className="w-[22.5rem] h-[5.5rem] flex justify-center items-center mb-8 bg-black text-white font-mono border-2 border-[#872341] rounded-sm text-3xl font-semibold">
@@ -22,7 +44,12 @@ function LoginContainer({ userInfo }: ILoginContainer) {
               {userInfo.nickname}님
             </h1>
 
-            <button className="text-xs ml-3 border-[1px] p-1">로그아웃</button>
+            <button
+              className="text-xs ml-3 border-[1px] p-1"
+              onClick={handleLogout}
+            >
+              로그아웃
+            </button>
           </div>
           <h2 className="text-sm">{userInfo.email}</h2>
           <div className="text-xs">
