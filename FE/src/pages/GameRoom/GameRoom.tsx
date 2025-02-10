@@ -39,6 +39,7 @@ interface IUser {
 interface IEmitDone {
   success: boolean;
   errorMessage: string;
+  enterId: number;
 }
 
 function GameRoom() {
@@ -73,7 +74,10 @@ function GameRoom() {
 
   const [roomError, setRoomError] = useState(false);
   const [RoomErrorMessage, setRoomErrorMessage] = useState("");
+
   //플레이어 본인
+  //본인 엔터 아이다와 정보 각각
+  const [playerEnterId, setPlayerEnterId] = useState<number>();
   const [playerInfo, setPlayerInfo] = useState<IUser | undefined>({
     id: 999,
     playerNum: 1,
@@ -153,6 +157,7 @@ function GameRoom() {
           }))
           .slice(0, 6);
         setUsers(newUsers);
+        setPlayerInfo(newUsers.find((user) => user.id === playerEnterId));
       }
     });
 
@@ -196,9 +201,10 @@ function GameRoom() {
         roomId: Number(roomId),
         password: password,
       },
-      ({ success, errorMessage }: IEmitDone) => {
+      ({ success, errorMessage, enterId }: IEmitDone) => {
         if (success) {
           //올바른 방인 경우
+          setPlayerEnterId(enterId);
           return;
         } else {
           setRoomError(true);
