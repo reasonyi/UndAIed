@@ -16,5 +16,6 @@ public class Room implements Serializable {
     private String roomTitle;
     private Boolean isPrivate;
     private Integer roomPassword;
+    private Boolean playing;
     private List<RoomUser> currentPlayers;
 }

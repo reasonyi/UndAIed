@@ -61,7 +61,7 @@ public class SocketIoHandler {
                 client.set("nickname", user.getNickname());
 
                 // 로비 입장
-                lobbyService.joinLobby(client, userId);
+                lobbyService.joinLobby(client);
             } catch (Exception e) {
                 throw new BaseException(SOCKET_CONNECTION_FAILED);
             }
