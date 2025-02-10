@@ -2,8 +2,8 @@ package com.ssafy.undaied.socket.common.handler;
 
 import com.ssafy.undaied.global.common.exception.BaseException;
 import com.ssafy.undaied.socket.common.constant.EventType;
-import com.ssafy.undaied.socket.gameChat.handler.GameChatHandler;
-import com.ssafy.undaied.socket.gameStage.handler.GameStageHandler;
+import com.ssafy.undaied.socket.chat.handler.GameChatHandler;
+import com.ssafy.undaied.socket.stage.handler.GameStageHandler;
 import com.ssafy.undaied.domain.user.entity.Users;
 import com.ssafy.undaied.domain.user.entity.repository.UserRepository;
 import com.ssafy.undaied.socket.common.service.SocketAuthenticationService;
@@ -61,7 +61,7 @@ public class SocketIoHandler {
                 client.set("nickname", user.getNickname());
 
                 // 로비 입장
-                lobbyService.joinLobby(client, userId);
+                lobbyService.joinLobby(client);
             } catch (Exception e) {
                 throw new BaseException(SOCKET_CONNECTION_FAILED);
             }
