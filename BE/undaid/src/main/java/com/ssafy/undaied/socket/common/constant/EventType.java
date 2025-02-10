@@ -4,6 +4,7 @@ public enum EventType {
 
     // 로비
     CREATE_ROOM_AT_LOBBY("lobby:room:create"),
+    UPDATE_LOBBY("lobby:room:update"),
     CREATE_ROOM("room:create"),
     LIST_ROOMS("room:list"),
     ENTER_ROOM_AT_LOBBY("lobby:room:enter"),

@@ -1,7 +1,7 @@
 import React, { createContext, useEffect, useRef } from "react";
 import { io, Socket } from "socket.io-client";
 
-const SOCKET_URL = "http://localhost:3000";
+const SOCKET_URL = "http://localhost:9090";
 
 // 1. Context 생성
 export const SocketContext = createContext<Socket | null>(null);

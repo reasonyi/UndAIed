@@ -1,0 +1,24 @@
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:rw  # 이거 rw로 해줘야함
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - /etc/ssl/certs:/etc/ssl/certs:ro
+      - /etc/nginx/sites-available:/etc/nginx/sites-available:ro
+      - /var/log/nginx:/var/log/nginx
+      - ./nginx/html:/usr/share/nginx/html:ro
+    networks:
+      - app_network
+    restart: always
+    environment:
+      TZ: Asia/Seoul
+
+networks:
+  app_network:
+    external: true  # 기존 네트워크를 사용하기 위한 설정
