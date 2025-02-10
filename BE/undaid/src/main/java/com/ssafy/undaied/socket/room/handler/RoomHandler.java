@@ -71,10 +71,25 @@ public class RoomHandler {
                 }
         );
 
+        server.addEventListener(ENTER_ROOM_AT_LOBBY.getValue(), RoomEnterRequestDto.class,
+                (client, data, ackRequest) -> {
+                    try {
+                        System.out.println("여기 들어올까");
+                        roomService.enterRoom(client, data.getRoomId(), data.getRoomPassword());
+                    } catch (Exception e) {
+                        log.error("Room enter failed: {}", e.getMessage());
+                        Map<String, Object> errorData = new HashMap<>();
+                        errorData.put("code", e instanceof SocketException ?
+                                ((SocketException) e).getErrorCode().getStatus() :
+                                SocketErrorCode.SOCKET_EVENT_ERROR.getStatus());
+                        errorData.put("message", e instanceof SocketException ?
+                                ((SocketException) e).getErrorCode().getMessage() :
+                                "방 입장 실패");
+                        client.sendEvent("error", errorData);
+                    }
 
-
-
-
+                }
+        );
 
     }
 }
