@@ -15,4 +15,5 @@ public class RoomUser implements Serializable {
     private Integer enterId;
     private Boolean isHost;
     private String nickname;
+    private Integer profileImage;
 }
