@@ -34,7 +34,7 @@ function GameMainChat() {
   useEffect(() => {
     if (!socket) return;
 
-    socket.on("lobby:chat:send", (message: ChatMessage) => {
+    socket.on("lobby:chat", (message: ChatMessage) => {
       setChatList((prev) => [...prev, message]);
 
       if (isScrolledToBottom) {
@@ -43,7 +43,7 @@ function GameMainChat() {
     });
 
     return () => {
-      socket.off("lobby:chat:send");
+      socket.off("lobby:chat");
     };
   }, [socket, isScrolledToBottom]);
 
@@ -53,7 +53,7 @@ function GameMainChat() {
     const message = chat;
     setChat(""); // 입력창 초기화
 
-    socket.emit("lobby:chat:send", { message }, (response: ChatMessage) => {
+    socket.emit("lobby:chat", { message }, (response: ChatMessage) => {
       // 서버 응답을 받으면 채팅 목록에 추가
       setChatList((prev) => [...prev, response]);
       setTimeout(scrollToBottom, 0);
