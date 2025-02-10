@@ -9,10 +9,7 @@ import lombok.Setter;
 @Getter
 @AllArgsConstructor
 @Builder
-public class RoomCreatedAtLobbyReponseDto {
-    private Long roomId;
-    private String roomTitle;
-    private Boolean isPrivate;
-    private int currentPlayerNum;
-    private Boolean playing;
+public class LobbyUpdateResponseDto {
+    private String type;
+    private UpdateData data;
 }

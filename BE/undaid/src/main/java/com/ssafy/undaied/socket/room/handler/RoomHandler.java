@@ -1,11 +1,9 @@
 package com.ssafy.undaied.socket.room.handler;
 
-import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.SocketIOServer;
 import com.ssafy.undaied.socket.common.exception.SocketException;
-import com.ssafy.undaied.socket.lobby.dto.response.RoomCreatedAtLobbyReponseDto;
+import com.ssafy.undaied.socket.lobby.dto.response.LobbyUpdateResponseDto;
 import com.ssafy.undaied.socket.lobby.service.LobbyService;
-import com.ssafy.undaied.socket.room.dto.Room;
 import com.ssafy.undaied.socket.room.dto.request.RoomCreateRequestDto;
 import com.ssafy.undaied.socket.room.dto.request.RoomEnterRequestDto;
 import com.ssafy.undaied.socket.room.dto.request.RoomLeaveRequestDto;
@@ -18,14 +16,11 @@ import org.springframework.stereotype.Component;
 
 import static com.ssafy.undaied.socket.common.constant.EventType.*;
 import static com.ssafy.undaied.socket.common.constant.SocketRoom.LOBBY_ROOM;
-import static com.ssafy.undaied.socket.common.constant.SocketRoom.ROOM_KEY_PREFIX;
 
 import com.ssafy.undaied.socket.common.exception.SocketErrorCode;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import static com.ssafy.undaied.socket.common.exception.SocketErrorCode.CREATE_ROOM_FAILED;
 
 @Component
 @Slf4j
@@ -47,9 +42,9 @@ public class RoomHandler {
                         log.info("Room created - ID: {}, Title: {}", responseRoomData.getRoomId(), responseRoomData.getRoomTitle());
 
                         // 로비에 데이터 보내주기
-                        RoomCreatedAtLobbyReponseDto roomCreatedAtLobbyReponseDto = lobbyService.sendEventRoomCreate(responseRoomData, client);
-                        if(roomCreatedAtLobbyReponseDto != null) {
-                            server.getRoomOperations(LOBBY_ROOM).sendEvent(UPDATE_LOBBY.getValue(), roomCreatedAtLobbyReponseDto);
+                        LobbyUpdateResponseDto lobbyUpdateResponseDto = lobbyService.sendEventRoomCreate(responseRoomData, client);
+                        if(lobbyUpdateResponseDto != null) {
+                            server.getRoomOperations(LOBBY_ROOM).sendEvent(UPDATE_LOBBY.getValue(), lobbyUpdateResponseDto);
                         }
 
                         // 방을 생성한 클라이언트에게 데이터 전송
@@ -90,6 +85,7 @@ public class RoomHandler {
         server.addEventListener(ENTER_ROOM.getValue(), RoomEnterRequestDto.class,
                 (client, data, ackRequest) -> {
                     try {
+
                         roomService.enterRoom(client, data.getRoomId(), data.getRoomPassword());
                     } catch (Exception e) {
                         log.error("Room enter failed: {}", e.getMessage());

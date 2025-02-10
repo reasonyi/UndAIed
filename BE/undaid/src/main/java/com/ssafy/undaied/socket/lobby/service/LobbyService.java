@@ -1,8 +1,8 @@
 package com.ssafy.undaied.socket.lobby.service;
 
 import com.corundumstudio.socketio.SocketIOClient;
-import com.ssafy.undaied.socket.lobby.dto.response.RoomCreatedAtLobbyReponseDto;
-import com.ssafy.undaied.socket.room.dto.Room;
+import com.ssafy.undaied.socket.lobby.dto.response.LobbyUpdateResponseDto;
+import com.ssafy.undaied.socket.lobby.dto.response.UpdateData;
 import com.ssafy.undaied.socket.room.dto.response.RoomCreateResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,19 +43,24 @@ public class LobbyService {
         return true;
     }
 
-    public RoomCreatedAtLobbyReponseDto sendEventRoomCreate(RoomCreateResponseDto responseDto, SocketIOClient client) {
+    public LobbyUpdateResponseDto sendEventRoomCreate(RoomCreateResponseDto responseDto, SocketIOClient client) {
 
         // 비밀방인 경우 로비에 보내지 않는다.
         if(responseDto.getIsPrivate()) return null;
 
         System.out.println("방 아이디: "+responseDto.getRoomId()+" 방 제목: "+responseDto.getRoomTitle()+" 비밀방 여부: "+ false +" 인원 수: "+ responseDto.getCurrentPlayers().size()+"플레이 중: "+responseDto.getPlaying());
 
-        return RoomCreatedAtLobbyReponseDto.builder()
+        UpdateData updateData = UpdateData.builder()
                 .roomId(responseDto.getRoomId())
                 .roomTitle(responseDto.getRoomTitle())
                 .isPrivate(responseDto.getIsPrivate())
                 .currentPlayerNum(responseDto.getCurrentPlayers().size())
                 .playing(responseDto.getPlaying())
+                .build();
+
+        return LobbyUpdateResponseDto.builder()
+                .type("create")
+                .data(updateData)
                 .build();
     }
 
