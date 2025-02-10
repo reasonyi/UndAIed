@@ -9,6 +9,7 @@ import GameHeader from "./components/GameHeader";
 import GameSidebar from "./components/GameSidebar";
 import GameMainChat from "./components/GameMainChat";
 import GameMainMenu from "./components/GameMainMenu";
+import CreateRoomButton from "./components/CreateRoomButton";
 
 function GameMain() {
   return (
@@ -25,11 +26,8 @@ function GameMain() {
           <div className="md:flex md:h-screen md:max-h-[730px] md:m-12 md:mb-5 mb-5">
             <GameSidebar />
             <div className="flex flex-col flex-1 gap-4 px-8 ">
-              <Link to="/createroom">
-                <button className="w-32 justify-start px-6 py-2 bg-black border-2 border-[#bf8f5b] text-white rounded hover:bg-[#211b05] hover:border-[#dea569] hover:shadow-[0_0_10px_0] hover:shadow-[#f99f3e] active:border-[#906639] active:bg-black active:shadow-none duration-100 ">
-                  방 만들기
-                </button>
-              </Link>
+              <CreateRoomButton />
+
               <GameRoomList />
               <GameMainChat />
             </div>
