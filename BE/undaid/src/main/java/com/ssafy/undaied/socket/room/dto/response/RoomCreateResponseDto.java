@@ -14,6 +14,7 @@ public class RoomCreateResponseDto {
     private Long roomId;
     private String roomTitle;
     private Boolean isPrivate;
+    private Boolean playing;
     private List<RoomUser> currentPlayers;
 
 }
