@@ -25,15 +25,9 @@ public class SocketDisconnectService {
      */
     public void handleDisconnect(SocketIOClient client) {
         Integer userId = client.get("userId");
-        log.info("Starting disconnect process for user: {}", userId);
 
-        try {
-            // 게임방 및 로비에서 퇴장 처리
-            handleRoomDisconnect(client, userId);
-            log.info("Room disconnect handled for user: {}", userId);
-        } catch (Exception e) {
-            log.error("Error during room disconnect for user: {}", userId, e);
-        }
+        // 게임방 및 로비에서 퇴장 처리
+        handleRoomDisconnect(client, userId);
 
         log.info("Client disconnected - userId: {}, sessionId: {}", userId, client.getSessionId());
         client.disconnect();
