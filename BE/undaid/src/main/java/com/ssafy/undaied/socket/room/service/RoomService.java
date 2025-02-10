@@ -10,13 +10,16 @@ import com.ssafy.undaied.socket.room.dto.Room;
 import com.ssafy.undaied.socket.room.dto.RoomUser;
 import com.ssafy.undaied.socket.room.dto.request.RoomCreateRequestDto;
 import com.ssafy.undaied.socket.room.dto.response.RoomCreateResponseDto;
+import com.ssafy.undaied.socket.room.dto.response.RoomEnterResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static com.ssafy.undaied.socket.common.constant.EventType.*;
 import static com.ssafy.undaied.socket.common.constant.SocketRoom.*;
@@ -89,6 +92,7 @@ public class RoomService {
                     .currentPlayers(users)
                     .build();
 
+            // 방을 저장할 때 레디스에서 분리를...
             String key = ROOM_KEY_PREFIX + roomId;
             jsonRedisTemplate.opsForValue().set(key, room);
             log.info("Room created - ID: {}, Title: {}", roomId, room.getRoomTitle());
@@ -131,12 +135,9 @@ public class RoomService {
             List<RoomUser> currentPlayers = room.getCurrentPlayers();
 
             // 나가려는 유저가 방에 있는지 확인
-            boolean userExists = currentPlayers.stream()
-                    .anyMatch(user -> user.getEnterId() == enterId);
-            if (!userExists) {
+            if (!isUserInRoom(client, roomId)) {
                 throw new SocketException(USER_NOT_IN_ROOM);
             }
-
             // 나가려는 유저가 호스트인지 확인
             boolean isHost = currentPlayers.stream()
                     .filter(user -> user.getEnterId() == enterId)
@@ -199,8 +200,16 @@ public class RoomService {
         log.info("Room information sent to room {} users", key);
     }
 
+    // 유저가 특정 방에 있는지 확인하는 메서드 추가
+    public boolean isUserInRoom(SocketIOClient client, Long roomId) {
+        String key = ROOM_KEY_PREFIX + roomId;
+        Set<String> rooms = new HashSet<>(client.getAllRooms());
 
-    public Room enterRoom(SocketIOClient client, Long roomId, Integer password) throws SocketException {
+        return rooms.contains(key);
+    }
+
+
+    public RoomEnterResponseDto enterRoom(SocketIOClient client, Long roomId, Integer password) throws SocketException {
         String key = ROOM_KEY_PREFIX + roomId;
 
         // 레디스에서 방 정보 조회
@@ -210,42 +219,49 @@ public class RoomService {
             throw new SocketException(ROOM_NOT_FOUND);
         }
 
-        // 방이 private인 경우 비밀번호 체크
-        if (room.getIsPrivate() && !room.getRoomPassword().equals(password)) {
-            throw new SocketException(INVALID_ROOM_PASSWORD);
+        Integer enterId = 0;
+
+        // 유저가 방에 있는지 확인
+        if (!isUserInRoom(client, roomId)) {
+
+            // 방이 private인 경우 비밀번호 체크
+            if (room.getIsPrivate() && !room.getRoomPassword().equals(password)) {
+                throw new SocketException(INVALID_ROOM_PASSWORD);
+            }
+
+            // 3. 새로운 RoomUser 생성
+            String nickname = client.get("nickname");
+            if (nickname == null) {
+                throw new SocketException(USER_INFO_NOT_FOUND);
+            }
+
+            // 현재 방의 최대 enterId를 찾아서 +1
+            int newEnterId = room.getCurrentPlayers().stream()
+                    .mapToInt(RoomUser::getEnterId)
+                    .max()
+                    .orElse(-1) + 1;  // 방이 비어있다면 0이 됨
+
+            enterId = newEnterId;
+
+            RoomUser newUser = RoomUser.builder()
+                    .enterId(newEnterId)
+                    .isHost(false)
+                    .nickname(nickname)
+                    .build();
+
+            room.getCurrentPlayers().add(newUser);
+            jsonRedisTemplate.opsForValue().set(key, room);
+
+            // 입장하는 사용자를 이동시키기.
+            client.leaveRoom(LOBBY_ROOM);
+            client.joinRoom(key);
         }
 
-        // 3. 새로운 RoomUser 생성
-        String nickname = client.get("nickname");
-        if (nickname == null) {
-            throw new SocketException(USER_INFO_NOT_FOUND);
-        }
-
-        // 현재 방의 최대 enterId를 찾아서 +1
-        int newEnterId = room.getCurrentPlayers().stream()
-                .mapToInt(RoomUser::getEnterId)
-                .max()
-                .orElse(-1) + 1;  // 방이 비어있다면 0이 됨
-
-        RoomUser newUser = RoomUser.builder()
-                .enterId(newEnterId)
-                .isHost(false)
-                .nickname(nickname)
+        return RoomEnterResponseDto.builder()
+                .enterId(enterId)
+                .room(room)
                 .build();
-
-        room.getCurrentPlayers().add(newUser);
-        jsonRedisTemplate.opsForValue().set(key, room);
-
-        // 입장하는 사용자를 이동시키기.
-        client.leaveRoom(LOBBY_ROOM);
-        client.joinRoom(key);
-
-        // 방에 있는 모든 사용자에게 업데이트된 정보 전송
-        server.getRoomOperations(key).sendEvent(ENTER_ROOM.getValue(), room);
-
-        return room;
     }
-
 
 
 }
