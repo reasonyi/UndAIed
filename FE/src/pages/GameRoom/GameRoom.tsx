@@ -142,13 +142,16 @@ function GameRoom() {
       console.log("방 입장 이벤트 수신:", data);
       // 예: { roomId, roomTitle, isPrivate, playing, currentPlayers: [...] }
       if (data.currentPlayers) {
-        const newUsers: IUser[] = data.currentPlayers.map((player: any) => ({
-          id: player.enterId,
-          playerNum: player.enterId,
-          name: player.nickname,
-          token: "",
-          imgNum: 1,
-        }));
+        const newUsers: IUser[] = data.currentPlayers
+          .sort((a: any, b: any) => a.enterId - b.enterId)
+          .map((player: any, index: number) => ({
+            id: player.enterId,
+            playerNum: index + 1, // 1부터 시작
+            name: player.nickname,
+            token: "",
+            imgNum: 1,
+          }))
+          .slice(0, 6);
         setUsers(newUsers);
       }
     });
