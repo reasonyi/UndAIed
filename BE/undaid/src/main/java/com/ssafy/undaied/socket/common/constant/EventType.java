@@ -6,6 +6,7 @@ public enum EventType {
     CREATE_ROOM_AT_LOBBY("lobby:room:create"),
     CREATE_ROOM("room:create"),
     LIST_ROOMS("room:list"),
+    ENTER_ROOM_AT_LOBBY("lobby:room:enter"),
     ENTER_ROOM("room:enter"),
     SEND_LOBBY_CHAT("chat:lobby:send"),
 
