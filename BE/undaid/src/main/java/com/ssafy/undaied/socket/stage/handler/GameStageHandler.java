@@ -1,14 +1,13 @@
-package com.ssafy.undaied.socket.gameStage.handler;
+package com.ssafy.undaied.socket.stage.handler;
 
 import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.SocketIOServer;
 import com.ssafy.undaied.socket.common.constant.EventType;
 import com.ssafy.undaied.socket.common.util.GameTimer;
-import com.ssafy.undaied.socket.gameChat.service.GameChatService;
-import com.ssafy.undaied.socket.gameStage.dto.response.StageNotifyDto;
-import com.ssafy.undaied.socket.gameStage.constant.StageType;
+import com.ssafy.undaied.socket.chat.service.GameChatService;
+import com.ssafy.undaied.socket.stage.dto.response.StageNotifyDto;
+import com.ssafy.undaied.socket.stage.constant.StageType;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.event.spi.EventManager;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;

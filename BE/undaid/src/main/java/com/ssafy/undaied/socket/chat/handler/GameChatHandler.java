@@ -1,10 +1,10 @@
-package com.ssafy.undaied.socket.gameChat.handler;
+package com.ssafy.undaied.socket.chat.handler;
 
 import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.annotation.OnEvent;
-import com.ssafy.undaied.socket.gameChat.dto.request.GameChatRequestDto;
-import com.ssafy.undaied.socket.gameChat.service.GameChatService;
-import com.ssafy.undaied.socket.gameStage.handler.GameStageHandler;
+import com.ssafy.undaied.socket.chat.dto.request.GameChatRequestDto;
+import com.ssafy.undaied.socket.chat.service.GameChatService;
+import com.ssafy.undaied.socket.stage.handler.GameStageHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
