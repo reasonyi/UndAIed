@@ -20,7 +20,10 @@ services:
       - "8080"
       - "9090"
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/undaied?useSSL=true&serverTimezone=Asia/Seoul
       SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
@@ -29,6 +32,8 @@ services:
       SOCKETIO_SERVER_HOSTNAME: "0.0.0.0"
       SOCKETIO_SERVER_PORT: 9090
       SPRING_REDIS_PASSWORD: ${REDIS_PASSWORD}
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
       TZ: Asia/Seoul
     networks:
       - app_network
@@ -68,6 +73,11 @@ services:
       - --collation-server=utf8mb4_unicode_ci
       - --default-time-zone=+09:00
     restart: always
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:alpine
@@ -75,7 +85,6 @@ services:
     ports:
       - "6379:6379"
     command: redis-server --requirepass ${REDIS_PASSWORD}
-    # command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
     volumes:
       - redis_data:/data
     networks:
@@ -84,7 +93,12 @@ services:
     environment:
       - TZ=Asia/Seoul
       - VM_OVERCOMMIT_MEMORY=1
-    user: redis #
+    user: redis
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   mysql_data:
