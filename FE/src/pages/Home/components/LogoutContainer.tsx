@@ -49,7 +49,7 @@ function LogoutContainer() {
           // setShowSignUpModal(true);
         } else if (response.status === 200) {
           // 이미 회원가입된 사용자이므로 바로 메인 페이지 등으로 이동
-          navigate("/home");
+          navigate("/");
         }
       }
     } catch (error: any) {
