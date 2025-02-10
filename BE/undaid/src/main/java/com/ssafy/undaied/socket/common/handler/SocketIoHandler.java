@@ -84,6 +84,7 @@ public class SocketIoHandler {
                 // 클라이언트 데이터 설정
                 client.set("userId", userId);
                 client.set("nickname", user.getNickname());
+                client.set("profileImage", user.getProfileImage());
 
                 // 로비 입장
                 try {
