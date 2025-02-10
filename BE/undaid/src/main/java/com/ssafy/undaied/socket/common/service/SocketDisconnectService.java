@@ -1,13 +1,16 @@
 package com.ssafy.undaied.socket.common.service;
 
 import com.corundumstudio.socketio.SocketIOClient;
+import com.ssafy.undaied.global.common.exception.BaseException;
 import com.ssafy.undaied.socket.lobby.service.LobbyService;
 import com.ssafy.undaied.socket.room.service.RoomService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import static com.ssafy.undaied.global.common.exception.ErrorCode.SOCKET_DISCONNECTION_ERROR;
 import static com.ssafy.undaied.socket.common.constant.SocketRoom.LOBBY_ROOM;
+import static com.ssafy.undaied.socket.common.constant.SocketRoom.ROOM_KEY_PREFIX;
 
 @Service
 @Slf4j
@@ -40,13 +43,19 @@ public class SocketDisconnectService {
      * 클라이언트가 속한 모든 방에서 퇴장 처리합니다.
      */
     private void handleRoomDisconnect(SocketIOClient client, Integer userId) {
-        for (String room : client.getAllRooms()) {
-            if (room.startsWith(GAME_ROOM_PREFIX)) {
-                roomService.leaveGameRoom(client, room);
-            } else if (room.equals(LOBBY_ROOM)) {
-                lobbyService.leaveLobby(client);
+        try {
+            for (String room : client.getAllRooms()) {
+                if (room.startsWith(ROOM_KEY_PREFIX)) {  // GAME_ROOM_PREFIX 대신 ROOM_KEY_PREFIX 사용
+                    roomService.leaveRoom(client, room);
+                }
+                else if (room.equals(LOBBY_ROOM)) {
+                    lobbyService.leaveLobby(client);
+                }
+                client.leaveRoom(room); //
             }
-            client.leaveRoom(room);
+        } catch (Exception e) {
+            throw new BaseException(SOCKET_DISCONNECTION_ERROR);
         }
+
     }
 }
