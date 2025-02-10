@@ -47,8 +47,13 @@ public class RoomService {
                 throw new SocketException(CREATE_ROOM_FAILED);
             }
 
-            // 유저가 로비에 있는지 확인
+            // 현재 클라이언트의 방 상태 로깅
+            Set<String> currentRooms = client.getAllRooms();
+            log.debug("Current client rooms before creation: {}", currentRooms);
+
+            // 로비 체크
             if (!lobbyService.isUserInLobby(client)) {
+                log.error("User attempt to create room while not in lobby");
                 throw new SocketException(USER_ALREADY_IN_ROOM);
             }
 

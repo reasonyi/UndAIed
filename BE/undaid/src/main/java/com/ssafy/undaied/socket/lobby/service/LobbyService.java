@@ -21,8 +21,20 @@ public class LobbyService {
      * 클라이언트를 로비에 입장시킵니다.
      */
     public void joinLobby(SocketIOClient client) {
+        log.debug("Attempting to join lobby - Client ID: {}", client.getSessionId());
+        log.debug("Current rooms before joining lobby: {}", client.getAllRooms());
+
+        // 기존 방에서 모두 나가기
+        Set<String> rooms = new HashSet<>(client.getAllRooms());
+        rooms.remove("");
+        for (String room : rooms) {
+            client.leaveRoom(room);
+            log.debug("Left room: {}", room);
+        }
+
+        // 로비에 입장
         client.joinRoom(LOBBY_ROOM);
-        log.info("User {} (sessionId: {}) joined lobby", client.get("userId"), client.getSessionId());
+        log.debug("Joined lobby - Current rooms: {}", client.getAllRooms());
     }
 
     /**
@@ -34,13 +46,16 @@ public class LobbyService {
     }
 
     public boolean isUserInLobby(SocketIOClient client) {
-        Set<String> rooms = new HashSet<>(client.getAllRooms()); // 새로운 Set으로 복사
-        rooms.remove(""); // 빈 room 제거
+        Set<String> rooms = new HashSet<>(client.getAllRooms());
+        log.debug("Checking lobby status for client {} - All rooms: {}", client.getSessionId(), rooms);
 
-        if (rooms.size() != 1 || !rooms.contains(LOBBY_ROOM)) {
-            return false;
-        }
-        return true;
+        rooms.remove("");
+        log.debug("Rooms after removing empty: {}", rooms);
+
+        boolean inLobby = rooms.size() == 1 && rooms.contains(LOBBY_ROOM);
+        log.debug("Is user in lobby? {}", inLobby);
+
+        return inLobby;
     }
 
     public LobbyUpdateResponseDto sendEventRoomCreate(RoomCreateResponseDto responseDto, SocketIOClient client) {
