@@ -10,6 +10,7 @@ import com.ssafy.undaied.socket.room.dto.Room;
 import com.ssafy.undaied.socket.room.dto.RoomUser;
 import com.ssafy.undaied.socket.room.dto.request.RoomCreateRequestDto;
 import com.ssafy.undaied.socket.room.dto.response.RoomCreateResponseDto;
+import com.ssafy.undaied.socket.room.dto.response.RoomEnterResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -208,7 +209,7 @@ public class RoomService {
     }
 
 
-    public Room enterRoom(SocketIOClient client, Long roomId, Integer password) throws SocketException {
+    public RoomEnterResponseDto enterRoom(SocketIOClient client, Long roomId, Integer password) throws SocketException {
         String key = ROOM_KEY_PREFIX + roomId;
 
         // 레디스에서 방 정보 조회
@@ -217,6 +218,8 @@ public class RoomService {
         if (room == null) {
             throw new SocketException(ROOM_NOT_FOUND);
         }
+
+        Integer enterId = 0;
 
         // 유저가 방에 있는지 확인
         if (!isUserInRoom(client, roomId)) {
@@ -238,6 +241,8 @@ public class RoomService {
                     .max()
                     .orElse(-1) + 1;  // 방이 비어있다면 0이 됨
 
+            enterId = newEnterId;
+
             RoomUser newUser = RoomUser.builder()
                     .enterId(newEnterId)
                     .isHost(false)
@@ -252,10 +257,10 @@ public class RoomService {
             client.joinRoom(key);
         }
 
-        // 방에 있는 모든 사용자에게 업데이트된 정보 전송
-        server.getRoomOperations(key).sendEvent(ENTER_ROOM.getValue(), room);
-
-        return room;
+        return RoomEnterResponseDto.builder()
+                .enterId(enterId)
+                .room(room)
+                .build();
     }
 
 
