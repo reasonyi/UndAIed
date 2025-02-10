@@ -3,28 +3,29 @@ package com.ssafy.undaied.socket.stage.dto.response;
 import com.ssafy.undaied.socket.stage.constant.StageType;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import org.springframework.stereotype.Component;
 
-@Component
+
 @Getter
-@NoArgsConstructor
+@Builder
 public class StageNotifyDto {
-    private String stage;       // 낮/밤
+    private final Integer number = 0;
+    private String message;
 
-    @Builder
-    public StageNotifyDto(String stage) {
-        this.stage = stage;
+    public static StageNotifyDto notifyStartStage(StageType stage) {
+        String message = stage == StageType.DAY || stage == StageType.NIGHT ?
+                stage.getValue() + stage.getParticle() + " 되었습니다." :
+                stage.getValue() + stage.getParticle() + " 시작합니다.";
+
+        return StageNotifyDto.builder()
+                .message(message)
+                .build();
     }
 
-    public String notifyStartStage(StageType stage) {
-        if (stage == StageType.DAY || stage == StageType.NIGHT)
-            return stage.getValue() + stage.getParticle() + " 되었습니다.";
-        else return stage.getValue() + stage.getParticle() + " 시작합니다.";
-    }
-
-    public String notifyEndStage(StageType stage) {
-        return stage.getValue() + stage.getParticle() + " 종료합니다.";
+    public static StageNotifyDto notifyEndStage(StageType stage) {
+        String message = stage.getValue() + stage.getParticle() + " 종료합니다.";
+        return StageNotifyDto.builder()
+                .message(message)
+                .build();
     }
 
 }
