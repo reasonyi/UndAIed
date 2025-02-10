@@ -8,7 +8,7 @@ interface DonutChartProps {
 }
 
 function DonutChart({
-  percent = 25,
+  percent = 65,
   size = 200,
   strokeWidth = 20,
   color = "#fb472c",
