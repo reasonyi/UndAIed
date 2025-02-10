@@ -38,9 +38,14 @@ function CreateRoomButton() {
       console.log("응답입니다.", response);
       if (response.isError) {
         //에러 발생 처리
-        console.log(response.errorMessage);
+        console.log("방 생성 에러 발생", response.errorMessage, response);
       } else {
-        navigate(`/room/${response.roomId}`);
+        console.log("들어왔어");
+        if (roomInfo.isPrivate) {
+          navigate(`room/${response.roomId}?pwd=${roomInfo.roomPassword}`);
+        } else {
+          navigate(`room/${response.roomId}`);
+        }
       }
     });
     setIsOpen(false);
