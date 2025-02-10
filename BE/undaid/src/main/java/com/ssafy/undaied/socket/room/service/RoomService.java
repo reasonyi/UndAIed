@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.undaied.domain.user.entity.Users;
 import com.ssafy.undaied.domain.user.entity.repository.UserRepository;
 import com.ssafy.undaied.socket.common.exception.SocketException;
+import com.ssafy.undaied.socket.lobby.dto.response.LobbyUpdateResponseDto;
+import com.ssafy.undaied.socket.lobby.dto.response.UpdateData;
 import com.ssafy.undaied.socket.lobby.service.LobbyService;
 import com.ssafy.undaied.socket.room.dto.Room;
 import com.ssafy.undaied.socket.room.dto.RoomUser;
@@ -126,7 +128,7 @@ public class RoomService {
         }
     }
 
-    public void leaveRoom(Long roomId, SocketIOClient client) throws SocketException {
+    public LobbyUpdateResponseDto leaveRoom(Long roomId, SocketIOClient client) throws SocketException {
         try {
             String key = ROOM_KEY_PREFIX + roomId;
 
@@ -153,6 +155,21 @@ public class RoomService {
             // 현재 플레이어 목록에서 해당 유저 제거
             currentPlayers.removeIf(user -> user.getNickname() == client.get("nickname"));
 
+            UpdateData updateData = UpdateData
+                    .builder()
+                    .roomId(room.getRoomId())
+                    .roomTitle(room.getRoomTitle())
+                    .isPrivate(room.getIsPrivate())
+                    .currentPlayerNum(currentPlayers.size())
+                    .playing(false)
+                    .build();
+
+            LobbyUpdateResponseDto updateResponseDto = LobbyUpdateResponseDto
+                    .builder()
+                    .type("update")
+                    .data(updateData)
+                    .build();
+
             // 만약 나간 유저가 호스트였고, 남은 유저가 있다면 첫 번째 유저를 호스트로 지정
             if (isHost && !currentPlayers.isEmpty()) {
                 currentPlayers.get(0).setIsHost(true);
@@ -165,6 +182,8 @@ public class RoomService {
             if (currentPlayers.isEmpty()) {
                 jsonRedisTemplate.delete(key);
                 log.info("Room deleted - ID: {}", roomId);
+
+                updateResponseDto.setType("delete");
             } else {
                 // 방 정보 업데이트
                 room.setCurrentPlayers(currentPlayers);
@@ -176,6 +195,8 @@ public class RoomService {
 
             // 로비로 돌아가기
             lobbyService.joinLobby(client);
+
+            return updateResponseDto;
 
         } catch (SocketException e) {
             log.error("Failed to leave room: {}", e.getErrorCode().getMessage());
