@@ -1,10 +1,10 @@
-package com.ssafy.undaied.socket.gameChat.service;
+package com.ssafy.undaied.socket.chat.service;
 
 import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.SocketIOServer;
-import com.ssafy.undaied.socket.gameChat.dto.request.GameChatRequestDto;
-import com.ssafy.undaied.socket.gameChat.dto.response.GameChatResponseDto;
-import com.ssafy.undaied.socket.gameChat.dto.response.SendSubjectResponseDto;
+import com.ssafy.undaied.socket.chat.dto.request.GameChatRequestDto;
+import com.ssafy.undaied.socket.chat.dto.response.GameChatResponseDto;
+import com.ssafy.undaied.socket.chat.dto.response.SendSubjectResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 @Service

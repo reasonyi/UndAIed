@@ -1,4 +1,4 @@
-package com.ssafy.undaied.socket.gameChat.dto.request;
+package com.ssafy.undaied.socket.init.dto.request;
 
 import lombok.Data;
 import lombok.Getter;
@@ -9,7 +9,6 @@ import lombok.Setter;
 @Setter
 @Data
 @NoArgsConstructor
-public class GameChatRequestDto {
-    private String content;
-
+public class GameInitRequestDto {
+    private int roomId;
 }

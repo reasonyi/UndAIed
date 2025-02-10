@@ -14,8 +14,8 @@ import InfoContainer from "./components/InfoContainer";
 
 import { useRecoilValue } from "recoil";
 import { userState } from "../../store/userState";
-import LoginContainer from "./components/loginContainer";
-import LogoutContainer from "./components/logoutContainer";
+import LoginContainer from "./components/LoginContainer";
+import LogoutContainer from "./components/LogoutContainer";
 
 interface OuletContextType {
   isLoggedIn: boolean;
@@ -151,7 +151,7 @@ function Home() {
               </Link>
               <ul className="board-container mt-3">
                 {boards.map((board: IBoard) => (
-                  <Link className="" to="/">
+                  <Link className="" to="/" key={`info-${board.id}`}>
                     <li className="board-content font-medium">
                       <span className="board-content-title text-ellipsis">
                         {board.title}
@@ -174,7 +174,7 @@ function Home() {
               </Link>
               <ul className="board-container mt-3">
                 {boards.map((board: IBoard) => (
-                  <Link className="" to="/">
+                  <Link className="" to="/" key={`bug-${board.id}`}>
                     <li className="board-content font-medium">
                       <span className="board-content-title">{board.title}</span>
                       <span className="board-content-date">{board.date}</span>

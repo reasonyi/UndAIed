@@ -1,4 +1,4 @@
-package com.ssafy.undaied.socket.stage.response.dto;
+package com.ssafy.undaied.socket.stage.dto.response;
 
 import com.ssafy.undaied.socket.stage.constant.StageType;
 import lombok.Builder;

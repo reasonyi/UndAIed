@@ -46,6 +46,7 @@ public enum ErrorCode {
 
     SOCKET_CONNECTION_FAILED(HttpStatusCode.BAD_REQUEST.getStatus(), "소켓 연결에 실패했습니다."),
     SOCKET_EVENT_ERROR(HttpStatusCode.BAD_REQUEST.getStatus(), "소켓 이벤트 처리 중 오류가 발생했습니다."),
+    SOCKET_DISCONNECTION_ERROR(HttpStatusCode.BAD_REQUEST.getStatus(), "소켓 연결 해제 중 제대로 처리되지 않은 작업이 있습니다."),
     ;
 
     private final int status;

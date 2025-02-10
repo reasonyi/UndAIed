@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import PlayerIcon1 from "../../assets/player-icon/player-icon-1.svg";
 import PlayerIcon2 from "../../assets/player-icon/player-icon-2.svg";
@@ -40,7 +40,7 @@ interface IUser {
 }
 
 function GameRoom() {
-  const { number } = useParams();
+  const { number: roomId } = useParams();
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
 
@@ -79,61 +79,111 @@ function GameRoom() {
     scrollRef.current?.scrollIntoView({ block: "end" });
   };
 
-  //user 참가자 전원원 변화화
+  // ----------------------------------------------------
+  // 1) 서버에서 보내주는 room:create, room:enter, room:leave 이벤트 수신
+  // ----------------------------------------------------
   useEffect(() => {
-    socket.on(
-      "enter_room",
-      //player는 1~6까지의 값이다.
-      (id: number, playerNum: number, name: string, token: string) => {
-        setUsers((prev) => [
-          ...prev,
-          { id, playerNum, name, token, imgNum: 1 },
-        ]);
+    if (!socket) return;
+
+    // 방이 생성되었을 때 수신(서버에서 emit('room:create', data)로 보냈다고 가정)
+    socket.on("room:create", (data: any) => {
+      console.log("방 생성 이벤트 수신:", data);
+      // 예: 서버에서 넘어온 data 구조가 { roomId, roomTitle, isPrivate, playing, currentPlayers }라고 가정
+      // currentPlayers(enterId -> id 등)를 state에 반영
+      if (data.currentPlayers) {
+        const newUsers: IUser[] = data.currentPlayers.map((player: any) => ({
+          id: player.enterId, // 또는 playerId로 변경을 제안
+          playerNum: player.enterId, // 기존 코드 호환을 위해
+          name: player.nickname,
+          token: "", // 실제 로직에 맞게 설정
+          imgNum: 1, // 실제 로직에 맞게 설정
+        }));
+        setUsers(newUsers);
       }
-    );
-
-    return () => {
-      socket.off("enter_room");
-    };
-  }, []);
-
-  //socket 시작
-  //IMessage 형식으로 받아야 하나?
-  useEffect(() => {
-    socket.on(
-      "receive_system_message",
-      (id: number, player: number, message: string) => {
-        setMessages((prev) => [
-          ...prev,
-          { id, player, text: message, isMine: false },
-        ]);
-      }
-    );
-
-    return () => {
-      socket.off("message");
-    };
-  }, []);
-
-  //채팅
-  useEffect(() => {
-    socket.on("chat2", (data: { id: number; player: number; text: string }) => {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: data.id,
-          player: data.player,
-          text: data.text,
-          // 보낸 playerNum과 현재 사용자의 playerNum이 같으면 isMine = true
-          isMine: data.player === playerInfo?.playerNum,
-        },
-      ]);
     });
 
+    // 누군가(또는 내가) 방에 입장했을 때 (서버에서 emit('room:enter', data))
+    socket.on("room:enter", (data: any) => {
+      console.log("방 입장 이벤트 수신:", data);
+      // 예: { roomId, roomTitle, isPrivate, playing, currentPlayers: [...] }
+      if (data.currentPlayers) {
+        const newUsers: IUser[] = data.currentPlayers.map((player: any) => ({
+          id: player.enterId,
+          playerNum: player.enterId,
+          name: player.nickname,
+          token: "",
+          imgNum: 1,
+        }));
+        setUsers(newUsers);
+      }
+    });
+
+    // 누군가(또는 내가) 방에서 나갔을 때 (서버에서 emit('room:leave', data))
+    socket.on("room:leave", (data: any) => {
+      console.log("방 퇴장 이벤트 수신:", data);
+      // 예:
+      // 1) 방에서 나간 사람 정보: { enterId: 2, roomId: 1 }
+      // 2) 남아 있는 사람 목록 정보: { currentPlayers: [...] }
+      if (data.currentPlayers) {
+        const newUsers: IUser[] = data.currentPlayers.map((player: any) => ({
+          id: player.enterId,
+          playerNum: player.enterId,
+          name: player.nickname,
+          token: "",
+          imgNum: 1,
+        }));
+        setUsers(newUsers);
+      }
+    });
+
+    // 클린업
     return () => {
-      socket.off("chat");
+      socket.off("room:create");
+      socket.off("room:enter");
+      socket.off("room:leave");
     };
-  }, [playerInfo?.playerNum]);
+  }, [socket]);
+
+  // ----------------------------------------------------
+  // 2) 클라이언트에서 서버로 이벤트 emit (방 생성, 입장, 퇴장)
+  // ----------------------------------------------------
+  const handleCreateRoom = useCallback(() => {
+    // 방 생성 요청: 서버가 받아서 room:create 이벤트를 다른 클라이언트에게 브로드캐스트
+    if (!socket) return;
+    socket.emit("room:create", {
+      roomTitle: "초보만 들어오셈",
+      isPrivate: false,
+      playing: false,
+      currentPlayers: [
+        {
+          enterId: playerInfo?.id,
+          isHost: true,
+          nickname: playerInfo?.name,
+        },
+      ],
+    });
+  }, [socket, playerInfo]);
+
+  const handleEnterRoom = useCallback(() => {
+    // 방 입장 요청
+    if (!socket) return;
+    // roomId는 string일 수 있으니 Number(roomId) 등으로 파싱
+    socket.emit("room:enter", {
+      roomId: Number(roomId),
+      nickname: playerInfo?.name,
+    });
+  }, [socket, roomId, playerInfo]);
+
+  const handleLeaveRoom = useCallback(() => {
+    // 방 퇴장 요청
+    if (!socket || !playerInfo) return;
+    socket.emit("room:leave", {
+      enterId: playerInfo.id, // 실제로는 playerId로 변경하는 것을 추천
+      roomId: Number(roomId),
+    });
+    // 퇴장 후 메인 페이지로 이동하거나, 다른 페이지로 이동할 수 있음
+    navigate("/");
+  }, [socket, roomId, playerInfo, navigate]);
 
   useEffect(() => {
     // 새로운 메시지가 추가될 때 스크롤을 아래로 이동

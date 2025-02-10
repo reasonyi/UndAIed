@@ -1,4 +1,4 @@
-package com.ssafy.undaied.socket.gameChat.dto.response;
+package com.ssafy.undaied.socket.chat.dto.response;
 
 import lombok.Builder;
 import lombok.Getter;
