@@ -14,6 +14,7 @@ import BoardWrite from "../pages/BoardWrite";
 import Friends from "../pages/Friends/Friends";
 import Game from "../pages/Game";
 import GameMyPage from "../pages/GameMyPage/GameMyPage";
+import Signup from "../pages/Signup";
 
 const router = createBrowserRouter([
   {
@@ -28,6 +29,10 @@ const router = createBrowserRouter([
       {
         path: "/policy",
         element: <Policy />,
+      },
+      {
+        path: "/signup",
+        element: <Signup />,
       },
       {
         path: "/game",
