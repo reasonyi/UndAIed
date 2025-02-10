@@ -126,7 +126,7 @@ public class RoomService {
         }
     }
 
-    public void leaveRoom(Long roomId, int enterId, SocketIOClient client) throws SocketException {
+    public void leaveRoom(Long roomId, SocketIOClient client) throws SocketException {
         try {
             String key = ROOM_KEY_PREFIX + roomId;
 
@@ -145,13 +145,13 @@ public class RoomService {
             }
             // 나가려는 유저가 호스트인지 확인
             boolean isHost = currentPlayers.stream()
-                    .filter(user -> user.getEnterId() == enterId)
+                    .filter(user -> user.getNickname() == client.get("nickname"))
                     .findFirst()
                     .map(RoomUser::getIsHost)
                     .orElse(false);
 
             // 현재 플레이어 목록에서 해당 유저 제거
-            currentPlayers.removeIf(user -> user.getEnterId() == enterId);
+            currentPlayers.removeIf(user -> user.getNickname() == client.get("nickname"));
 
             // 만약 나간 유저가 호스트였고, 남은 유저가 있다면 첫 번째 유저를 호스트로 지정
             if (isHost && !currentPlayers.isEmpty()) {
@@ -169,7 +169,7 @@ public class RoomService {
                 // 방 정보 업데이트
                 room.setCurrentPlayers(currentPlayers);
                 jsonRedisTemplate.opsForValue().set(key, room);
-                log.info("User left room - Room ID: {}, User ID: {}", roomId, enterId);
+                log.info("User left room - Room ID: {}, User ID: {}", roomId, client.get("userId"));
                 // 방 안에 남아있는 유저들에게 알림.
                 leaveRoomAlarmToAnotherClient(key);
             }
@@ -189,10 +189,9 @@ public class RoomService {
     public void leaveRoom(SocketIOClient client, String room) throws SocketException {
         // "room:" 접두사 이후의 문자열을 추출하여 Long으로 변환
         Long roomId = Long.parseLong(room.substring(ROOM_KEY_PREFIX.length()));
-        int enterId = client.get("userId");  // client에서 userId를 가져옴
 
         // 기존의 leaveRoom 메서드 호출
-        leaveRoom(roomId, enterId, client);
+        leaveRoom(roomId, client);
     }
 
     public void leaveRoomAlarmToAnotherClient(String key) throws SocketException {
