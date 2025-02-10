@@ -72,7 +72,14 @@ public class RoomHandler {
         server.addEventListener(LEAVE_ROOM.getValue(), RoomLeaveRequestDto.class,
                 (client, data, ackRequest) -> {
                     try {
-                        roomService.leaveRoom(data.getRoomId(), client);
+
+                        LobbyUpdateResponseDto lobbyUpdateResponseDto = roomService.leaveRoom(data.getRoomId(), client);
+
+                        // 로비에 데이터 보내주기
+                        if(lobbyUpdateResponseDto != null) {
+                            server.getRoomOperations(LOBBY_ROOM).sendEvent(UPDATE_LOBBY.getValue(), lobbyUpdateResponseDto);
+                        }
+
                     } catch (Exception e) {
                         log.error("Failed to send room information: {}", e.getMessage());
                         Map<String, Object> errorData = new HashMap<>();

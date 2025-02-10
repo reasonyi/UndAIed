@@ -8,6 +8,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RoomLeaveRequestDto {
-    private Integer enterId;
     private Long roomId;
 }
