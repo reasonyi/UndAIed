@@ -2,7 +2,9 @@ package com.ssafy.undaied.socket.room.service;
 
 import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.SocketIOServer;
+import com.corundumstudio.socketio.handler.SocketIOException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ssafy.undaied.domain.user.entity.Users;
 import com.ssafy.undaied.domain.user.entity.repository.UserRepository;
 import com.ssafy.undaied.socket.common.exception.SocketException;
 import com.ssafy.undaied.socket.lobby.service.LobbyService;
@@ -60,25 +62,22 @@ public class RoomService {
             Long roomId = jsonRedisTemplate.opsForValue().increment(ROOM_SEQUENCE_KEY);
             log.info("Generated room ID: {}", roomId);
 
-            Object userIdObj = client.get("userId");
-            if (userIdObj == null) {
-                throw new SocketException(CREATE_ROOM_FAILED);
-            }
-
             int hostId;
+            int profileImage;
             try {
-                hostId = Integer.parseInt(userIdObj.toString());
+                hostId = Integer.parseInt(client.get("userId"));
+                profileImage = Integer.parseInt(client.get("profileImage"));
             } catch (NumberFormatException e) {
-                throw new SocketException(CREATE_ROOM_FAILED);
+                throw new SocketException(USER_INFO_NOT_FOUND);
             }
 
             if (!userRepository.existsById(hostId)) {
-                throw new SocketException(CREATE_ROOM_FAILED);
+                throw new SocketException(USER_INFO_NOT_FOUND);
             }
 
             String nickname = client.get("nickname");
             if (nickname == null) {
-                throw new SocketException(CREATE_ROOM_FAILED);
+                throw new SocketException(USER_INFO_NOT_FOUND);
             }
 
             List<RoomUser> users = new ArrayList<>();
@@ -86,6 +85,7 @@ public class RoomService {
                     .enterId(0)
                     .isHost(true)
                     .nickname(nickname)
+                    .profileImage(profileImage)
                     .build());
 
             Room room = Room.builder()
