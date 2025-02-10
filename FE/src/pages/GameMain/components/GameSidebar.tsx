@@ -3,6 +3,10 @@ import playerIcon from "../../../assets/player-icon/player-icon-1.svg";
 import DonutChart from "../components/DonutChart";
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { userState } from "../../../store/userState";
+import { useEffect } from "react";
+import { useUserProfile } from "../../../hooks/useUserData";
 
 function GameSidebar() {
   const blockStyle =
@@ -11,17 +15,6 @@ function GameSidebar() {
     "hover:bg-[#f8376467] hover:border-[#f93c4f] hover:shadow-[0_0_15px_0] hover:shadow-[#F74A5C]";
   const blockActive =
     "active:bg-[#f837644e] active:border-[#f837644e] active:shadow-sm";
-
-  function useUserProfile() {
-    return useQuery({
-      queryKey: ["userProfile"],
-      queryFn: async () => {
-        const response = await axios.get("api/v1/user/profile");
-        console.log("유저 데이터 수신 완료", response);
-        return response.data;
-      },
-    });
-  }
 
   const { data, isLoading, error } = useUserProfile();
 
