@@ -1,13 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import PlayerIcon1 from "../../assets/player-icon/player-icon-1.svg";
 import PlayerIcon2 from "../../assets/player-icon/player-icon-2.svg";
 import PlayerIcon3 from "../../assets/player-icon/player-icon-3.svg";
 import PlayerIcon4 from "../../assets/player-icon/player-icon-4.svg";
 import PlayerIcon5 from "../../assets/player-icon/player-icon-5.svg";
 import PlayerIcon6 from "../../assets/player-icon/player-icon-1.svg";
-import PlayerIcon7 from "../../assets/player-icon/player-icon-2.svg";
-import PlayerIcon8 from "../../assets/player-icon/player-icon-3.svg";
 import Sample from "../../assets/svg-icon/sample.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
@@ -38,11 +36,26 @@ interface IUser {
   token: string;
   imgNum: number;
 }
+interface IEmitDone {
+  success: boolean;
+  errorMessage: string;
+}
 
 function GameRoom() {
   const { number: roomId } = useParams();
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const password = searchParams.get("pwd");
+
+  const iconArr = [
+    PlayerIcon1,
+    PlayerIcon2,
+    PlayerIcon3,
+    PlayerIcon4,
+    PlayerIcon5,
+    PlayerIcon6,
+  ];
 
   //socket 훅 사용
   const socket = useSocket();
@@ -58,6 +71,8 @@ function GameRoom() {
 
   console.log(socket);
 
+  const [roomError, setRoomError] = useState(false);
+  const [RoomErrorMessage, setRoomErrorMessage] = useState("");
   //플레이어 본인
   const [playerInfo, setPlayerInfo] = useState<IUser | undefined>({
     id: 999,
@@ -66,8 +81,43 @@ function GameRoom() {
     token: "dummy-token-123",
     imgNum: 1,
   });
+
   //방 참여자 전원
-  const [users, setUsers] = useState<IUser[]>([]);
+  const [users, setUsers] = useState<IUser[]>([
+    {
+      id: 999,
+      playerNum: 1,
+      name: "DummyUser",
+      token: "dummy-token-123",
+      imgNum: 1,
+    },
+  ]);
+
+  const player1 = useMemo(
+    () => users?.find((user) => user.playerNum === 1),
+    [users]
+  );
+  const player2 = useMemo(
+    () => users?.find((user) => user.playerNum === 2),
+    [users]
+  );
+  const player3 = useMemo(
+    () => users?.find((user) => user.playerNum === 3),
+    [users]
+  );
+  const player4 = useMemo(
+    () => users?.find((user) => user.playerNum === 4),
+    [users]
+  );
+  const player5 = useMemo(
+    () => users?.find((user) => user.playerNum === 5),
+    [users]
+  );
+  const player6 = useMemo(
+    () => users?.find((user) => user.playerNum === 6),
+    [users]
+  );
+
   const [messages, setMessages] = useState<IMessage[]>([]);
 
   const addMessage = (newMessage: IMessage) => {
@@ -86,34 +136,22 @@ function GameRoom() {
     if (!socket) return;
 
     // 방이 생성되었을 때 수신(서버에서 emit('room:create', data)로 보냈다고 가정)
-    socket.on("room:create", (data: any) => {
-      console.log("방 생성 이벤트 수신:", data);
-      // 예: 서버에서 넘어온 data 구조가 { roomId, roomTitle, isPrivate, playing, currentPlayers }라고 가정
-      // currentPlayers(enterId -> id 등)를 state에 반영
-      if (data.currentPlayers) {
-        const newUsers: IUser[] = data.currentPlayers.map((player: any) => ({
-          id: player.enterId, // 또는 playerId로 변경을 제안
-          playerNum: player.enterId, // 기존 코드 호환을 위해
-          name: player.nickname,
-          token: "", // 실제 로직에 맞게 설정
-          imgNum: 1, // 실제 로직에 맞게 설정
-        }));
-        setUsers(newUsers);
-      }
-    });
 
     // 누군가(또는 내가) 방에 입장했을 때 (서버에서 emit('room:enter', data))
-    socket.on("room:enter", (data: any) => {
+    socket.on("room:enter:send", (data: any) => {
       console.log("방 입장 이벤트 수신:", data);
       // 예: { roomId, roomTitle, isPrivate, playing, currentPlayers: [...] }
       if (data.currentPlayers) {
-        const newUsers: IUser[] = data.currentPlayers.map((player: any) => ({
-          id: player.enterId,
-          playerNum: player.enterId,
-          name: player.nickname,
-          token: "",
-          imgNum: 1,
-        }));
+        const newUsers: IUser[] = data.currentPlayers
+          .sort((a: any, b: any) => a.enterId - b.enterId)
+          .map((player: any, index: number) => ({
+            id: player.enterId,
+            playerNum: index + 1, // 1부터 시작
+            name: player.nickname,
+            token: "",
+            imgNum: 1,
+          }))
+          .slice(0, 6);
         setUsers(newUsers);
       }
     });
@@ -147,31 +185,30 @@ function GameRoom() {
   // ----------------------------------------------------
   // 2) 클라이언트에서 서버로 이벤트 emit (방 생성, 입장, 퇴장)
   // ----------------------------------------------------
-  const handleCreateRoom = useCallback(() => {
-    // 방 생성 요청: 서버가 받아서 room:create 이벤트를 다른 클라이언트에게 브로드캐스트
-    if (!socket) return;
-    socket.emit("room:create", {
-      roomTitle: "초보만 들어오셈",
-      isPrivate: false,
-      playing: false,
-      currentPlayers: [
-        {
-          enterId: playerInfo?.id,
-          isHost: true,
-          nickname: playerInfo?.name,
-        },
-      ],
-    });
-  }, [socket, playerInfo]);
 
   const handleEnterRoom = useCallback(() => {
     // 방 입장 요청
     if (!socket) return;
     // roomId는 string일 수 있으니 Number(roomId) 등으로 파싱
-    socket.emit("room:enter", {
-      roomId: Number(roomId),
-      nickname: playerInfo?.name,
-    });
+    socket.emit(
+      "room:enter:emit",
+      {
+        roomId: Number(roomId),
+        password: password,
+      },
+      ({ success, errorMessage }: IEmitDone) => {
+        if (success) {
+          //올바른 방인 경우
+          return;
+        } else {
+          setRoomError(true);
+          setRoomErrorMessage(
+            errorMessage || "입장 도중 에러러가 발생했습니다."
+          );
+          return;
+        }
+      }
+    );
   }, [socket, roomId, playerInfo]);
 
   const handleLeaveRoom = useCallback(() => {
@@ -184,6 +221,17 @@ function GameRoom() {
     // 퇴장 후 메인 페이지로 이동하거나, 다른 페이지로 이동할 수 있음
     navigate("/");
   }, [socket, roomId, playerInfo, navigate]);
+
+  //컴포넌트 마운트시 방에 입장
+  //반복 입장하지 않기 위해 useRef 사용
+  const didEnterRoomRef = useRef(false);
+
+  useEffect(() => {
+    if (!didEnterRoomRef.current && socket && playerInfo && roomId) {
+      handleEnterRoom();
+      didEnterRoomRef.current = true; // 다시 못 들어가도록
+    }
+  }, [socket, playerInfo, roomId, handleEnterRoom]);
 
   useEffect(() => {
     // 새로운 메시지가 추가될 때 스크롤을 아래로 이동
@@ -244,7 +292,8 @@ function GameRoom() {
               </button>
               <button
                 onClick={() => {
-                  navigate("/");
+                  handleLeaveRoom();
+                  navigate("/game");
                 }}
               >
                 <FontAwesomeIcon
@@ -286,23 +335,70 @@ function GameRoom() {
               </div>
               <div className="fixed z-20 right-[max(0px,calc(50%-45rem))] w-[33.5rem] py-6 px-3 hidden h-screen bg-black bg-opacity-40 xl:grid grid-cols-3 grid-rows-4 gap-4 shadow-[0px_0px_16px_rgba(255,255,255,0.25)]  border-solid border-l-[rgba(255,255,255,0.35)]">
                 <div className="row-start-1 px-2 py-1">
-                  {users.find((user) => user.playerNum === 1)?.name}
-                  <EmptyProfile />
+                  {player1 ? (
+                    <ReadyProfile
+                      nickname={player1.name}
+                      playerNum={player1.playerNum}
+                      icon={iconArr[player1.imgNum]}
+                    />
+                  ) : (
+                    <EmptyProfile />
+                  )}
                 </div>
                 <div className="row-start-1 px-2 py-1">
-                  <EmptyProfile />
+                  {player2 ? (
+                    <ReadyProfile
+                      nickname={player2.name}
+                      playerNum={player2.playerNum}
+                      icon={iconArr[player2.imgNum]}
+                    />
+                  ) : (
+                    <EmptyProfile />
+                  )}
                 </div>
                 <div className="row-start-1 px-2 py-1">
-                  <EmptyProfile />
+                  {player3 ? (
+                    <ReadyProfile
+                      nickname={player3.name}
+                      playerNum={player3.playerNum}
+                      icon={iconArr[player3.imgNum]}
+                    />
+                  ) : (
+                    <EmptyProfile />
+                  )}
                 </div>
                 <div className="row-start-2 px-2 py-1">
-                  <EmptyProfile />
+                  {player4 ? (
+                    <ReadyProfile
+                      nickname={player4.name}
+                      playerNum={player4.playerNum}
+                      icon={iconArr[player4.imgNum]}
+                    />
+                  ) : (
+                    <EmptyProfile />
+                  )}
                 </div>
                 <div className="row-start-2 px-2 py-1">
-                  <EmptyProfile />
+                  {player5 ? (
+                    <ReadyProfile
+                      nickname={player5.name}
+                      playerNum={player5.playerNum}
+                      icon={iconArr[player5.imgNum]}
+                    />
+                  ) : (
+                    <EmptyProfile />
+                  )}
                 </div>
                 <div className="row-start-2 px-2 py-1">
-                  <EmptyProfile />
+                  {player6 ? (
+                    <ReadyProfile
+                      nickname={player6.name}
+                      playerNum={player6.playerNum}
+                      icon={iconArr[player6.imgNum]}
+                    />
+                  ) : (
+                    <EmptyProfile />
+                  )}
                 </div>
                 <div className="w-full text-base flex flex-col justify-between items-center row-start-3 row-end-5 col-span-3 text-white px-2 py-1">
                   <div className="w-full text-base flex justify-end items-center text-white px-2 py-1">

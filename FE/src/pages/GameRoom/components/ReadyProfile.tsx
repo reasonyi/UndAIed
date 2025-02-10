@@ -9,9 +9,10 @@ import {
 interface IReadyProfileProps {
   nickname: string;
   icon: string;
+  playerNum: number;
 }
 
-function ReadyProfile({ nickname, icon }: IReadyProfileProps) {
+function ReadyProfile({ nickname, icon, playerNum }: IReadyProfileProps) {
   const robot: IconDefinition = faRobot;
   const noteSticky: IconDefinition = faNoteSticky;
   const checkToSlot: IconDefinition = faCheckToSlot;
