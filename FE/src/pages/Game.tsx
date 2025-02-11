@@ -4,11 +4,20 @@ import { SocketProvider } from "../components/SocketContext";
 function Game() {
   return (
     <>
-      <SocketProvider>
         <Outlet />
-      </SocketProvider>
     </>
   );
 }
 
 export default Game;
+// function Game() {
+//   return (
+//     <>
+//       <SocketProvider>
+//         <Outlet />
+//       </SocketProvider>
+//     </>
+//   );
+// }
+
+// export default Game;
