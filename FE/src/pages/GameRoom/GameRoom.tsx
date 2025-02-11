@@ -239,6 +239,25 @@ function GameRoom() {
     }
   }, [socket, playerInfo, roomId, handleEnterRoom]);
 
+  // (1) chat-input-temp 너비를 저장할 state
+  const [chatInputWidth, setChatInputWidth] = useState<number>(0);
+
+  useEffect(() => {
+    // (3) ResizeObserver를 통한 너비 측정
+    const ro = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        // contentRect.width가 실제 요소의 넓이
+        setChatInputWidth(entry.contentRect.width);
+      }
+    });
+    if (scrollRef.current) {
+      ro.observe(scrollRef.current);
+    }
+    return () => {
+      ro.disconnect();
+    };
+  }, []);
+
   useEffect(() => {
     // 새로운 메시지가 추가될 때 스크롤을 아래로 이동
     scrollToBottom();
@@ -335,7 +354,10 @@ function GameRoom() {
                   ref={scrollRef}
                   className="chat-input-temp h-[4.5rem] w-full"
                 ></div>
-                <div className="chat-input fixed h-10 bottom-4 w-[calc(90rem-21rem-33.5rem-2rem)]">
+                <div
+                  className="chat-input fixed z-10 h-10 bottom-4"
+                  style={{ width: chatInputWidth }}
+                >
                   <ChatForm playerNum={playerInfo?.playerNum} socket={socket} />
                 </div>
               </div>
