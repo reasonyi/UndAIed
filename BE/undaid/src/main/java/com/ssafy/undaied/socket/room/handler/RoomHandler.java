@@ -95,6 +95,12 @@ public class RoomHandler {
                     try {
                         RoomEnterResponseDto roomEnterResponseDto = roomService.enterRoom(client, data.getRoomId(), data.getRoomPassword());
 
+                        // 로비에 데이터 보내주기
+                        LobbyUpdateResponseDto lobbyUpdateResponseDto = lobbyService.sendEventRoomEnter(roomEnterResponseDto, client);
+                        if(lobbyUpdateResponseDto != null) {
+                            server.getRoomOperations(LOBBY_ROOM).sendEvent(UPDATE_LOBBY.getValue(), lobbyUpdateResponseDto);
+                        }
+
                         // 방을 생성한 클라이언트에게 데이터 전송
                         if (ackRequest.isAckRequested()) {
                             Map<String, Object> response = new HashMap<>();
