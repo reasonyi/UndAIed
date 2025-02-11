@@ -12,11 +12,7 @@ function LogoutContainer() {
   const handleTokenReceive = async (token: string) => {
     try {
       // 서버로 토큰 전송
-      const response = await axios.post("api/v1/user", {
-      // const response = await axios.post("http://localhost:8080", {
-      // const response = await axios.post("https://i12b212.p.ssafy.io/api/v1/user", {
-        token,
-      });
+      const response = await axios.post("api/v1/user", { token });
       // 서버 응답 확인
       console.log("서버 응답:", response.data);
 

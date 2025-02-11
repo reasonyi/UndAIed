@@ -27,7 +27,8 @@ public enum SocketErrorCode {
 
     INVALID_PARTICIPANT_COUNT(4008, "참가자 수가 올바르지 않습니다."),
 
-    ROOM_CHAT_FAILED(4012, "채팅 전송에 실패했습니다.")
+    ROOM_CHAT_FAILED(4012, "채팅 전송에 실패했습니다."),
+    LOBBY_CHAT_FAILED(4013, "로비 채팅 전송에 실패했습니다.")
     ;
 
 
