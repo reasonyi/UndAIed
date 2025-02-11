@@ -29,14 +29,25 @@ public class SocketIoConfig {
         config.setHostname(hostname);
         config.setPort(port);
         config.setOrigin("*");
-
-        //LocalDateTime 직렬화 및 역직렬화 위한 설정
         config.setJsonSupport(new JacksonJsonSupport(new JavaTimeModule()));
 
+        // 연결 관련 타임아웃 설정
+        config.setUpgradeTimeout(10000);
+        config.setPingTimeout(60000);
+        config.setPingInterval(25000);
+        config.setAllowCustomRequests(true);
+        config.setRandomSession(false);
+
+        // LocalDateTime 직렬화 및 역직렬화 위한 설정
+        JacksonJsonSupport jsonSupport = new JacksonJsonSupport(new JavaTimeModule());
+        config.setJsonSupport(jsonSupport);
+
         SocketIOServer server = new SocketIOServer(config);
-        server.removeAllListeners("error");  // 기본 에러 리스너 제거
+        server.removeAllListeners("error"); // 기본 에러 리스너 제거
+
+        // 기본 네임스페이스 연결 리스너
+        server.addNamespace("/socket.io");
 
         return server;
     }
 }
-

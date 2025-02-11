@@ -1,6 +1,6 @@
 package com.ssafy.undaied.global.auth.entity;
 
-import jakarta.persistence.Id;
+import org.springframework.data.annotation.Id; // 수정
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.redis.core.RedisHash;
