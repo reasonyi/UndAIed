@@ -3,7 +3,7 @@ import { io, Socket } from "socket.io-client";
 import { userState } from "../store/userState";
 import { useRecoilValue } from "recoil";
 
-const SOCKET_URL = "ws://localhost:9090";
+const SOCKET_URL = "http://localhost:9090";
 
 // 1. Context 생성
 export const SocketContext = createContext<Socket | null>(null);
