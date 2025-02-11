@@ -4,37 +4,29 @@ public enum EventType {
 
     // 로비
     CREATE_ROOM_AT_LOBBY("lobby:room:create"),
+    UPDATE_LOBBY("lobby:room:update"),
     CREATE_ROOM("room:create"),
     LIST_ROOMS("room:list"),
+    ENTER_ROOM_AT_LOBBY("lobby:room:enter"),
     ENTER_ROOM("room:enter"),
-    SEND_LOBBY_CHAT("chat:lobby:send"),
+    LOBBY_CHAT("lobby:chat"),
 
     // 대기방
     LEAVE_ROOM("room:leave"),
     UPDATE_ROOM_HOST("room:host:update"),
-    SEND_ROOM_CHAT("chat:room:send"),
+    ROOM_CHAT("room:chat"),
     START_GAME("game:start"),
 
     // 게임진행(낮)
-    START_SUBJECT_DEBATE("debate:subject:start"),
-    SEND_SUBJECT_DEBATE("debate:subject:send"),
-    END_SUBJECT_DEBATE("debate:subject:end"),
-    START_FREE_DEBATE("debate:free:start"),
-    SEND_FREE_DEBATE("debate:free:send"),
-    END_FREE_DEBATE("debate:free:end"),
+    SEND_SUBJECT("send:subject"),
+    GAME_CHAT("chat:game"),
 
     // 투표
-    START_VOTE("vote:start"),
-    END_VOTE("vote:end"),
     SUBMIT_VOTE ("vote:submit"),
     SHOW_VOTE_RESULT("vote:result"),
 
     // 게임 진행 밤
     SHOW_INFECTION_RESULT("infection:result"),
-
-    // 스테이지 알림
-    START_STAGE("game:stage:start"),
-    END_STAGE("game:stage:end"),
 
     // 게임 종료
     SHOW_GAME_RESULT("game:result"),

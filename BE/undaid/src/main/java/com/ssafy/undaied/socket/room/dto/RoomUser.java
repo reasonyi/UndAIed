@@ -8,10 +8,12 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Getter
 public class RoomUser implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private int enterId;
-    private boolean isHost;
+    private Integer enterId;
+    private Boolean isHost;
     private String nickname;
+    private Integer profileImage;
 }

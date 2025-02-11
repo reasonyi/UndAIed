@@ -1,4 +1,4 @@
-package com.ssafy.undaied.socket.gameStage.constant;
+package com.ssafy.undaied.socket.stage.constant;
 
 public enum StageType {
     START("게임", "을"),
