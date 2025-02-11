@@ -1,6 +1,7 @@
 package com.ssafy.undaied.socket.chat.handler;
 
 import com.corundumstudio.socketio.SocketIOServer;
+import com.ssafy.undaied.socket.chat.dto.request.LobbyChatRequestDto;
 import com.ssafy.undaied.socket.chat.dto.request.RoomChatRequestDto;
 import com.ssafy.undaied.socket.chat.service.ChatService;
 import jakarta.annotation.PostConstruct;
@@ -40,6 +41,18 @@ public class ChatHandler {
                         client.sendEvent("error", errorData);
                     }
                 }
+        );
+
+        server.addEventListener(LOBBY_CHAT.getValue(), LobbyChatRequestDto.class,
+                (client, data, ackRequest) -> {
+                try {
+                    chatService.lobbyChat(data, client);
+                    log.info("lobby chat - userId: {}, nickname: {}, message: {}", client.get("userId"), client.get("nickname"), data.getMessage());
+                } catch (Exception e) {
+                    log.error("Lobby chat failed: {}", e.getMessage());
+                }
+
+            }
         );
     }
 
