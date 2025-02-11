@@ -23,6 +23,7 @@ import EmptyProfile from "./components/EmptyProfile";
 import ChatForm from "./components/ChatForm";
 import { useSocket } from "../../hooks/useSocket";
 import LeftSideBar from "./components/LeftSideBar";
+import RightSideBar from "./components/RightSideBar";
 
 interface IMessage {
   id: number;
@@ -318,82 +319,7 @@ function GameRoom() {
                   <ChatForm playerNum={playerInfo?.playerNum} socket={socket} />
                 </div>
               </div>
-              <div className="fixed z-20 right-[max(0px,calc(50%-45rem))] w-[33.5rem] py-6 px-3 hidden h-screen bg-black bg-opacity-40 xl:grid grid-cols-3 grid-rows-4 gap-4 shadow-[0px_0px_16px_rgba(255,255,255,0.25)]  border-solid border-l-[rgba(255,255,255,0.35)]">
-                <div className="row-start-1 px-2 py-1">
-                  {player1 ? (
-                    <ReadyProfile
-                      nickname={player1.name}
-                      playerNum={player1.playerNum}
-                      icon={iconArr[player1.imgNum]}
-                    />
-                  ) : (
-                    <EmptyProfile />
-                  )}
-                </div>
-                <div className="row-start-1 px-2 py-1">
-                  {player2 ? (
-                    <ReadyProfile
-                      nickname={player2.name}
-                      playerNum={player2.playerNum}
-                      icon={iconArr[player2.imgNum]}
-                    />
-                  ) : (
-                    <EmptyProfile />
-                  )}
-                </div>
-                <div className="row-start-1 px-2 py-1">
-                  {player3 ? (
-                    <ReadyProfile
-                      nickname={player3.name}
-                      playerNum={player3.playerNum}
-                      icon={iconArr[player3.imgNum]}
-                    />
-                  ) : (
-                    <EmptyProfile />
-                  )}
-                </div>
-                <div className="row-start-2 px-2 py-1">
-                  {player4 ? (
-                    <ReadyProfile
-                      nickname={player4.name}
-                      playerNum={player4.playerNum}
-                      icon={iconArr[player4.imgNum]}
-                    />
-                  ) : (
-                    <EmptyProfile />
-                  )}
-                </div>
-                <div className="row-start-2 px-2 py-1">
-                  {player5 ? (
-                    <ReadyProfile
-                      nickname={player5.name}
-                      playerNum={player5.playerNum}
-                      icon={iconArr[player5.imgNum]}
-                    />
-                  ) : (
-                    <EmptyProfile />
-                  )}
-                </div>
-                <div className="row-start-2 px-2 py-1">
-                  {player6 ? (
-                    <ReadyProfile
-                      nickname={player6.name}
-                      playerNum={player6.playerNum}
-                      icon={iconArr[player6.imgNum]}
-                    />
-                  ) : (
-                    <EmptyProfile />
-                  )}
-                </div>
-                <div className="w-full text-base flex flex-col justify-between items-center row-start-3 row-end-5 col-span-3 text-white px-2 py-1">
-                  <div className="w-full text-base flex justify-end items-center text-white px-2 py-1">
-                    0/6
-                  </div>
-                  <div className="w-full h-[80%] text-base justify-center items-center bg-[rgb(7,7,10)] border-2 border-solid border-[#B4B4B4] text-white px-2 py-1">
-                    <div>시스템 로그</div>
-                  </div>
-                </div>
-              </div>
+              <RightSideBar players={users} iconArr={iconArr} />
             </div>
           </div>
         </div>

@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   faBell,
   faGear,
   faUserGroup,
   faDoorOpen,
   faCircleExclamation,
+  faBars,
+  faChevronLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -20,22 +22,44 @@ const gear: IconDefinition = faGear;
 const userGroup: IconDefinition = faUserGroup;
 const circleExclamation: IconDefinition = faCircleExclamation;
 const doorOpen: IconDefinition = faDoorOpen;
+const menu: IconDefinition = faBars;
+const leftChervon: IconDefinition = faChevronLeft;
 
 function LeftSideBar({ nickname, icon }: ILeftSideBarProps) {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   return (
     <>
       <button
-        className="text-white p-2 bg-gray-800"
-        onClick={() => setIsOpen(!isOpen)}
+        className={`fixed block translate-y-0 lg:-translate-y-[120%] z-30 text-white px-1 py-2 bg-gray-800 rounded-b-lg
+          transform transition-all duration-300
+          ${isOpen ? "close-left-sidebar" : ""}
+     `}
+        onClick={() => setIsOpen((prev) => !prev)}
       >
-        Toggle Sidebar
+        {isOpen ? (
+          <FontAwesomeIcon
+            className="text-white p-1 w-[1rem] h-[1rem]"
+            icon={leftChervon}
+          />
+        ) : (
+          <FontAwesomeIcon
+            icon={menu}
+            className="text-white p-1 w-[1rem] h-[1rem]"
+          />
+        )}
       </button>
       <div
-        className={`hidden lg:flex flex-col justify-between items-center fixed z-20 inset-0 left-[max(0px,calc(50%-45rem))] right-auto w-[21rem] pb-10 pt-6 pl-6 pr-4 bg-black bg-opacity-70 shadow-[0px_0px_16px_rgba(255,255,255,0.25)] border-r-2 border-solid border-r-[rgba(255,255,255,0.35)]
-          transform transition-transform duration-300 ${
-            isOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
+        className={`
+          fixed -translate-x-full lg:translate-x-0 z-20 inset-0 
+          left-[max(0px,calc(50%-45rem))] right-auto
+          w-[21rem] pb-10 pt-6 pl-6 pr-4 
+          bg-black bg-opacity-70 
+          shadow-[0px_0px_16px_rgba(255,255,255,0.25)] 
+          border-r-2 border-solid border-r-[rgba(255,255,255,0.35)] 
+          flex flex-col justify-between items-center
+          transform transition-transform duration-300
+          ${isOpen ? "translate-x-0" : "-translate-x-full"}
+        `}
       >
         <div className="w-full text-base flex justify-center items-center text-[white] bg-[rgb(7,7,10)] px-1.5 py-1 border-2 border-solid border-[rgba(255,255,255,0.35)] rounded-md">
           No. 001 방 제목
