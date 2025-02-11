@@ -9,7 +9,7 @@ public enum EventType {
     LIST_ROOMS("room:list"),
     ENTER_ROOM_AT_LOBBY("lobby:room:enter"),
     ENTER_ROOM("room:enter"),
-    LOOBY_CHAT("lobby:chat"),
+    LOBBY_CHAT("lobby:chat"),
 
     // 대기방
     LEAVE_ROOM("room:leave"),

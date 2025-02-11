@@ -22,6 +22,7 @@ import ReadyProfile from "./components/ReadyProfile";
 import EmptyProfile from "./components/EmptyProfile";
 import ChatForm from "./components/ChatForm";
 import { useSocket } from "../../hooks/useSocket";
+import LeftSideBar from "./components/LeftSideBar";
 
 interface IMessage {
   id: number;
@@ -73,7 +74,7 @@ function GameRoom() {
   console.log(socket);
 
   const [roomError, setRoomError] = useState(false);
-  const [RoomErrorMessage, setRoomErrorMessage] = useState("");
+  const [roomErrorMessage, setRoomErrorMessage] = useState("");
 
   //플레이어 본인
   //본인 엔터 아이다와 정보 각각
@@ -157,32 +158,33 @@ function GameRoom() {
           }))
           .slice(0, 6);
         setUsers(newUsers);
-        setPlayerInfo(newUsers.find((user) => user.id === playerEnterId));
+        console.log(playerInfo);
       }
     });
 
-    // 누군가(또는 내가) 방에서 나갔을 때 (서버에서 emit('room:leave', data))
+    // 누군가(또는 내가) 방에서 나갔을 때 (서버에서 send ('room:leave', data))
     socket.on("room:leave", (data: any) => {
       console.log("방 퇴장 이벤트 수신:", data);
       // 예:
       // 1) 방에서 나간 사람 정보: { enterId: 2, roomId: 1 }
       // 2) 남아 있는 사람 목록 정보: { currentPlayers: [...] }
       if (data.currentPlayers) {
-        const newUsers: IUser[] = data.currentPlayers.map((player: any) => ({
-          id: player.enterId,
-          playerNum: player.enterId,
-          name: player.nickname,
-          token: "",
-          imgNum: 1,
-        }));
+        const newUsers: IUser[] = data.currentPlayers
+          .sort((a: any, b: any) => a.enterId - b.enterId)
+          .map((player: any, index: number) => ({
+            id: player.enterId,
+            playerNum: index + 1,
+            name: player.nickname,
+            token: "",
+            imgNum: 1,
+          }));
         setUsers(newUsers);
       }
     });
 
     // 클린업
     return () => {
-      socket.off("room:create");
-      socket.off("room:enter");
+      socket.off("room:enter:send");
       socket.off("room:leave");
     };
   }, [socket]);
@@ -211,6 +213,7 @@ function GameRoom() {
           setRoomErrorMessage(
             errorMessage || "입장 도중 에러러가 발생했습니다."
           );
+          console.log(errorMessage);
           return;
         }
       }
@@ -219,18 +222,33 @@ function GameRoom() {
 
   const handleLeaveRoom = useCallback(() => {
     // 방 퇴장 요청
+    console.log("playerInfo: ", playerInfo);
+    console.log("socket: ", socket);
     if (!socket || !playerInfo) return;
-    socket.emit("room:leave", {
-      enterId: playerInfo.id, // 실제로는 playerId로 변경하는 것을 추천
-      roomId: Number(roomId),
-    });
-    // 퇴장 후 메인 페이지로 이동하거나, 다른 페이지로 이동할 수 있음
-    navigate("/");
+    socket.emit(
+      "room:leave",
+      {
+        enterId: playerInfo.id,
+        roomId: Number(roomId),
+      },
+      (response: { success: boolean; errorMessage?: string }) => {
+        if (response.success) {
+          navigate("/game");
+        } else {
+          console.error("방 퇴장 중 오류:", response.errorMessage);
+        }
+      }
+    );
   }, [socket, roomId, playerInfo, navigate]);
 
   //컴포넌트 마운트시 방에 입장
   //반복 입장하지 않기 위해 useRef 사용
   const didEnterRoomRef = useRef(false);
+
+  useEffect(() => {
+    if (!playerEnterId) return;
+    setPlayerInfo(users.find((u) => u.id === playerEnterId));
+  }, [playerEnterId, users]);
 
   useEffect(() => {
     if (!didEnterRoomRef.current && socket && playerInfo && roomId) {
@@ -267,68 +285,7 @@ function GameRoom() {
   return (
     <div className="bg-[#07070a]">
       <div className="background-gradient max-w-[90rem] mx-auto px-4 sm:px-4 md:px-6">
-        <div className="hidden lg:flex flex-col justify-between items-center fixed z-20 inset-0 left-[max(0px,calc(50%-45rem))] right-auto w-[21rem] pb-10 pt-6 pl-6 pr-4 bg-black bg-opacity-70 shadow-[0px_0px_16px_rgba(255,255,255,0.25)] border-r-2 border-solid border-r-[rgba(255,255,255,0.35)]">
-          <div className="w-full text-base flex justify-center items-center text-[white] bg-[rgb(7,7,10)] px-1.5 py-1 border-2 border-solid border-[rgba(255,255,255,0.35)] rounded-md">
-            No. 001 방 제목
-          </div>
-          <div className="flex flex-col items-center justify-center profile w-52 h-52 border-2 border-solid border-[rgba(255,255,255,0.35)] bg-[#07070a4d]">
-            <img
-              className="filter brightness-75 w-28 h-28 mb-3"
-              src={PlayerIcon1}
-            />
-            <span className="text-base font-bold justify-center text-[#cccccc] mb-1">
-              유저닉네임
-            </span>
-          </div>
-          <button className="w-52 h-14 bg-gradient-to-r from-black via-black to-black rounded-[5px] backdrop-blur-[12.20px] justify-center items-center inline-flex mb-6">
-            <div className="w-52 h-14 relative">
-              <div className="w-52 h-14 left-0 top-0 absolute opacity-90 bg-black/50 rounded-[5px] shadow-[inset_0px_0px_17px_4px_rgba(255,222,32,0.25)] border-2 border-[#ffc07e]/70" />
-              <div className="w-52 h-14 left-0 top-0 absolute flex justify-center items-center text-white text-xl font-normal font-['Inder']">
-                게임 시작
-              </div>
-            </div>
-          </button>
-
-          <div className="w-full">
-            <div className="config-container w-[3rem] h-[16rem] bg-[#ff3939]/10 rounded-xl flex flex-col justify-between py-4">
-              <button>
-                <FontAwesomeIcon
-                  icon={bell}
-                  className="text-white p-1 w-[1.25rem] h-[1.25rem]"
-                />
-              </button>
-              <button>
-                <FontAwesomeIcon
-                  icon={gear}
-                  className="text-white p-1 w-[1.25rem] h-[1.25rem]"
-                />
-              </button>
-              <button>
-                <FontAwesomeIcon
-                  icon={userGroup}
-                  className="text-white p-1 w-[1.25rem] h-[1.25rem]"
-                />
-              </button>
-              <button>
-                <FontAwesomeIcon
-                  icon={circleExclamation}
-                  className="text-white p-1 w-[1.25rem] h-[1.25rem]"
-                />
-              </button>
-              <button
-                onClick={() => {
-                  handleLeaveRoom();
-                  navigate("/game");
-                }}
-              >
-                <FontAwesomeIcon
-                  icon={doorOpen}
-                  className="text-white p-1 w-[1.25rem] h-[1.25rem]"
-                />
-              </button>
-            </div>
-          </div>
-        </div>
+        <LeftSideBar nickname={"유저 닉네임임"} icon={PlayerIcon1} />
         <div className="lg:pl-[19.5rem]">
           <div className="max-w-3xl mx-auto xl:max-w-none xl:ml-0 xl:mr-[32rem]">
             <div className="chat-container flex flex-col h-screen overflow-auto">

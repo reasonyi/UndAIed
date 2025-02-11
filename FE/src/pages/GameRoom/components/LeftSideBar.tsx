@@ -83,7 +83,7 @@ function LeftSideBar({ nickname, icon }: ILeftSideBarProps) {
             </button>
             <button
               onClick={() => {
-                handleLeaveRoom();
+                //handleLeaveRoom();
               }}
             >
               <FontAwesomeIcon
@@ -97,3 +97,5 @@ function LeftSideBar({ nickname, icon }: ILeftSideBarProps) {
     </>
   );
 }
+
+export default LeftSideBar;
