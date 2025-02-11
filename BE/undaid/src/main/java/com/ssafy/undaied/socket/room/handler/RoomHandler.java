@@ -101,10 +101,6 @@ public class RoomHandler {
                             server.getRoomOperations(LOBBY_ROOM).sendEvent(UPDATE_LOBBY.getValue(), lobbyUpdateResponseDto);
                         }
 
-                        // 방에 있는 모든 사용자에게 업데이트된 정보 전송
-                        String key = ROOM_KEY_PREFIX + data.getRoomId();
-                        server.getRoomOperations(key).sendEvent(ENTER_ROOM.getValue(), roomEnterResponseDto.getRoom());
-
                         // 방을 생성한 클라이언트에게 데이터 전송
                         if (ackRequest.isAckRequested()) {
                             Map<String, Object> response = new HashMap<>();
@@ -113,6 +109,10 @@ public class RoomHandler {
                             response.put("data", roomEnterResponseDto.getEnterId());
                             ackRequest.sendAckData(response);
                         }
+
+                        // 방에 있는 모든 사용자에게 업데이트된 정보 전송
+                        String key = ROOM_KEY_PREFIX + data.getRoomId();
+                        server.getRoomOperations(key).sendEvent(ENTER_ROOM.getValue(), roomEnterResponseDto.getRoom());
 
                     } catch (Exception e) {
                         log.error("Room enter failed: {}", e.getMessage());
