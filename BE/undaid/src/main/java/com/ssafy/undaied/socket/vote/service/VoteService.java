@@ -43,7 +43,7 @@ public class VoteService {
             }
 
             String voterNumber = voterNumberObj.toString();
-            String targetNumber = voteSubmitRequestDto.getTarget().toString();
+            String targetNumber = voteSubmitRequestDto.getTarget();
             String targetUserId = null;
 
             // targetNumber로 targetUserId 찾기

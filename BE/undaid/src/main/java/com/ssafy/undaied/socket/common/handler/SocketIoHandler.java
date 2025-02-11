@@ -143,7 +143,7 @@ public class SocketIoHandler {
     }
 
     public void addVoteSubmitListeners() {
-        server.addEventListener(EventType.SUBMIT_VOTE.getValue(), VoteSubmitRequestDto.class,
+        server.addNamespace("/socket.io").addEventListener(EventType.SUBMIT_VOTE.getValue(), VoteSubmitRequestDto.class,
                 (client, data, ack) -> {
                     try {
                         Integer userId = client.get("userId");
