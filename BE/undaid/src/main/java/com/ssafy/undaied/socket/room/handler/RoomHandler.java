@@ -95,6 +95,12 @@ public class RoomHandler {
                     try {
                         RoomEnterResponseDto roomEnterResponseDto = roomService.enterRoom(client, data.getRoomId(), data.getRoomPassword());
 
+                        // 로비에 데이터 보내주기
+                        LobbyUpdateResponseDto lobbyUpdateResponseDto = lobbyService.sendEventRoomEnter(roomEnterResponseDto, client);
+                        if(lobbyUpdateResponseDto != null) {
+                            server.getRoomOperations(LOBBY_ROOM).sendEvent(UPDATE_LOBBY.getValue(), lobbyUpdateResponseDto);
+                        }
+
                         // 방에 있는 모든 사용자에게 업데이트된 정보 전송
                         String key = ROOM_KEY_PREFIX + data.getRoomId();
                         server.getRoomOperations(key).sendEvent(ENTER_ROOM.getValue(), roomEnterResponseDto.getRoom());
