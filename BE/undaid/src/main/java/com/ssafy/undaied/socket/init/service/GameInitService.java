@@ -18,7 +18,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -31,13 +30,13 @@ public class GameInitService {
     private static final int REQUIRED_PLAYERS = 6;
     private static final int TOTAL_NUMBERS = 8;
 
-    //테스트 데이터. 나중에 지우려고 함.
-    // @PostConstruct
-    // public void initTestData() {
-    //     String roomKey = "room:456:participants";
-    //     redisTemplate.delete(roomKey);
-    //     redisTemplate.opsForSet().add(roomKey,
-    //             "1001", "1002", "1003", "1004", "1005", "1006");
+    // 테스트 데이터. 나중에 지우려고 함.
+    @PostConstruct
+    public void initTestData() {
+        String roomKey = "room:456:participants";
+        redisTemplate.delete(roomKey);
+        redisTemplate.opsForSet().add(roomKey,
+                "1001", "1002", "1003", "1004", "1005", "1006");
 
     //     log.info("Test data initialized - roomId: 456, participants: [1001, 1002, 1003, 1004, 1005, 1006]");
     //     log.info("\n" +
@@ -51,21 +50,29 @@ public class GameInitService {
     //             "     \"roomId\": 456\n" +
     //             "   }\n" +
     //             "=========================");
-    // }
+    }
 
     public void startGame(SocketIOClient client, int roomId) throws SocketException {
-        Integer userId = validateAuthentication(client);
-        List<Integer> participants = getRoomParticipants(roomId);
-        validateParticipants(participants);
+        try { // 예외처리문으로 감쌈
+            Integer userId = validateAuthentication(client);
+            List<Integer> participants = getRoomParticipants(roomId);
+            validateParticipants(participants);
 
-        int gameId = initGame();
-        saveGameRoomMapping(gameId, roomId);
-        saveParticipantsAndAssignNumbers(gameId, participants);
+            int gameId = initGame();
+            saveGameRoomMapping(gameId, roomId);
+            saveParticipantsAndAssignNumbers(gameId, participants);
 
-        handleSocketConnection(client, gameId);
-        broadcastGameInit(gameId);
+            handleSocketConnection(client, gameId);
+            broadcastGameInit(gameId);
 
-        log.info("Game successfully initialized - gameId: {}, roomId: {}", gameId, roomId);
+            log.info("Game successfully initialized - gameId: {}, roomId: {}", gameId, roomId);
+        } catch (SocketException e) { // 추가된 예외처리 1
+            log.error("Socket error occurred: {}", e.getMessage());
+            client.sendEvent("error", e.getMessage());
+        } catch (Exception e) { // 추가된 예외처리 2
+            log.error("Unexpected error occurred: {}", e.getMessage());
+            client.sendEvent("error", "An unexpected error occurred");
+        }
     }
 
     private Integer validateAuthentication(SocketIOClient client) throws SocketException {
@@ -156,8 +163,8 @@ public class GameInitService {
         redisTemplate.opsForHash().put(userNicknameKey, "ai2", "AI-2");
 
         // 기본 닉네임 설정
-        createNumberNicknames().forEach((number, nickname) ->
-                redisTemplate.opsForHash().put(numberNicknameKey, number.toString(), nickname));
+        createNumberNicknames().forEach(
+                (number, nickname) -> redisTemplate.opsForHash().put(numberNicknameKey, number.toString(), nickname));
 
         // 만료시간 설정
         Arrays.asList(mappingKey, participantsKey, aiKey, userNicknameKey, numberNicknameKey, statusKey)
@@ -175,6 +182,9 @@ public class GameInitService {
     private void handleSocketConnection(SocketIOClient client, int gameId) {
         client.set("gameId", gameId);
         client.joinRoom("game:" + gameId);
+
+        // 연결 유지를 위한 ping 이벤트 설정
+        // client.sendEvent("ping"); >> 얘는 디버깅용, 나중에 문제생기면 주석 풀어서 테스트트
     }
 
     private void broadcastGameInit(int gameId) {
@@ -213,8 +223,7 @@ public class GameInitService {
                 .boxed()
                 .collect(Collectors.toMap(
                         i -> i,
-                        i -> "익명" + i
-                ));
+                        i -> "익명" + i));
     }
 
     public void updatePlayerStatus(int gameId, int playerNumber, boolean isDied, boolean isInfected) {
