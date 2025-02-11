@@ -28,7 +28,21 @@ public enum SocketErrorCode {
     INVALID_PARTICIPANT_COUNT(4008, "참가자 수가 올바르지 않습니다."),
 
     ROOM_CHAT_FAILED(4012, "채팅 전송에 실패했습니다."),
-    LOBBY_CHAT_FAILED(4013, "로비 채팅 전송에 실패했습니다.")
+    LOBBY_CHAT_FAILED(4013, "로비 채팅 전송에 실패했습니다."),
+
+    // Game 관련 공통 예외 (4100-4199)
+    GAME_NOT_FOUND(4101,"해당 게임을 찾을 수 없습니다." ),
+    PLAYER_NOT_IN_GAME(4102, "게임에 참여하지 않은 사용자입니다."),
+    DEAD_PLAYER(4103, "사망한 플레이어는 게임에 참여할 수 없습니다"),
+    INFECTED_PLAYER(4104, "감염된 플레이어는 게임에 참여할 수 없습니다"),
+
+    // 투표 관련 예외 (4200-4299)
+    VOTE_INVALID_TARGET(4201, "유효하지 않은 투표 대상입니다."),
+    VOTE_INVALID_PLAYER(4202, "유효하지 않은 투표입니다."),
+    VOTE_ALREADY_SUBMITTED(4203, "이미 투표를 제출했습니다."),
+    VOTE_STAGE_INVALID(4204, "현재는 투표가 불가합니다."),
+    VOTE_SUBMIT_FAILED(4205, "투표 제출이 실패하였습니다." )
+
     ;
 
 

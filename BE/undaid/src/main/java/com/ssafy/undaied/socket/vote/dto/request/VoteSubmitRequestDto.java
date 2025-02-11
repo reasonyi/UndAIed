@@ -1,6 +1,7 @@
 package com.ssafy.undaied.socket.vote.dto.request;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
 @Getter
