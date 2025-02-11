@@ -4,16 +4,17 @@ public enum EventType {
 
     // 로비
     CREATE_ROOM_AT_LOBBY("lobby:room:create"),
+    UPDATE_LOBBY("lobby:room:update"),
     CREATE_ROOM("room:create"),
     LIST_ROOMS("room:list"),
     ENTER_ROOM_AT_LOBBY("lobby:room:enter"),
     ENTER_ROOM("room:enter"),
-    SEND_LOBBY_CHAT("chat:lobby:send"),
+    LOOBY_CHAT("lobby:chat"),
 
     // 대기방
     LEAVE_ROOM("room:leave"),
     UPDATE_ROOM_HOST("room:host:update"),
-    SEND_ROOM_CHAT("chat:room:send"),
+    ROOM_CHAT("room:chat"),
     START_GAME("game:start"),
 
     // 게임진행(낮)

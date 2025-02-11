@@ -1,11 +1,20 @@
 package com.ssafy.undaied.socket.common.service;
 
+import com.corundumstudio.socketio.HandshakeData;
 import com.corundumstudio.socketio.SocketIOClient;
 import com.ssafy.undaied.global.auth.token.JwtTokenProvider;
 import com.ssafy.undaied.global.common.exception.BaseException;
+import com.ssafy.undaied.global.common.exception.ErrorCode;
+import io.netty.handler.codec.http.HttpHeaders;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.ssafy.undaied.global.common.exception.ErrorCode.NOT_AUTHENTICATED;
 import static com.ssafy.undaied.global.common.exception.ErrorCode.TOKEN_VALIDATION_FAILED;
@@ -16,22 +25,58 @@ import static com.ssafy.undaied.global.common.exception.ErrorCode.TOKEN_VALIDATI
 public class SocketAuthenticationService {
     private final JwtTokenProvider jwtTokenProvider;
 
-    /**
-     * 클라이언트의 인증을 처리합니다.
-     * @return 인증된 사용자의 ID
-     */
     public int authenticateClient(SocketIOClient client) {
-        String bearerToken = client.getHandshakeData().getHttpHeaders().get("Authorization");
-        String jwt = jwtTokenProvider.resolveToken(bearerToken);
+        try {
+            // 디버깅을 위한 handshake 데이터 출력
+            HandshakeData handshakeData = client.getHandshakeData();
+            Map<String, List<String>> params = handshakeData.getUrlParams();
+            log.debug("Connection attempt - URL params: {}", params);
 
-        if(jwt == null) {
-            throw new BaseException(NOT_AUTHENTICATED);
+            // 먼저 auth 매개변수로 토큰을 찾음
+            String token = null;
+            if (params.containsKey("auth")) {
+                token = params.get("auth").get(0);
+                log.debug("Found token in URL params: {}", token);
+            }
+
+            // URL 매개변수에 없다면 헤더에서 찾기
+            if (token == null) {
+                token = handshakeData.getSingleUrlParam("Authorization");
+                log.debug("Found token in headers: {}", token);
+            }
+
+            if (token == null) {
+                log.error("No authorization token found");
+                throw new BaseException(ErrorCode.NOT_AUTHENTICATED);
+            }
+
+            // Bearer 접두사 처리
+            if (!token.startsWith("Bearer ")) {
+                token = "Bearer " + token;
+            }
+
+            String jwt = jwtTokenProvider.resolveToken(token);
+            if (jwt == null) {
+                log.error("Failed to resolve JWT token");
+                throw new BaseException(ErrorCode.TOKEN_VALIDATION_FAILED);
+            }
+
+            if (!jwtTokenProvider.validateToken(jwt)) {
+                log.error("JWT validation failed");
+                throw new BaseException(ErrorCode.TOKEN_VALIDATION_FAILED);
+            }
+
+            int userId = jwtTokenProvider.getUserIdFromToken(jwt);
+            log.debug("Successfully authenticated user ID: {}", userId);
+
+            return userId;
+
+        } catch (BaseException e) {
+            log.error("Authentication failed with error code: {}", e.getErrorCode());
+            throw e;
+        } catch (Exception e) {
+            log.error("Unexpected authentication error", e);
+            throw new BaseException(ErrorCode.NOT_AUTHENTICATED);
         }
-
-        if (!jwtTokenProvider.validateToken(jwt)) {
-            throw new BaseException(TOKEN_VALIDATION_FAILED);
-        }
-
-        return jwtTokenProvider.getUserIdFromToken(jwt);
     }
 }
