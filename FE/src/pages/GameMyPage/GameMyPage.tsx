@@ -1,7 +1,7 @@
 import GameHeader from "../GameMain/components/GameHeader";
 import gameMyPageBackground from "../../assets/game-my-page/game-my-page-background.png";
 import playerIcon from "../../assets/player-icon/player-icon-1.svg";
-import charactor from "../../assets/game-my-page/charactor-demo.png";
+import charactor from "../../assets/character/character-demo.png";
 import leftIcon from "../../assets/icon/left.svg";
 import rightIcon from "../../assets/icon/right.svg";
 
