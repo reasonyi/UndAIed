@@ -51,18 +51,28 @@ public class SocketIoHandler {
      */
     public ConnectListener listenConnected() {
         return (client) -> {
+            String namespace = client.getNamespace().getName();
+            log.info("Client attempting to connect to namespace: {}", namespace);
+            
             try {
-                // 클라이언트 인증
                 int userId = authenticationService.authenticateClient(client);
                 Users user = userRepository.findById(userId)
-                                .orElseThrow(() -> new BaseException(USER_NOT_FOUND));
-
+                    .orElseThrow(() -> new BaseException(USER_NOT_FOUND));
+ 
                 client.set("userId", userId);
                 client.set("nickname", user.getNickname());
-
-                // 로비 입장
-                lobbyService.joinLobby(client);
+                
+                // 로비 입장 전 네임스페이스 확인
+                if ("/socket.io".equals(namespace)) {
+                    lobbyService.joinLobby(client);
+                }
+                else{
+                    log.info("Connection failed: wrong namespace:" + namespace + " :: Client SessionId: " + client.getSessionId());
+                    throw new BaseException(SOCKET_CONNECTION_FAILED);
+                }
             } catch (Exception e) {
+                log.error("Connection error: ", e);
+                client.disconnect();
                 throw new BaseException(SOCKET_CONNECTION_FAILED);
             }
         };

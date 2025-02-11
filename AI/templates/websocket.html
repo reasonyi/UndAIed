@@ -12,7 +12,7 @@
         <ul id='messages'>
         </ul>
         <script>
-            let ws = new WebSocket("ws://localhost:9090/ws");
+            let ws = new WebSocket("wss://localhost:9090/wss");
             // let ws = new WebSocket("ws://localhost:8000/ws");
             // 여기서 포트번호를 설정해야함
             ws.onmessage = function(event) {

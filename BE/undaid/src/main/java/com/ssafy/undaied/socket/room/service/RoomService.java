@@ -109,7 +109,7 @@ public class RoomService {
             log.error("Exception message: {}", e.getMessage());
             log.error("Exception class: {}", e.getClass().getName());
             log.error("Exception details:", e);
-            log.error("Stack trace: ", e.getStackTrace());
+            log.error("Stack trace: ", (Object[]) e.getStackTrace()); // 디버깅용으로 남겨두기, 마지막에 코드 클리닝할 때 주석처리 or 삭제제
             throw e;
         } catch (Exception e) {
             log.error("Unexpected error while creating room: {}", e.getMessage());
