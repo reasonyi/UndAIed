@@ -1,0 +1,8 @@
+[mysqld]
+character-set-server = utf8mb4
+collation-server = utf8mb4_unicode_ci
+default-time-zone = +09:00
+max-connections = 1000
+innodb-buffer-pool-size = 256M
+pid-file = /pid/mysqld.pid
+bind-address = 0.0.0.0

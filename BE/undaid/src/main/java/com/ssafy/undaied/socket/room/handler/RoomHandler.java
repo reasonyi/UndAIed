@@ -1,10 +1,8 @@
 package com.ssafy.undaied.socket.room.handler;
 
 import com.corundumstudio.socketio.SocketIOServer;
-import com.ssafy.undaied.socket.common.exception.SocketException;
 import com.ssafy.undaied.socket.lobby.dto.response.LobbyUpdateResponseDto;
 import com.ssafy.undaied.socket.lobby.service.LobbyService;
-import com.ssafy.undaied.socket.room.dto.Room;
 import com.ssafy.undaied.socket.room.dto.request.RoomCreateRequestDto;
 import com.ssafy.undaied.socket.room.dto.request.RoomEnterRequestDto;
 import com.ssafy.undaied.socket.room.dto.request.RoomLeaveRequestDto;
@@ -74,7 +72,14 @@ public class RoomHandler {
         server.addEventListener(LEAVE_ROOM.getValue(), RoomLeaveRequestDto.class,
                 (client, data, ackRequest) -> {
                     try {
-                        roomService.leaveRoom(data.getRoomId(), data.getEnterId(), client);
+
+                        LobbyUpdateResponseDto lobbyUpdateResponseDto = roomService.leaveRoom(data.getRoomId(), client);
+
+                        // 로비에 데이터 보내주기
+                        if(lobbyUpdateResponseDto != null) {
+                            server.getRoomOperations(LOBBY_ROOM).sendEvent(UPDATE_LOBBY.getValue(), lobbyUpdateResponseDto);
+                        }
+
                     } catch (Exception e) {
                         log.error("Failed to send room information: {}", e.getMessage());
                         Map<String, Object> errorData = new HashMap<>();

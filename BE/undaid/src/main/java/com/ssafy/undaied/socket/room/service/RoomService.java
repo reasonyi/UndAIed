@@ -2,9 +2,13 @@ package com.ssafy.undaied.socket.room.service;
 
 import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.SocketIOServer;
+import com.corundumstudio.socketio.handler.SocketIOException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ssafy.undaied.domain.user.entity.Users;
 import com.ssafy.undaied.domain.user.entity.repository.UserRepository;
 import com.ssafy.undaied.socket.common.exception.SocketException;
+import com.ssafy.undaied.socket.lobby.dto.response.LobbyUpdateResponseDto;
+import com.ssafy.undaied.socket.lobby.dto.response.UpdateData;
 import com.ssafy.undaied.socket.lobby.service.LobbyService;
 import com.ssafy.undaied.socket.room.dto.Room;
 import com.ssafy.undaied.socket.room.dto.RoomUser;
@@ -47,33 +51,35 @@ public class RoomService {
                 throw new SocketException(CREATE_ROOM_FAILED);
             }
 
-            // 유저가 로비에 있는지 확인
+            // 현재 클라이언트의 방 상태 로깅
+            Set<String> currentRooms = client.getAllRooms();
+            log.debug("Current client rooms before creation: {}", currentRooms);
+
+            // 로비 체크
             if (!lobbyService.isUserInLobby(client)) {
+                log.error("User attempt to create room while not in lobby");
                 throw new SocketException(USER_ALREADY_IN_ROOM);
             }
 
             Long roomId = jsonRedisTemplate.opsForValue().increment(ROOM_SEQUENCE_KEY);
             log.info("Generated room ID: {}", roomId);
 
-            Object userIdObj = client.get("userId");
-            if (userIdObj == null) {
-                throw new SocketException(CREATE_ROOM_FAILED);
-            }
-
             int hostId;
+            int profileImage;
             try {
-                hostId = Integer.parseInt(userIdObj.toString());
+                hostId = Integer.parseInt(client.get("userId"));
+                profileImage = Integer.parseInt(client.get("profileImage"));
             } catch (NumberFormatException e) {
-                throw new SocketException(CREATE_ROOM_FAILED);
+                throw new SocketException(USER_INFO_NOT_FOUND);
             }
 
             if (!userRepository.existsById(hostId)) {
-                throw new SocketException(CREATE_ROOM_FAILED);
+                throw new SocketException(USER_INFO_NOT_FOUND);
             }
 
             String nickname = client.get("nickname");
             if (nickname == null) {
-                throw new SocketException(CREATE_ROOM_FAILED);
+                throw new SocketException(USER_INFO_NOT_FOUND);
             }
 
             List<RoomUser> users = new ArrayList<>();
@@ -81,6 +87,7 @@ public class RoomService {
                     .enterId(0)
                     .isHost(true)
                     .nickname(nickname)
+                    .profileImage(profileImage)
                     .build());
 
             Room room = Room.builder()
@@ -113,7 +120,7 @@ public class RoomService {
             log.error("Exception message: {}", e.getMessage());
             log.error("Exception class: {}", e.getClass().getName());
             log.error("Exception details:", e);
-            log.error("Stack trace: ", e.getStackTrace());
+            log.error("Stack trace: ", (Object[]) e.getStackTrace()); // 디버깅용으로 남겨두기, 마지막에 코드 클리닝할 때 주석처리 or 삭제제
             throw e;
         } catch (Exception e) {
             log.error("Unexpected error while creating room: {}", e.getMessage());
@@ -121,7 +128,7 @@ public class RoomService {
         }
     }
 
-    public void leaveRoom(Long roomId, int enterId, SocketIOClient client) throws SocketException {
+    public LobbyUpdateResponseDto leaveRoom(Long roomId, SocketIOClient client) throws SocketException {
         try {
             String key = ROOM_KEY_PREFIX + roomId;
 
@@ -140,13 +147,28 @@ public class RoomService {
             }
             // 나가려는 유저가 호스트인지 확인
             boolean isHost = currentPlayers.stream()
-                    .filter(user -> user.getEnterId() == enterId)
+                    .filter(user -> user.getNickname() == client.get("nickname"))
                     .findFirst()
                     .map(RoomUser::getIsHost)
                     .orElse(false);
 
             // 현재 플레이어 목록에서 해당 유저 제거
-            currentPlayers.removeIf(user -> user.getEnterId() == enterId);
+            currentPlayers.removeIf(user -> user.getNickname() == client.get("nickname"));
+
+            UpdateData updateData = UpdateData
+                    .builder()
+                    .roomId(room.getRoomId())
+                    .roomTitle(room.getRoomTitle())
+                    .isPrivate(room.getIsPrivate())
+                    .currentPlayerNum(currentPlayers.size())
+                    .playing(false)
+                    .build();
+
+            LobbyUpdateResponseDto updateResponseDto = LobbyUpdateResponseDto
+                    .builder()
+                    .type("update")
+                    .data(updateData)
+                    .build();
 
             // 만약 나간 유저가 호스트였고, 남은 유저가 있다면 첫 번째 유저를 호스트로 지정
             if (isHost && !currentPlayers.isEmpty()) {
@@ -160,17 +182,21 @@ public class RoomService {
             if (currentPlayers.isEmpty()) {
                 jsonRedisTemplate.delete(key);
                 log.info("Room deleted - ID: {}", roomId);
+
+                updateResponseDto.setType("delete");
             } else {
                 // 방 정보 업데이트
                 room.setCurrentPlayers(currentPlayers);
                 jsonRedisTemplate.opsForValue().set(key, room);
-                log.info("User left room - Room ID: {}, User ID: {}", roomId, enterId);
+                log.info("User left room - Room ID: {}, User ID: {}", roomId, client.get("userId"));
                 // 방 안에 남아있는 유저들에게 알림.
                 leaveRoomAlarmToAnotherClient(key);
             }
 
             // 로비로 돌아가기
             lobbyService.joinLobby(client);
+
+            return updateResponseDto;
 
         } catch (SocketException e) {
             log.error("Failed to leave room: {}", e.getErrorCode().getMessage());
@@ -184,10 +210,9 @@ public class RoomService {
     public void leaveRoom(SocketIOClient client, String room) throws SocketException {
         // "room:" 접두사 이후의 문자열을 추출하여 Long으로 변환
         Long roomId = Long.parseLong(room.substring(ROOM_KEY_PREFIX.length()));
-        int enterId = client.get("userId");  // client에서 userId를 가져옴
 
         // 기존의 leaveRoom 메서드 호출
-        leaveRoom(roomId, enterId, client);
+        leaveRoom(roomId, client);
     }
 
     public void leaveRoomAlarmToAnotherClient(String key) throws SocketException {
