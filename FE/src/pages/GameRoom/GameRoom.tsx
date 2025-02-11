@@ -73,7 +73,7 @@ function GameRoom() {
   console.log(socket);
 
   const [roomError, setRoomError] = useState(false);
-  const [RoomErrorMessage, setRoomErrorMessage] = useState("");
+  const [roomErrorMessage, setRoomErrorMessage] = useState("");
 
   //플레이어 본인
   //본인 엔터 아이다와 정보 각각
@@ -157,32 +157,33 @@ function GameRoom() {
           }))
           .slice(0, 6);
         setUsers(newUsers);
-        setPlayerInfo(newUsers.find((user) => user.id === playerEnterId));
+        console.log(playerInfo);
       }
     });
 
-    // 누군가(또는 내가) 방에서 나갔을 때 (서버에서 emit('room:leave', data))
+    // 누군가(또는 내가) 방에서 나갔을 때 (서버에서 send ('room:leave', data))
     socket.on("room:leave", (data: any) => {
       console.log("방 퇴장 이벤트 수신:", data);
       // 예:
       // 1) 방에서 나간 사람 정보: { enterId: 2, roomId: 1 }
       // 2) 남아 있는 사람 목록 정보: { currentPlayers: [...] }
       if (data.currentPlayers) {
-        const newUsers: IUser[] = data.currentPlayers.map((player: any) => ({
-          id: player.enterId,
-          playerNum: player.enterId,
-          name: player.nickname,
-          token: "",
-          imgNum: 1,
-        }));
+        const newUsers: IUser[] = data.currentPlayers
+          .sort((a: any, b: any) => a.enterId - b.enterId)
+          .map((player: any, index: number) => ({
+            id: player.enterId,
+            playerNum: index + 1,
+            name: player.nickname,
+            token: "",
+            imgNum: 1,
+          }));
         setUsers(newUsers);
       }
     });
 
     // 클린업
     return () => {
-      socket.off("room:create");
-      socket.off("room:enter");
+      socket.off("room:enter:send");
       socket.off("room:leave");
     };
   }, [socket]);
@@ -211,6 +212,7 @@ function GameRoom() {
           setRoomErrorMessage(
             errorMessage || "입장 도중 에러러가 발생했습니다."
           );
+          console.log(errorMessage);
           return;
         }
       }
@@ -219,18 +221,33 @@ function GameRoom() {
 
   const handleLeaveRoom = useCallback(() => {
     // 방 퇴장 요청
+    console.log("playerInfo: ", playerInfo);
+    console.log("socket: ", socket);
     if (!socket || !playerInfo) return;
-    socket.emit("room:leave", {
-      enterId: playerInfo.id, // 실제로는 playerId로 변경하는 것을 추천
-      roomId: Number(roomId),
-    });
-    // 퇴장 후 메인 페이지로 이동하거나, 다른 페이지로 이동할 수 있음
-    navigate("/");
+    socket.emit(
+      "room:leave",
+      {
+        enterId: playerInfo.id,
+        roomId: Number(roomId),
+      },
+      (response: { success: boolean; errorMessage?: string }) => {
+        if (response.success) {
+          navigate("/game");
+        } else {
+          console.error("방 퇴장 중 오류:", response.errorMessage);
+        }
+      }
+    );
   }, [socket, roomId, playerInfo, navigate]);
 
   //컴포넌트 마운트시 방에 입장
   //반복 입장하지 않기 위해 useRef 사용
   const didEnterRoomRef = useRef(false);
+
+  useEffect(() => {
+    if (!playerEnterId) return;
+    setPlayerInfo(users.find((u) => u.id === playerEnterId));
+  }, [playerEnterId, users]);
 
   useEffect(() => {
     if (!didEnterRoomRef.current && socket && playerInfo && roomId) {
@@ -296,12 +313,7 @@ function GameRoom() {
                   className="text-white p-1 w-[1.25rem] h-[1.25rem]"
                 />
               </button>
-              <button
-                onClick={() => {
-                  handleLeaveRoom();
-                  navigate("/game");
-                }}
-              >
+              <button onClick={handleLeaveRoom}>
                 <FontAwesomeIcon
                   icon={doorOpen}
                   className="text-white p-1 w-[1.25rem] h-[1.25rem]"
