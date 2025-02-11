@@ -65,7 +65,10 @@ export const useGameRooms = () => {
 
     // 방 생성 이벤트 처리
     const handleRoomCreated = (newRoom: GameRoom) => {
-      setRooms((prev: GameRoom[]) => [newRoom, ...prev]);
+      if (!newRoom.isPrivate) {
+        console.log(newRoom.isPrivate);
+        setRooms((prev: GameRoom[]) => [newRoom, ...prev]);
+      }
     };
 
     // 방 업데이트 이벤트 처리
