@@ -50,7 +50,7 @@ public class GameInitService {
     //             "     \"roomId\": 456\n" +
     //             "   }\n" +
     //             "=========================");
-    // }
+    }
 
     public void startGame(SocketIOClient client, int roomId) throws SocketException {
         try { // 예외처리문으로 감쌈
