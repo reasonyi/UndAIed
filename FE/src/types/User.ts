@@ -35,11 +35,3 @@ export interface UserDataResponse {
 export interface GameUserInfoProps {
   userInfo: UserData;
 }
-
-export interface GameListProps {
-  gameList: Game[];
-}
-
-export interface AvatarProps {
-  avatar: number;
-}

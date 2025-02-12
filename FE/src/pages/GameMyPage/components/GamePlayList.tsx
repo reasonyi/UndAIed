@@ -1,22 +1,39 @@
 import leftIcon from "../../../assets/icon/left.svg";
 import rightIcon from "../../../assets/icon/right.svg";
-import { GameListProps } from "../../../types/User";
+import { useUserProfile } from "../../../hooks/useUserData";
+import { Game } from "../../../types/User";
 
-function MyPlayList({ gameList }: GameListProps) {
+function MyPlayList() {
   const blockStyle =
     "bg-[#0000006c] border border-[#f74a5c]/40 backdrop-blur-[12.20px] text-[#fffbfb] rounded-[5px] transition-all duration-200";
   const blockHover =
     "hover:bg-[#f8376467] hover:border-[#f93c4f] hover:shadow-[0_0_15px_0] hover:shadow-[#F74A5C]";
   const blockActive =
     "active:bg-[#f837644e] active:border-[#f837644e] active:shadow-sm";
+  const { data: response, isLoading, error } = useUserProfile();
+  const gameList = response?.data.game;
+  if (isLoading) {
+    return (
+      <>
+        <div>로딩중</div>
+      </>
+    );
+  }
 
+  if (error) {
+    return (
+      <>
+        <div>에러났어요</div>
+      </>
+    );
+  }
   return (
     <div className="p-4 md:p-6 relative z-20">
       <div className="text-lg md:text-2xl mb-3 md:mb-4 text-white">
         플레이 기록
       </div>
       <div className="space-y-2">
-        {gameList.map((game, index) => (
+        {gameList.map((game: Game, index: number) => (
           <div
             key={index}
             className={`${blockStyle} ${blockHover} ${blockActive} p-2 md:p-3 md:px-6 md:w-96 w-96 px-6 flex justify-between items-center text-sm md:text-base`}
