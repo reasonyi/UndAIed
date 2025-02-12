@@ -3,10 +3,13 @@ package com.ssafy.undaied.socket.lobby.service;
 import com.corundumstudio.socketio.SocketIOClient;
 import com.ssafy.undaied.socket.lobby.dto.response.LobbyUpdateResponseDto;
 import com.ssafy.undaied.socket.lobby.dto.response.UpdateData;
+import com.ssafy.undaied.socket.room.dto.Room;
 import com.ssafy.undaied.socket.room.dto.response.RoomCreateResponseDto;
+import com.ssafy.undaied.socket.room.dto.response.RoomEnterResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.function.support.RouterFunctionMapping;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -17,6 +20,8 @@ import static com.ssafy.undaied.socket.common.constant.SocketRoom.LOBBY_ROOM;
 @Slf4j
 @RequiredArgsConstructor
 public class LobbyService {
+    private final RouterFunctionMapping routerFunctionMapping;
+
     /**
      * 클라이언트를 로비에 입장시킵니다.
      */
@@ -75,6 +80,24 @@ public class LobbyService {
 
         return LobbyUpdateResponseDto.builder()
                 .type("create")
+                .data(updateData)
+                .build();
+    }
+
+    public LobbyUpdateResponseDto sendEventRoomEnter(RoomEnterResponseDto responseDto, SocketIOClient client) {
+
+        RoomCreateResponseDto room = responseDto.getRoom();
+
+        UpdateData updateData = UpdateData.builder()
+                .roomId(room.getRoomId())
+                .roomTitle(room.getRoomTitle())
+                .isPrivate(room.getIsPrivate())
+                .currentPlayerNum(room.getCurrentPlayers().size())
+                .playing(room.getPlaying())
+                .build();
+
+        return LobbyUpdateResponseDto.builder()
+                .type("update")
                 .data(updateData)
                 .build();
     }

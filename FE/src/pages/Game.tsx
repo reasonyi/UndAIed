@@ -13,7 +13,7 @@ import { SocketProvider } from "../components/SocketContext";
 function Game() {
   return (
     <>
-      <SocketProvider url="https://i12b212.p.ssafy.io">
+      <SocketProvider url={import.meta.env.VITE_SOCKET_URL}>
         <Outlet />
       </SocketProvider>
     </>

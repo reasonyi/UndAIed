@@ -22,6 +22,8 @@ import ReadyProfile from "./components/ReadyProfile";
 import EmptyProfile from "./components/EmptyProfile";
 import ChatForm from "./components/ChatForm";
 import { useSocket } from "../../hooks/useSocket";
+import LeftSideBar from "./components/LeftSideBar";
+import RightSideBar from "./components/RightSideBar";
 
 interface IMessage {
   id: number;
@@ -73,7 +75,7 @@ function GameRoom() {
   console.log(socket);
 
   const [roomError, setRoomError] = useState(false);
-  const [RoomErrorMessage, setRoomErrorMessage] = useState("");
+  const [roomErrorMessage, setRoomErrorMessage] = useState("");
 
   //플레이어 본인
   //본인 엔터 아이다와 정보 각각
@@ -133,9 +135,6 @@ function GameRoom() {
     scrollRef.current?.scrollIntoView({ block: "end" });
   };
 
-  // ----------------------------------------------------
-  // 1) 서버에서 보내주는 room:create, room:enter, room:leave 이벤트 수신
-  // ----------------------------------------------------
   useEffect(() => {
     if (!socket) return;
 
@@ -157,33 +156,34 @@ function GameRoom() {
           }))
           .slice(0, 6);
         setUsers(newUsers);
-        setPlayerInfo(newUsers.find((user) => user.id === playerEnterId));
+        console.log(playerInfo);
       }
     });
 
-    // 누군가(또는 내가) 방에서 나갔을 때 (서버에서 emit('room:leave', data))
-    socket.on("room:leave", (data: any) => {
+    // 누군가(또는 내가) 방에서 나갔을 때 (서버에서 send ('room:leave:send', data))
+    socket.on("room:leave:send", (data: any) => {
       console.log("방 퇴장 이벤트 수신:", data);
       // 예:
       // 1) 방에서 나간 사람 정보: { enterId: 2, roomId: 1 }
       // 2) 남아 있는 사람 목록 정보: { currentPlayers: [...] }
       if (data.currentPlayers) {
-        const newUsers: IUser[] = data.currentPlayers.map((player: any) => ({
-          id: player.enterId,
-          playerNum: player.enterId,
-          name: player.nickname,
-          token: "",
-          imgNum: 1,
-        }));
+        const newUsers: IUser[] = data.currentPlayers
+          .sort((a: any, b: any) => a.enterId - b.enterId)
+          .map((player: any, index: number) => ({
+            id: player.enterId,
+            playerNum: index + 1,
+            name: player.nickname,
+            token: "",
+            imgNum: 1,
+          }));
         setUsers(newUsers);
       }
     });
 
     // 클린업
     return () => {
-      socket.off("room:create");
-      socket.off("room:enter");
-      socket.off("room:leave");
+      socket.off("room:enter:send");
+      socket.off("room:leave:send");
     };
   }, [socket]);
 
@@ -211,6 +211,7 @@ function GameRoom() {
           setRoomErrorMessage(
             errorMessage || "입장 도중 에러러가 발생했습니다."
           );
+          console.log(errorMessage);
           return;
         }
       }
@@ -219,13 +220,23 @@ function GameRoom() {
 
   const handleLeaveRoom = useCallback(() => {
     // 방 퇴장 요청
+    console.log("playerInfo: ", playerInfo);
+    console.log("socket: ", socket);
     if (!socket || !playerInfo) return;
-    socket.emit("room:leave", {
-      enterId: playerInfo.id, // 실제로는 playerId로 변경하는 것을 추천
-      roomId: Number(roomId),
-    });
-    // 퇴장 후 메인 페이지로 이동하거나, 다른 페이지로 이동할 수 있음
-    navigate("/");
+    socket.emit(
+      "room:leave:emit",
+      {
+        enterId: playerInfo.id,
+        roomId: Number(roomId),
+      },
+      (response: { success: boolean; errorMessage?: string }) => {
+        if (response.success) {
+          navigate("/game");
+        } else {
+          console.error("방 퇴장 중 오류:", response.errorMessage);
+        }
+      }
+    );
   }, [socket, roomId, playerInfo, navigate]);
 
   //컴포넌트 마운트시 방에 입장
@@ -233,11 +244,35 @@ function GameRoom() {
   const didEnterRoomRef = useRef(false);
 
   useEffect(() => {
+    if (!playerEnterId) return;
+    setPlayerInfo(users.find((u) => u.id === playerEnterId));
+  }, [playerEnterId, users]);
+
+  useEffect(() => {
     if (!didEnterRoomRef.current && socket && playerInfo && roomId) {
       handleEnterRoom();
       didEnterRoomRef.current = true; // 다시 못 들어가도록
     }
   }, [socket, playerInfo, roomId, handleEnterRoom]);
+
+  // (1) chat-input-temp 너비를 저장할 state
+  const [chatInputWidth, setChatInputWidth] = useState<number>(0);
+
+  useEffect(() => {
+    // (3) ResizeObserver를 통한 너비 측정
+    const ro = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        // contentRect.width가 실제 요소의 넓이
+        setChatInputWidth(entry.contentRect.width);
+      }
+    });
+    if (scrollRef.current) {
+      ro.observe(scrollRef.current);
+    }
+    return () => {
+      ro.disconnect();
+    };
+  }, []);
 
   useEffect(() => {
     // 새로운 메시지가 추가될 때 스크롤을 아래로 이동
@@ -248,68 +283,12 @@ function GameRoom() {
   return (
     <div className="bg-[#07070a]">
       <div className="background-gradient max-w-[90rem] mx-auto px-4 sm:px-4 md:px-6">
-        <div className="hidden lg:flex flex-col justify-between items-center fixed z-20 inset-0 left-[max(0px,calc(50%-45rem))] right-auto w-[21rem] pb-10 pt-6 pl-6 pr-4 bg-black bg-opacity-70 shadow-[0px_0px_16px_rgba(255,255,255,0.25)] border-r-2 border-solid border-r-[rgba(255,255,255,0.35)]">
-          <div className="w-full text-base flex justify-center items-center text-[white] bg-[rgb(7,7,10)] px-1.5 py-1 border-2 border-solid border-[rgba(255,255,255,0.35)] rounded-md">
-            No. 001 방 제목
-          </div>
-          <div className="flex flex-col items-center justify-center profile w-52 h-52 border-2 border-solid border-[rgba(255,255,255,0.35)] bg-[#07070a4d]">
-            <img
-              className="filter brightness-75 w-28 h-28 mb-3"
-              src={PlayerIcon1}
-            />
-            <span className="text-base font-bold justify-center text-[#cccccc] mb-1">
-              유저닉네임
-            </span>
-          </div>
-          <button className="w-52 h-14 bg-gradient-to-r from-black via-black to-black rounded-[5px] backdrop-blur-[12.20px] justify-center items-center inline-flex mb-6">
-            <div className="w-52 h-14 relative">
-              <div className="w-52 h-14 left-0 top-0 absolute opacity-90 bg-black/50 rounded-[5px] shadow-[inset_0px_0px_17px_4px_rgba(255,222,32,0.25)] border-2 border-[#ffc07e]/70" />
-              <div className="w-52 h-14 left-0 top-0 absolute flex justify-center items-center text-white text-xl font-normal font-['Inder']">
-                게임 시작
-              </div>
-            </div>
-          </button>
-
-          <div className="w-full">
-            <div className="config-container w-[3rem] h-[16rem] bg-[#ff3939]/10 rounded-xl flex flex-col justify-between py-4">
-              <button>
-                <FontAwesomeIcon
-                  icon={bell}
-                  className="text-white p-1 w-[1.25rem] h-[1.25rem]"
-                />
-              </button>
-              <button>
-                <FontAwesomeIcon
-                  icon={gear}
-                  className="text-white p-1 w-[1.25rem] h-[1.25rem]"
-                />
-              </button>
-              <button>
-                <FontAwesomeIcon
-                  icon={userGroup}
-                  className="text-white p-1 w-[1.25rem] h-[1.25rem]"
-                />
-              </button>
-              <button>
-                <FontAwesomeIcon
-                  icon={circleExclamation}
-                  className="text-white p-1 w-[1.25rem] h-[1.25rem]"
-                />
-              </button>
-              <button
-                onClick={() => {
-                  handleLeaveRoom();
-                  navigate("/game");
-                }}
-              >
-                <FontAwesomeIcon
-                  icon={doorOpen}
-                  className="text-white p-1 w-[1.25rem] h-[1.25rem]"
-                />
-              </button>
-            </div>
-          </div>
-        </div>
+        <LeftSideBar
+          nickname={playerInfo ? playerInfo.name : "연결이 끊어졌습니다."}
+          icon={PlayerIcon1}
+          socket={socket}
+          onLeaveRoom={handleLeaveRoom}
+        />
         <div className="lg:pl-[19.5rem]">
           <div className="max-w-3xl mx-auto xl:max-w-none xl:ml-0 xl:mr-[32rem]">
             <div className="chat-container flex flex-col h-screen overflow-auto">
@@ -335,86 +314,14 @@ function GameRoom() {
                   ref={scrollRef}
                   className="chat-input-temp h-[4.5rem] w-full"
                 ></div>
-                <div className="chat-input fixed h-10 bottom-4 w-[calc(90rem-21rem-33.5rem-2rem)]">
+                <div
+                  className="chat-input fixed z-10 h-10 bottom-4"
+                  style={{ width: chatInputWidth }}
+                >
                   <ChatForm playerNum={playerInfo?.playerNum} socket={socket} />
                 </div>
               </div>
-              <div className="fixed z-20 right-[max(0px,calc(50%-45rem))] w-[33.5rem] py-6 px-3 hidden h-screen bg-black bg-opacity-40 xl:grid grid-cols-3 grid-rows-4 gap-4 shadow-[0px_0px_16px_rgba(255,255,255,0.25)]  border-solid border-l-[rgba(255,255,255,0.35)]">
-                <div className="row-start-1 px-2 py-1">
-                  {player1 ? (
-                    <ReadyProfile
-                      nickname={player1.name}
-                      playerNum={player1.playerNum}
-                      icon={iconArr[player1.imgNum]}
-                    />
-                  ) : (
-                    <EmptyProfile />
-                  )}
-                </div>
-                <div className="row-start-1 px-2 py-1">
-                  {player2 ? (
-                    <ReadyProfile
-                      nickname={player2.name}
-                      playerNum={player2.playerNum}
-                      icon={iconArr[player2.imgNum]}
-                    />
-                  ) : (
-                    <EmptyProfile />
-                  )}
-                </div>
-                <div className="row-start-1 px-2 py-1">
-                  {player3 ? (
-                    <ReadyProfile
-                      nickname={player3.name}
-                      playerNum={player3.playerNum}
-                      icon={iconArr[player3.imgNum]}
-                    />
-                  ) : (
-                    <EmptyProfile />
-                  )}
-                </div>
-                <div className="row-start-2 px-2 py-1">
-                  {player4 ? (
-                    <ReadyProfile
-                      nickname={player4.name}
-                      playerNum={player4.playerNum}
-                      icon={iconArr[player4.imgNum]}
-                    />
-                  ) : (
-                    <EmptyProfile />
-                  )}
-                </div>
-                <div className="row-start-2 px-2 py-1">
-                  {player5 ? (
-                    <ReadyProfile
-                      nickname={player5.name}
-                      playerNum={player5.playerNum}
-                      icon={iconArr[player5.imgNum]}
-                    />
-                  ) : (
-                    <EmptyProfile />
-                  )}
-                </div>
-                <div className="row-start-2 px-2 py-1">
-                  {player6 ? (
-                    <ReadyProfile
-                      nickname={player6.name}
-                      playerNum={player6.playerNum}
-                      icon={iconArr[player6.imgNum]}
-                    />
-                  ) : (
-                    <EmptyProfile />
-                  )}
-                </div>
-                <div className="w-full text-base flex flex-col justify-between items-center row-start-3 row-end-5 col-span-3 text-white px-2 py-1">
-                  <div className="w-full text-base flex justify-end items-center text-white px-2 py-1">
-                    0/6
-                  </div>
-                  <div className="w-full h-[80%] text-base justify-center items-center bg-[rgb(7,7,10)] border-2 border-solid border-[#B4B4B4] text-white px-2 py-1">
-                    <div>시스템 로그</div>
-                  </div>
-                </div>
-              </div>
+              <RightSideBar players={users} iconArr={iconArr} />
             </div>
           </div>
         </div>
