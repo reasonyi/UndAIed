@@ -1,8 +1,80 @@
+# services:
+#   frontend:
+#     build: ./FE
+#     ports: # 개발환경
+#       - "5173:5173"
+#     volumes:
+#       - ./FE:/app
+#       - /app/node_modules
+#     networks:
+#       - app_network
+#     restart: always
+#     environment:
+#       - TZ=Asia/Seoul
+
+#   backend:
+#     build: ./BE/undaid
+#     ports:
+#       - "8080:8080"
+#     depends_on:
+#       - mysql
+#     environment:
+#       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/undaied?useSSL=true&serverTimezone=Asia/Seoul
+#       SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
+#       SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+#       JWT_SECRET: ${JWT_SECRET}
+#       TZ: Asia/Seoul
+#     networks:
+#       - app_network
+#     restart: always
+
+#   ai:
+#     build: ./AI
+#     ports:
+#       - "8000:8000"
+#     volumes:
+#       - ./AI:/app
+#     environment:
+#       - PYTHONPATH=/app
+#       - TZ=Asia/Seoul
+#     networks:
+#       - app_network
+#     restart: always
+#     command: uvicorn app:app --host 0.0.0.0 --port 8000 --reload
+
+#   mysql:
+#     image: mysql:8.0
+#     container_name: mysql
+#     ports:
+#       - "3306:3306"
+#     environment:
+#       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+#       MYSQL_DATABASE: ${MYSQL_DATABASE}
+#       MYSQL_USER: ${MYSQL_USER}
+#       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+#     volumes:
+#       - mysql_data:/var/lib/mysql
+#     networks:
+#       - app_network
+#     command:
+#       - --character-set-server=utf8mb4
+#       - --collation-server=utf8mb4_unicode_ci
+#       - --default-time-zone=+09:00
+#     restart: always
+
+# volumes:
+#   nginx_logs:
+#   mysql_data:
+
+# networks:
+#   app_network:
+#     driver: bridge
 services:
   frontend:
     build: ./FE
-    ports: # 개발환경
-      - "5173:5173"
+    container_name: FE
+    expose:
+      - "5173"
     volumes:
       - ./FE:/app
       - /app/node_modules
@@ -14,24 +86,50 @@ services:
 
   backend:
     build: ./BE/undaid
-    ports:
-      - "8080:8080"
+    container_name: BE
+    expose:
+      - "8080"
+      - "9090"
     depends_on:
-      - mysql
+      mysql:
+        condition: service_started
+      redis:
+        condition: service_started
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/undaied?useSSL=true&serverTimezone=Asia/Seoul
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/undaied?useSSL=false&allowPublicKeyRetrieval=true&characterEncoding=UTF-8&serverTimezone=Asia/Seoul
       SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
+      SOCKETIO_SERVER_HOSTNAME: "0.0.0.0"
+      SOCKETIO_SERVER_PORT: 9090
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+      SPRING_REDIS_PASSWORD: ${REDIS_PASSWORD}
       TZ: Asia/Seoul
+      # 소켓 해결하고 추가된 환경변수
+      JAVA_SECURITY_PROPERTIES: |
+        jdk.internal.reflect.permitAll=true
+        jdk.reflect.allowNativeAccess=true
+    # 소켓 해결하고 추가된 환경변수 + 이건 왜 해주는거지???
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
     networks:
       - app_network
     restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
 
   ai:
     build: ./AI
-    ports:
-      - "8000:8000"
+    container_name: AI
+    expose:
+      - "8000"
     volumes:
       - ./AI:/app
     environment:
@@ -43,7 +141,8 @@ services:
     command: uvicorn app:app --host 0.0.0.0 --port 8000 --reload
 
   mysql:
-    image: mysql:8.0
+    build:
+      context: ./mysql
     container_name: mysql
     ports:
       - "3306:3306"
@@ -52,20 +151,39 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      TZ: Asia/Seoul
+      MYSQL_INIT_COMMAND: "SET GLOBAL host_cache_size=0"
     volumes:
       - mysql_data:/var/lib/mysql
+      - ./mysql/pid:/pid
     networks:
       - app_network
-    command: 
-      - --character-set-server=utf8mb4 
-      - --collation-server=utf8mb4_unicode_ci
-      - --default-time-zone=+09:00
     restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+
+  redis:
+    build: ./redis
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+      - ./redis/var/run/redis:/var/run/redis
+      - redis_data:/data
+    networks:
+      - app_network
 
 volumes:
-  nginx_logs:
   mysql_data:
+  mysql_pid:
+  redis_data:
+  redis_pid:
 
 networks:
   app_network:
-    driver: bridge
+    external: true

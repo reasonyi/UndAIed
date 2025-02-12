@@ -53,7 +53,6 @@
 //     </SocketContext.Provider>
 //   );
 // };
-
 import React, { createContext, useEffect, useState, ReactNode } from "react";
 import { Socket, io } from "socket.io-client";
 import { useRecoilValue } from "recoil";
@@ -97,12 +96,15 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({
       setSocket(null);
     }
 
+    console.log("Attempting socket connection with token:", userData.token);
+
     try {
+      // --- 쿼리 파라미터에 auth 필드로 토큰을 담아서 보냄 ---
       const newSocket = io(`${url}/socket.io`, {
-        // namespace를 URL에 포함
         transports: ["websocket"],
-        auth: {
-          token: `Bearer ${userData.token}`,
+        // 여기서 key 이름을 "auth"로 지정 (서버에서도 "auth"로 읽게 됨)
+        query: {
+          auth: `Bearer ${userData.token}`,
         },
         reconnection: true,
         reconnectionAttempts: 5,
