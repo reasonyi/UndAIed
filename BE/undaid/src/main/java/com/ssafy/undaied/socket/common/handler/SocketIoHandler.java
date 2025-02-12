@@ -118,9 +118,6 @@ public class SocketIoHandler {
                 client.set("nickname", user.getNickname());
                 client.set("profileImage", user.getProfileImage());
 
-                // 로비 입장
-                lobbyService.joinLobby(client);
-
             } catch (Exception e) {
                 log.error("Connection error: ", e);
                 client.disconnect();

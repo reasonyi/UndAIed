@@ -17,6 +17,7 @@ public enum SocketErrorCode {
 
     USER_INFO_NOT_FOUND(4012, "유저 정보를 찾을 수 없습니다."),
 
+    FULL_USER_IN_ROOM(4022, "방에 인원이 다 찼습니다."),
     SOCKET_ROOM_JOIN_FAILED(4004, "게임방 참여에 실패했습니다."),
     CREATE_ROOM_FAILED(4006, "방 생성에 실패했습니다."),
     USER_ALREADY_IN_ROOM(4007, "이미 방에 있는 유저입니다."),
