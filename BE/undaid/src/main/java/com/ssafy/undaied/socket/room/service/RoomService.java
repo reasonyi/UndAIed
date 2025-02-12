@@ -289,6 +289,10 @@ public class RoomService {
             throw new SocketException(ROOM_NOT_FOUND);
         }
 
+        if(room.getCurrentPlayers().size() >= 6) {
+            throw new SocketException(FULL_USER_IN_ROOM);
+        }
+
         Integer enterId = 0;
 
         // 유저가 방에 있는지 확인
