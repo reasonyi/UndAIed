@@ -33,6 +33,10 @@ function CreateRoomButton() {
 
   const navigate = useNavigate();
   const handleSubmit = (e: React.FormEvent) => {
+    if (!socket) {
+      console.log("socket이 없습니다");
+      return;
+    }
     e.preventDefault();
     socket.emit("lobby:room:create", roomInfo, (response: CreateResponse) => {
       console.log("응답입니다.", response);
@@ -111,7 +115,7 @@ function CreateRoomButton() {
                     id="isPrivate"
                     checked={roomInfo.isPrivate}
                     onChange={handleChange}
-                    className="w-4 h-4 accent-orange-500"
+                    className="w-4 h-4 accent-[#ffd941]"
                   />
                 </div>
 
@@ -137,7 +141,7 @@ function CreateRoomButton() {
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 transition-colors"
+                    className="px-4 py-2 bg-[#ff4141] text-white rounded hover:bg-[#ff0303] active:bg-[#d73737] transition-colors"
                   >
                     방 생성
                   </button>

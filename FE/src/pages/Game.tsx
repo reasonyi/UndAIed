@@ -13,7 +13,7 @@ import { SocketProvider } from "../components/SocketContext";
 function Game() {
   return (
     <>
-      <SocketProvider>
+      <SocketProvider url="http://localhost:9090">
         <Outlet />
       </SocketProvider>
     </>

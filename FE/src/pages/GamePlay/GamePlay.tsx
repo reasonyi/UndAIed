@@ -104,6 +104,10 @@ function GamePlay() {
   //socket 시작작
   //IMessage 형식으로 받아야 하나?
   useEffect(() => {
+    if (!socket) {
+      console.log("socket이 없습니다");
+      return;
+    }
     socket.on(
       "receive_system_message",
       (id: number, player: number, message: string) => {

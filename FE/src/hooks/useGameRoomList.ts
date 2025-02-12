@@ -1,4 +1,3 @@
-// useGameRooms.ts
 import { useSocket } from "./useSocket";
 import { useRecoilState } from "recoil";
 import { useEffect, useState, useCallback } from "react";
