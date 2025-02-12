@@ -1,11 +1,12 @@
 import { useEffect, useRef } from "react";
-import { useGameRooms } from "../../../hooks/useGameRoomList";
-
 import GameRoomCard from "./GameRoomCard";
+import { Link } from "react-router-dom";
+import { useGameRooms } from "../../../hooks/useGameRoomList";
 
 function GameRoomList() {
   const { rooms, loading, hasMore, fetchMoreRooms } = useGameRooms();
   const observerTarget = useRef<HTMLDivElement>(null);
+  console.log("게임룸 마운트", rooms);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -21,7 +22,9 @@ function GameRoomList() {
       observer.observe(observerTarget.current);
     }
 
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+    };
   }, [hasMore, fetchMoreRooms]);
 
   return (
@@ -47,19 +50,19 @@ function GameRoomList() {
           }
         `}
       </style>
-      <div className="flex-1 flex flex-col h-96 p-7 bg-[#0000008f] rounded-[5px] border border-[#f74a5c]/60">
-        {/* 헤더 영역 */}
-        <div className="h-8 grid md:grid-cols-[6rem,1fr,8rem] grid-cols-[4rem,1fr,5rem] px-2 text-white mb-4">
+      <div className="flex-1 flex flex-col px-7 py-4 bg-[#0000008f] rounded-[5px] border border-[#f74a5c]/60">
+        <div className="grid md:grid-cols-[6rem,1fr,8rem] grid-cols-[4rem,1fr,5rem] px-2 text-white mb-4">
           <span>No.</span>
           <span>Title</span>
           <span className="text-right">인원수</span>
         </div>
 
-        {/* 스크롤 가능한 컨텐츠 영역 */}
-        <div className="h-80 overflow-hidden">
+        <div className="h-[23.2rem] overflow-hidden">
           <ul className="custom-scrollbar h-full overflow-y-auto space-y-2.5 pr-2">
             {rooms.map((room) => (
-              <GameRoomCard key={room.roomId} room={room} />
+              <Link key={room.roomId} to={`room/${room.roomId}`}>
+                <GameRoomCard room={room} />
+              </Link>
             ))}
             <div
               ref={observerTarget}

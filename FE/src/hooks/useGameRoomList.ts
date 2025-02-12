@@ -113,6 +113,15 @@ export const useGameRooms = () => {
     }
   }, [gameRoomList.loading, gameRoomList.hasMore, fetchMoreRooms, socket]);
 
+  // const loadNextPage = useCallback(() => {
+  //   if (!gameRoomList.loading && gameRoomList.hasMore) {
+  //     setGameRoomList((prev) => ({
+  //       ...prev,
+  //       page: prev.page + 1,
+  //     }));
+  //     fetchMoreRooms();
+  //   }
+  // }, [gameRoomList.loading, gameRoomList.hasMore, fetchMoreRooms]);
   return {
     rooms,
     loading: gameRoomList.loading,

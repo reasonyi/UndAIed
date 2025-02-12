@@ -5,9 +5,10 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class ParticipantResultDto {
+public class PlayerResultDto {
     private int number;
     private String nickname;
     private boolean isDied;
     private boolean isInfected;
+    private boolean isInGame;
 }

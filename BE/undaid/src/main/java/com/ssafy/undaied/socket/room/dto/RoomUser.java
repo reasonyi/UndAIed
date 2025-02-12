@@ -13,6 +13,7 @@ public class RoomUser implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private Integer enterId;
+    private Integer userId;
     private Boolean isHost;
     private String nickname;
     private Integer profileImage;

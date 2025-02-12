@@ -1,11 +1,6 @@
 import { Link } from "react-router-dom";
 import playerIcon from "../../../assets/player-icon/player-icon-1.svg";
 import DonutChart from "../components/DonutChart";
-import axios from "axios";
-import { useQuery } from "@tanstack/react-query";
-import { useRecoilState, useRecoilValue } from "recoil";
-import { userState } from "../../../store/userState";
-import { useEffect } from "react";
 import { useUserProfile } from "../../../hooks/useUserData";
 
 function GameSidebar() {
@@ -16,11 +11,21 @@ function GameSidebar() {
   const blockActive =
     "active:bg-[#f837644e] active:border-[#f837644e] active:shadow-sm";
 
-  const { data, isLoading, error } = useUserProfile();
+  const { data: response, isLoading, error } = useUserProfile();
+  const userData = response?.data;
+
+  // userData가 존재할 때만 승률 계산
+  const winningRate = userData
+    ? userData.totalWin + userData.totalLose > 0
+      ? Math.round(
+          (userData.totalWin / (userData.totalLose + userData.totalWin)) * 10000
+        ) / 100
+      : 0
+    : 0;
 
   return (
     <aside
-      className={`mx-8 w-80 ${blockStyle} flex-col items-center bg-[#00000040] hidden md:flex`}
+      className={`mx-8 w-80 h-full ${blockStyle} flex-col items-center bg-[#00000040] hidden md:flex`}
     >
       {isLoading ? (
         <div className="flex items-center justify-center h-full">
@@ -31,28 +36,25 @@ function GameSidebar() {
           <div>프로필 로드 실패</div>
           <div className="text-sm text-red-400">다시 시도해주세요</div>
         </div>
-      ) : (
+      ) : userData ? (
         <>
           <div className="flex align-middle">
             <div className="w-32 h-32 mt-8 mb-3 flex items-center justify-center border border-[#f74a5c]/60">
               <img src={`${playerIcon}`} alt="" />
             </div>
             <div className="w-32 mt-5 flex flex-col gap-2 items-center justify-center text-[#fcfafa]">
-              <div>{data.nickname}</div>
-              <div>총 판수 : {data.totalWin + data.totalLose}</div>
+              <div>{userData.nickname}</div>
+              <div>총 판수 : {userData.totalWin + userData.totalLose}</div>
             </div>
           </div>
 
           <div className="mt-62 flex flex-col items-center">
             <div className="mt-10 mb-7 text-2xl">
-              <DonutChart />
+              <DonutChart percent={winningRate} />
             </div>
             <div className="mb-7">
-              승률 | {data.totalWin} 승 | {data.totalLose} 패 |{" "}
-              {Math.round(
-                (data.totalWin / (data.totalLose + data.totalWin)) * 10000
-              ) / 100}
-              %
+              승률 | {userData.totalWin} 승 | {userData.totalLose} 패 |{" "}
+              {winningRate}%
             </div>
           </div>
 
@@ -66,7 +68,7 @@ function GameSidebar() {
             </Link>
           </div>
         </>
-      )}
+      ) : null}
     </aside>
   );
 }

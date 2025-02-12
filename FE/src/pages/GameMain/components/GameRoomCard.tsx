@@ -12,7 +12,7 @@ function GameRoomCard({ room }: GameRoomCardProps) {
   return (
     <ul className="space-y-2.5">
       <li
-        className={`h-8 bg-[#241818de] grid md:grid-cols-[6rem,1fr,8rem] grid-cols-[4rem,1fr,5rem] items-center px-2 ${blockStyle} ${blockHover} ${blockActive} cursor-pointer`}
+        className={`h-8 bg-[#241818de] grid md:grid-cols-[6rem,1fr,8rem] grid-cols-[4rem,1fr,5rem] items-center mb-2 px-2 ${blockStyle} ${blockHover} ${blockActive} cursor-pointer`}
       >
         <span className="ml-2">{room.roomId}</span>
         <span className="truncate">{room.roomTitle}</span>

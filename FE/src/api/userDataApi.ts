@@ -6,30 +6,28 @@
 //   // baseURL: "http://localhost5173.com",
 // });
 
-
 import axios from "axios";
 
 export const userApi = axios.create({
-  baseURL: "https://i12b212.p.ssafy.io",
+  // baseURL: "https://i12b212.p.ssafy.io",
+  baseURL: import.meta.env.VITE_API_URL,
   withCredentials: true,
 });
 
-// Request interceptor
-userApi.interceptors.request.use((config) => {
-  const token = localStorage.getItem("accessToken");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
-// Response interceptor
-userApi.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // 토큰 갱신 또는 로그아웃 로직
+userApi.interceptors.request.use(
+  //header에 user token 넣어서 api 호출
+  (config) => {
+    const userPersist = localStorage.getItem("userPersist");
+    if (userPersist) {
+      const { userState } = JSON.parse(userPersist);
+      const token = userState.token; // JSON에서 token만 추출
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
+    return config;
+  },
+  (error) => {
     return Promise.reject(error);
   }
 );
