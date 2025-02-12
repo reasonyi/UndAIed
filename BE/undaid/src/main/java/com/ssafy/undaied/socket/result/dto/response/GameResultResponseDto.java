@@ -8,8 +8,7 @@ import java.util.List;
 @Getter
 @Builder
 public class GameResultResponseDto {
-    private int gameId;
     private String winner;
     private String message;
-    private List<ParticipantResultDto> participants;
+    private List<PlayerResultDto> players;
 }

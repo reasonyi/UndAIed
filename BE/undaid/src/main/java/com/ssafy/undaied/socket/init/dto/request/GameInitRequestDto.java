@@ -7,7 +7,6 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@Data
 @NoArgsConstructor
 public class GameInitRequestDto {
     private int roomId;

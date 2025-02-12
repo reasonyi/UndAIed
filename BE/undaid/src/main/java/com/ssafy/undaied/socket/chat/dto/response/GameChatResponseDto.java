@@ -8,12 +8,9 @@ import lombok.Getter;
 import java.time.LocalDateTime;
 
 @Data
-@Getter
 @Builder
 public class GameChatResponseDto {
-    private int userId;
+    private int number;
     private String content;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime timestamp;
 }

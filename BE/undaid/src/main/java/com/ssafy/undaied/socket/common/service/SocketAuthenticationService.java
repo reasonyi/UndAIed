@@ -39,6 +39,7 @@ public class SocketAuthenticationService {
             //     log.debug("Found token in URL params: {}", token);
             // }
 
+            //**임의로 수정 / 원래는 token = handshakeData.getSingleUrlParam("Authorization");
             // URL 매개변수에 없다면 헤더에서 찾기
             if (token == null) {
                 token = handshakeData.getHttpHeaders().get("Authorization");
