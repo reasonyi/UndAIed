@@ -25,7 +25,6 @@ public class VoteHandler {
 
     private final SocketIONamespace namespace;
     private final VoteService voteService;
-    private final SocketExceptionHandler socketExceptionHandler;
 
     @PostConstruct
     public void init() {
@@ -53,20 +52,4 @@ public class VoteHandler {
                     }
                 });
     }
-
-
-    // 투표 제출
-    public void submitVote(SocketIOClient client, VoteSubmitRequestDto voteSubmitRequestDto) {
-        Integer userId = client.get("userId");
-        Integer gameId = 1; // 테스트를 위해 임의로 설정
-//        Integer gameId = client.get("gameId");
-//        VoteSubmitResponseDto response = voteService.submitVote(userId, gameId, voteSubmitRequestDto);
-    }
-
-    // 투표 결과 알림
-    public void notifyVoteResult(Integer gameId) {
-        VoteResultResponseDto responseDto = voteService.computeVoteResult(gameId);
-        namespace.getRoomOperations(String.valueOf(gameId)).sendEvent(EventType.SHOW_VOTE_RESULT.getValue(), responseDto);
-    }
-
 }

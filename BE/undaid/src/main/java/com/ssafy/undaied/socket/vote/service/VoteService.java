@@ -8,7 +8,6 @@ import com.ssafy.undaied.socket.vote.dto.request.VoteSubmitRequestDto;
 import com.ssafy.undaied.socket.vote.dto.response.VoteResultResponseDto;
 import com.ssafy.undaied.socket.vote.dto.response.VoteSubmitResponseDto;
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
