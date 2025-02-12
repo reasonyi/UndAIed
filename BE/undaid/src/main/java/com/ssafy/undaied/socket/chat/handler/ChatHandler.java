@@ -29,7 +29,7 @@ public class ChatHandler {
 
     @PostConstruct
     private void init() {
-        server.addEventListener(ROOM_CHAT.getValue(), RoomChatRequestDto.class,
+        server.addEventListener(ROOM_CHAT_EMIT.getValue(), RoomChatRequestDto.class,
                 (client, data, ackRequest) -> {
                     try {
                         // 방 채팅.
@@ -46,7 +46,7 @@ public class ChatHandler {
                         }
 
                         String key = ROOM_KEY_PREFIX + data.getRoomId();
-                        server.getRoomOperations(key).sendEvent(ROOM_CHAT.getValue(), roomChat);
+                        server.getRoomOperations(key).sendEvent(ROOM_CHAT_SEND.getValue(), roomChat);
 
                     } catch (Exception e) {
                         log.error("Room chat failed: {}", e.getMessage());
