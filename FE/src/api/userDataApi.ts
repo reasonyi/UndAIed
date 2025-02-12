@@ -6,12 +6,11 @@
 //   // baseURL: "http://localhost5173.com",
 // });
 
-
 import axios from "axios";
 
 export const userApi = axios.create({
   // baseURL: "https://i12b212.p.ssafy.io",
-  baseURL: "http://localhost:8080",
+  baseURL: import.meta.env.VITE_API_URL,
   withCredentials: true,
 });
 
