@@ -15,6 +15,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import static com.ssafy.undaied.socket.common.constant.SocketRoom.GAME_KEY_PREFIX;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -82,31 +84,61 @@ public class GameChatService {
 
     }
 
-    public void processGameChat(SocketIOClient client, Integer userId, GameChatRequestDto gameChatRequestDto){
+    public void processGameChat(SocketIOClient client, Integer userId, GameChatRequestDto gameChatRequestDto) {
+        // 임시 지정
+//        Integer gameId=client.get("gameId");
+//        Integer gameId=1;
 
-        //임시 지정
-        gameId=1;
+        // URL 파라미터에서 gameId 가져오기 // 나중에 수정해야.
+        String gameIdStr = client.getHandshakeData().getSingleUrlParam("gameId");
+        Integer gameId = Integer.parseInt(gameIdStr);
+
+        // 클라이언트를 해당 게임 방에 조인시키기 // 나중에 수정해야.
+        String gameRoom = GAME_KEY_PREFIX + gameId;
+        if (!client.getAllRooms().contains(gameRoom)) {
+            client.joinRoom(gameRoom);
+            log.info("Client joined game room - userId: {}, gameRoom: {}", userId, gameRoom);
+        }
+
+        log.info(String.valueOf(gameId));
+        if (gameId == null) {
+            log.warn("Game ID not found for userId: {}", userId);
+            return; // 게임 ID가 없으면 처리 중단
+        }
 
         String nickname = client.get("nickname");
         LocalDateTime timestamp = LocalDateTime.now();
 
-        //뒤에 userId는 나중에 익명 참가자 번호로 수정해야 함
-        String message = String.format("{%d} [%s] <%d>(%s) %s",
-                userId, nickname, userId, gameChatRequestDto.getContent(),
+        // 🔹 Redis에서 userId에 해당하는 익명 번호 가져오기
+        String mappingKey = GAME_KEY_PREFIX + gameId + ":number_mapping";
+        Object numberObj = redisTemplate.opsForHash().get(mappingKey, userId.toString());
+        if (numberObj == null) {
+            log.warn("No number found for userId: {}", userId);
+            return; // 해당 유저가 번호를 부여받지 않았다면 그냥 리턴
+        }
+
+        int number = Integer.parseInt(numberObj.toString());
+
+        // 채팅 메시지 포맷
+        String chatKey = "game:" + gameId + ":chats";
+        String message = String.format("[%s] (%d) %s - %s",
+                nickname, number, gameChatRequestDto.getContent(),
                 timestamp.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
 
-        // 채팅 저장
-        String chatKey = "game:" + gameId + ":chats";
-        Long messageNumber = redisTemplate.opsForList().rightPush(chatKey, message);
+        // Redis에 채팅 저장
+        redisTemplate.opsForList().rightPush(chatKey, message);
         redisTemplate.expire(chatKey, EXPIRE_TIME, TimeUnit.SECONDS);
 
-        // 응답 전송
+        // 익명 번호(number)를 포함한 응답 전송
         GameChatResponseDto gameChatResponseDto = GameChatResponseDto.builder()
-                .userId(userId)
+                .number(number)
                 .content(gameChatRequestDto.getContent())
                 .build();
 
-        server.getRoomOperations(String.valueOf(gameId)).sendEvent("chat:game", gameChatResponseDto);
+        server.getRoomOperations("game:" + gameId).sendEvent("chat:game", gameChatResponseDto);
+
+        log.info("Game chat sent - gameId: {}, userId: {}, number: {}, message: {}",
+                gameId, userId, number, gameChatRequestDto.getContent());
     }
 }
 

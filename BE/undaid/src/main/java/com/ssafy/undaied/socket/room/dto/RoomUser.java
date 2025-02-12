@@ -15,5 +15,7 @@ public class RoomUser implements Serializable {
     private Integer enterId;
     private Boolean isHost;
     private String nickname;
+    //테스트 위해 일단 임의로 추가
+    private Integer userId;
     private Integer profileImage;
 }

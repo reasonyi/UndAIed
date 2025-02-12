@@ -9,7 +9,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class GameInitResponseDto {
-    private int gameId;
-    private List<PlayerInfoDto> participants;
+public class GameInfoResponseDto {
+    private List<PlayerInfoDto> players;
 }

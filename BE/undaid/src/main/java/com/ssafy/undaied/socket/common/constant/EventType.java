@@ -17,6 +17,8 @@ public enum EventType {
     ROOM_CHAT("room:chat"),
     START_GAME("game:start"),
 
+    GAME_INFO("game:info"),
+
     // 게임진행(낮)
     SEND_SUBJECT("send:subject"),
     GAME_CHAT("chat:game"),
@@ -28,9 +30,13 @@ public enum EventType {
     // 게임 진행 밤
     SHOW_INFECTION_RESULT("infection:result"),
 
+    //게임 중 나가기
+
+    QUIT_GAME("quit:game"),
+
     // 게임 종료
-    SHOW_GAME_RESULT("game:result"),
-    RETURN_TO_ROOM("room:return")
+    SHOW_GAME_RESULT("game:result")
+
     ;
 
     private final String value;

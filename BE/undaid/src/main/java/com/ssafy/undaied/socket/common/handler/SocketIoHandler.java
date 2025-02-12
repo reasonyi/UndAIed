@@ -42,7 +42,6 @@ public class SocketIoHandler {
     private void init() {
         server.addConnectListener(listenConnected());
         server.addDisconnectListener(listenDisconnected());
-        server.addListeners(gameChatHandler);
 
         addGameStartListeners();
     }
@@ -54,7 +53,19 @@ public class SocketIoHandler {
         return (client) -> {
             String namespace = client.getNamespace().getName();
             log.info("Client attempting to connect to namespace: {}", namespace);
-            
+
+            //gameId 설정(포스트맨 테스트용)
+//            String gameIdParam = client.getHandshakeData().getSingleUrlParam("gameId"); // 쿼리에서 gameId 가져오기
+//
+//            if (gameIdParam != null) {
+//                int gameId = Integer.parseInt(gameIdParam);
+//                client.set("gameId", gameId);
+//                client.joinRoom("game:" + gameId);  // ✅ "game:5" 같은 방에 자동으로 들어가도록 설정
+//                log.info("Client connected - gameId: {}, sessionId: {}", gameId, client.getSessionId());
+//            } else {
+//                log.warn("Client connected without gameId - sessionId: {}", client.getSessionId());
+//            }
+
             try {
                  // 디버깅을 위한 handshake 데이터 출력
                 HandshakeData handshakeData = client.getHandshakeData();
@@ -90,14 +101,7 @@ public class SocketIoHandler {
                 client.set("nickname", user.getNickname());
                 client.set("profileImage", user.getProfileImage());
                 
-                // 로비 입장 전 네임스페이스 확인
-                if ("/socket.io".equals(namespace)) {
-                    lobbyService.joinLobby(client);
-                }
-                else{
-                    log.info("Connection failed: wrong namespace:" + namespace + " :: Client SessionId: " + client.getSessionId());
-                    throw new BaseException(SOCKET_CONNECTION_FAILED);
-                }
+
             } catch (Exception e) {
                 log.error("Connection error: ", e);
                 client.disconnect();
