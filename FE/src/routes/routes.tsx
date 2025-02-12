@@ -12,7 +12,7 @@ import User from "../pages/User";
 import Log from "../pages/Log";
 import BoardWrite from "../pages/BoardWrite";
 import Friends from "../pages/Friends/Friends";
-import Game from "../pages/Game";
+import Game from "../pages/Game/Game";
 import GameMyPage from "../pages/GameMyPage/GameMyPage";
 import Signup from "../pages/Signup";
 

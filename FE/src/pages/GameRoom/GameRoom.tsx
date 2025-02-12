@@ -278,8 +278,6 @@ function GameRoom() {
     // 새로운 메시지가 추가될 때 스크롤을 아래로 이동
     scrollToBottom();
   }, [messages]);
-
-  console.log(scrollRef);
   return (
     <div className="bg-[#07070a]">
       <div className="background-gradient max-w-[90rem] mx-auto px-4 sm:px-4 md:px-6">
