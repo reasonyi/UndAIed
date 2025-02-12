@@ -21,7 +21,6 @@ import static com.ssafy.undaied.socket.common.constant.SocketRoom.*;
 public class SocketDisconnectService {
 
     private final RoomService roomService;
-    private final LobbyService lobbyService;
     private final QuitService quitService;
 
     /**
@@ -33,7 +32,7 @@ public class SocketDisconnectService {
         handleGameDisconnect(client);
 
         // 게임방 및 로비에서 퇴장 처리
-        handleRoomDisconnect(client, userId);
+        handleRoomDisconnect(client);
 
         log.info("Client disconnected - userId: {}, sessionId: {}", userId, client.getSessionId());
         client.disconnect();
@@ -42,17 +41,9 @@ public class SocketDisconnectService {
     /**
      * 클라이언트가 속한 모든 방에서 퇴장 처리합니다.
      */
-    private void handleRoomDisconnect(SocketIOClient client, Integer userId) {
+    private void handleRoomDisconnect(SocketIOClient client) {
         try {
-            for (String room : client.getAllRooms()) {
-                if (room.startsWith(ROOM_KEY_PREFIX)) {  // GAME_ROOM_PREFIX 대신 ROOM_KEY_PREFIX 사용
-                    roomService.leaveRoom(client, room);
-                }
-                else if (room.equals(LOBBY_ROOM)) {
-                    lobbyService.leaveLobby(client);
-                }
-                client.leaveRoom(room); //
-            }
+            roomService.clientLeaveAllRooms(client);
         } catch (Exception e) {
             throw new BaseException(SOCKET_DISCONNECTION_ERROR);
         }
