@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.undaied.domain.user.entity.Users;
 import com.ssafy.undaied.domain.user.entity.repository.UserRepository;
 import com.ssafy.undaied.socket.common.exception.SocketException;
+import com.ssafy.undaied.socket.lobby.dto.response.LobbyRoomListResponseDto;
 import com.ssafy.undaied.socket.lobby.dto.response.LobbyUpdateResponseDto;
 import com.ssafy.undaied.socket.lobby.dto.response.UpdateData;
 import com.ssafy.undaied.socket.lobby.service.LobbyService;
@@ -19,12 +20,10 @@ import com.ssafy.undaied.socket.room.dto.response.RoomUserResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.ssafy.undaied.socket.common.constant.EventType.*;
@@ -37,11 +36,13 @@ import static com.ssafy.undaied.socket.common.exception.SocketErrorCode.*;
 public class RoomService {
 
     private final RedisTemplate<String, Object> jsonRedisTemplate;
+    private final StringRedisTemplate stringRedisTemplate;
     private final LobbyService lobbyService;
     private final UserRepository userRepository;
     private final SocketIOServer server;
     private final ObjectMapper objectMapper;
 
+    private static final Integer PAGE_SIZE = 10;
 
     public RoomCreateResponseDto createRoom(RoomCreateRequestDto request, SocketIOClient client) throws SocketException {
         try {
@@ -277,7 +278,6 @@ public class RoomService {
         return rooms.contains(key);
     }
 
-
     public RoomEnterResponseDto enterRoom(SocketIOClient client, Long roomId, Integer password) throws SocketException {
         String key = ROOM_KEY_PREFIX + roomId;
         String roomKey = ROOM_LIST + key;  // "rooms:room:1"
@@ -351,5 +351,62 @@ public class RoomService {
                 .room(roomResponse)  // RoomCreateResponseDto로 변경
                 .build();
     }
+
+    public LobbyRoomListResponseDto findWaitingRoomList() {
+        List<UpdateData> waitingRooms = new ArrayList<>();
+
+        try {
+            Set<String> waitingKeys = stringRedisTemplate.keys(WAITING_LIST + "*");
+            log.debug("Found waiting keys: {}", waitingKeys);
+
+            if (waitingKeys != null) {
+                for (String waitingKey : waitingKeys) {
+                    try {
+                        String roomKey = waitingKey.substring(WAITING_LIST.length());
+                        String fullRoomKey = ROOM_LIST + roomKey;
+                        log.debug("Attempting to get room data for key: {}", fullRoomKey);
+
+                        Object roomData = jsonRedisTemplate.opsForValue().get(fullRoomKey);
+//                        log.debug("Raw room data: {}", roomData);
+//                        log.debug("Raw room data class: {}", roomData != null ? roomData.getClass().getName() : "null");
+
+                        if (roomData instanceof LinkedHashMap<?, ?> map) {
+                            // Integer를 Long으로 안전하게 변환
+                            Object roomIdObj = map.get("roomId");
+                            Long roomId;
+                            if (roomIdObj instanceof Integer) {
+                                roomId = ((Integer) roomIdObj).longValue();
+                            } else if (roomIdObj instanceof Long) {
+                                roomId = (Long) roomIdObj;
+                            } else {
+                                roomId = Long.valueOf(roomIdObj.toString());
+                            }
+
+                            UpdateData updateData = UpdateData.builder()
+                                    .roomId(roomId)  // 변환된 Long 값 사용
+                                    .roomTitle((String) map.get("roomTitle"))
+                                    .isPrivate((Boolean) map.get("isPrivate"))
+                                    .currentPlayerNum(((List<?>) map.get("currentPlayers")).size())
+                                    .playing((Boolean) map.get("playing"))
+                                    .build();
+                            waitingRooms.add(updateData);
+
+                        }
+                    } catch (Exception e) {
+                        log.error("Error processing room key {}: {}", waitingKey, e.getMessage(), e);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("Error in findWaitingRoomList: {}", e.getMessage(), e);
+            throw e;
+        }
+
+        return LobbyRoomListResponseDto.builder()
+                .rooms(waitingRooms)
+                .totalPage(waitingRooms.size() / PAGE_SIZE)
+                .build();
+    }
+
 
 }
