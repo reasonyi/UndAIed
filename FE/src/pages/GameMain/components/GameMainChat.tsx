@@ -52,12 +52,9 @@ function GameMainChat() {
     const message = chat;
     setChat(""); // 입력창 초기화
 
-    socket.emit("lobby:chat", { message }, (response: ChatMessage) => {
-      // 서버 응답을 받으면 채팅 목록에 추가
-      // setChatList((prev) => [...prev, response]);
-      setTimeout(scrollToBottom, 0);
-      setIsScrolledToBottom(true);
-    });
+    socket?.emit("lobby:chat", message);
+    setTimeout(scrollToBottom, 0);
+    setIsScrolledToBottom(true);
   };
   <style>
     {`
