@@ -72,7 +72,7 @@ public class VoteService {
             redisTemplate.opsForList().rightPush(eventKey, voteEvent);
 
             VoteSubmitResponseDto responseDto = VoteSubmitResponseDto.builder()
-                    .number(Integer.parseInt(voterNumber))
+                    .number(Integer.parseInt(targetNumber))
                     .build();
 
             return responseDto;
