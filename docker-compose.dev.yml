@@ -69,7 +69,6 @@
 # networks:
 #   app_network:
 #     driver: bridge
-
 services:
   frontend:
     build: ./FE

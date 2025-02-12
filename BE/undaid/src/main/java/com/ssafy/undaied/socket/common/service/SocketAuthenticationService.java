@@ -5,16 +5,9 @@ import com.corundumstudio.socketio.SocketIOClient;
 import com.ssafy.undaied.global.auth.token.JwtTokenProvider;
 import com.ssafy.undaied.global.common.exception.BaseException;
 import com.ssafy.undaied.global.common.exception.ErrorCode;
-import io.netty.handler.codec.http.HttpHeaders;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import static com.ssafy.undaied.global.common.exception.ErrorCode.NOT_AUTHENTICATED;
 import static com.ssafy.undaied.global.common.exception.ErrorCode.TOKEN_VALIDATION_FAILED;
@@ -23,34 +16,39 @@ import static com.ssafy.undaied.global.common.exception.ErrorCode.TOKEN_VALIDATI
 @Slf4j
 @RequiredArgsConstructor
 public class SocketAuthenticationService {
+
     private final JwtTokenProvider jwtTokenProvider;
 
     public int authenticateClient(SocketIOClient client) {
         try {
+            // 1. Socket.io handshake data
             HandshakeData handshakeData = client.getHandshakeData();
-            Map<String, List<String>> authData = handshakeData.getUrlParams();
+            // 2. 쿼리 파라미터 "auth"에서 토큰 추출
+            String token = handshakeData.getSingleUrlParam("auth");
 
-            // auth 파라미터에서 토큰 가져오기
-            if (!authData.containsKey("token")) {
-                log.error("No token found in auth data");
+            if (token == null) {
+                log.error("No auth parameter found in query");
                 throw new BaseException(NOT_AUTHENTICATED);
             }
 
-            String token = authData.get("token").get(0);
-            log.debug("Found token in auth data: {}", token);
+            log.debug("Found auth param: {}", token);
 
-            // 이미 Bearer prefix가 포함되어 있으므로 추가할 필요 없음
+            // 3. "Bearer " 접두사가 포함되어 있다면, JwtTokenProvider에서 제거
+            //    (JwtTokenProvider.resolveToken()이 알아서 처리한다고 가정)
             String jwt = jwtTokenProvider.resolveToken(token);
+
             if (jwt == null) {
                 log.error("Failed to resolve JWT token");
                 throw new BaseException(TOKEN_VALIDATION_FAILED);
             }
 
+            // 4. 토큰 유효성 검증
             if (!jwtTokenProvider.validateToken(jwt)) {
                 log.error("JWT validation failed");
                 throw new BaseException(TOKEN_VALIDATION_FAILED);
             }
 
+            // 5. 토큰에서 userId 추출
             int userId = jwtTokenProvider.getUserIdFromToken(jwt);
             log.debug("Successfully authenticated user ID: {}", userId);
 
