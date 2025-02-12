@@ -11,4 +11,5 @@ public class PlayerInfoDto {
     private int number; // 익명 ID 인덱스 (1~7)
     private boolean isDied; // 생존 여부
     private boolean isInfected; // 감염 여부
+    private boolean isInGame;
 }

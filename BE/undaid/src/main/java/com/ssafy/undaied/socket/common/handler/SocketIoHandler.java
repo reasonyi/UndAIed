@@ -43,9 +43,9 @@ public class SocketIoHandler {
 
     @PostConstruct
     private void init() {
+
         namespace.addConnectListener(listenConnected());
         namespace.addDisconnectListener(listenDisconnected());
-        namespace.addListeners(gameChatHandler);
 
         addGameStartListeners();
     }
@@ -58,12 +58,17 @@ public class SocketIoHandler {
      */
     public ConnectListener listenConnected() {
         return (client) -> {
+
+            String namespace = client.getNamespace().getName();
+            log.info("Client attempting to connect to namespace: {}", namespace);
+
             // 더 자세한 디버깅을 위한 로그
             SocketIONamespace clientNamespace = client.getNamespace();
             String namespaceName = clientNamespace != null ? clientNamespace.getName() : "null";
 
             log.info("Client namespace object: {}", clientNamespace);
             log.info("Client attempting to connect to namespace: '{}'", namespaceName);
+
 
             try {
                 // null 체크를 포함한 네임스페이스 검증
