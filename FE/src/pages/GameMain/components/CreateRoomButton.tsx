@@ -19,7 +19,7 @@ interface CreateRoomForm {
 interface CreateResponse {
   isError: boolean;
   errorMessage: string;
-  roomId: number;
+  data: number;
 }
 
 function CreateRoomButton() {
@@ -46,9 +46,9 @@ function CreateRoomButton() {
       } else {
         console.log("들어왔어");
         if (roomInfo.isPrivate) {
-          navigate(`room/${response.roomId}?pwd=${roomInfo.roomPassword}`);
+          navigate(`room/${response.data}?pwd=${roomInfo.roomPassword}`);
         } else {
-          navigate(`room/${response.roomId}`);
+          navigate(`room/${response.data}`);
         }
       }
     });
