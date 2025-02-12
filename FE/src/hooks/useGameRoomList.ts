@@ -29,7 +29,7 @@ export const useGameRooms = () => {
   }, [rooms, gameRoomList.page]);
 
   const fetchMoreRooms = useCallback(async () => {
-    if (gameRoomList.loading || !gameRoomList.hasMore) return;
+    if (gameRoomList.loading || !gameRoomList.hasMore || !socket) return;
 
     setGameRoomList((prev) => ({ ...prev, loading: true }));
     try {
@@ -43,6 +43,8 @@ export const useGameRooms = () => {
 
   // 소켓 이벤트 리스너를 위한 useEffect
   useEffect(() => {
+    if (!socket) return;
+
     const handleRoomList = (response: {
       rooms: GameRoom[];
       totalPage: number;
@@ -103,14 +105,24 @@ export const useGameRooms = () => {
   }, [socket]); // socket만 의존성으로 가짐
 
   const loadNextPage = useCallback(() => {
-    if (!gameRoomList.loading && gameRoomList.hasMore) {
+    if (!gameRoomList.loading && gameRoomList.hasMore && socket) {
       setGameRoomList((prev) => ({
         ...prev,
         page: prev.page + 1,
       }));
       fetchMoreRooms();
     }
-  }, [gameRoomList.loading, gameRoomList.hasMore, fetchMoreRooms]);
+  }, [gameRoomList.loading, gameRoomList.hasMore, fetchMoreRooms, socket]);
+
+  // const loadNextPage = useCallback(() => {
+  //   if (!gameRoomList.loading && gameRoomList.hasMore) {
+  //     setGameRoomList((prev) => ({
+  //       ...prev,
+  //       page: prev.page + 1,
+  //     }));
+  //     fetchMoreRooms();
+  //   }
+  // }, [gameRoomList.loading, gameRoomList.hasMore, fetchMoreRooms]);
   return {
     rooms,
     loading: gameRoomList.loading,
