@@ -13,7 +13,7 @@ import { SocketProvider } from "../components/SocketContext";
 function Game() {
   return (
     <>
-      <SocketProvider url="http://localhost:9090">
+      <SocketProvider url={import.meta.env.VITE_SOCKET_URL}>
         <Outlet />
       </SocketProvider>
     </>
