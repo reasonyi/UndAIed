@@ -1,6 +1,7 @@
 package com.ssafy.undaied.socket.chat.handler;
 
 import com.corundumstudio.socketio.SocketIOClient;
+import com.corundumstudio.socketio.SocketIONamespace;
 import com.corundumstudio.socketio.SocketIOServer;
 import com.corundumstudio.socketio.annotation.OnEvent;
 import com.ssafy.undaied.socket.stage.handler.StageHandler;
@@ -19,12 +20,12 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class GameChatHandler {
 
-    private final SocketIOServer socketIOServer;
+    private final SocketIONamespace namespace;
     private final GameChatService gameChatService;
 
     @PostConstruct
     private void init() {
-        socketIOServer.addNamespace("/socket.io").addEventListener("chat:game", GameChatRequestDto.class,
+        namespace.addEventListener("chat:game", GameChatRequestDto.class,
                 (client, data, ackRequest) -> {
                     try {
                         log.info("Received data: {}", data);

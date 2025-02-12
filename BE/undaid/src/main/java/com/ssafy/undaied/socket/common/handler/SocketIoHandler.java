@@ -1,6 +1,7 @@
 package com.ssafy.undaied.socket.common.handler;
 
 import com.corundumstudio.socketio.HandshakeData;
+import com.corundumstudio.socketio.SocketIONamespace;
 import com.ssafy.undaied.global.common.exception.BaseException;
 import com.ssafy.undaied.socket.common.constant.EventType;
 import com.ssafy.undaied.socket.stage.handler.StageHandler;
@@ -12,6 +13,7 @@ import com.ssafy.undaied.socket.common.service.SocketDisconnectService;
 import com.ssafy.undaied.socket.lobby.service.LobbyService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import com.corundumstudio.socketio.SocketIOServer;
@@ -31,6 +33,7 @@ import static com.ssafy.undaied.global.common.exception.ErrorCode.*;
 public class SocketIoHandler {
 
     private final SocketIOServer server;
+    private final SocketIONamespace namespace;
     private final SocketAuthenticationService authenticationService;
     private final SocketDisconnectService disconnectService;
     private final LobbyService lobbyService;
@@ -40,8 +43,9 @@ public class SocketIoHandler {
 
     @PostConstruct
     private void init() {
-        server.addConnectListener(listenConnected());
-        server.addDisconnectListener(listenDisconnected());
+
+        namespace.addConnectListener(listenConnected());
+        namespace.addDisconnectListener(listenDisconnected());
 
         addGameStartListeners();
     }
@@ -49,25 +53,32 @@ public class SocketIoHandler {
     /**
      * 클라이언트 연결 리스너
      */
+    /**
+     * 클라이언트 연결 리스너
+     */
     public ConnectListener listenConnected() {
         return (client) -> {
+
             String namespace = client.getNamespace().getName();
             log.info("Client attempting to connect to namespace: {}", namespace);
 
-            //gameId 설정(포스트맨 테스트용)
-//            String gameIdParam = client.getHandshakeData().getSingleUrlParam("gameId"); // 쿼리에서 gameId 가져오기
-//
-//            if (gameIdParam != null) {
-//                int gameId = Integer.parseInt(gameIdParam);
-//                client.set("gameId", gameId);
-//                client.joinRoom("game:" + gameId);  // ✅ "game:5" 같은 방에 자동으로 들어가도록 설정
-//                log.info("Client connected - gameId: {}, sessionId: {}", gameId, client.getSessionId());
-//            } else {
-//                log.warn("Client connected without gameId - sessionId: {}", client.getSessionId());
-//            }
+            // 더 자세한 디버깅을 위한 로그
+            SocketIONamespace clientNamespace = client.getNamespace();
+            String namespaceName = clientNamespace != null ? clientNamespace.getName() : "null";
+
+            log.info("Client namespace object: {}", clientNamespace);
+            log.info("Client attempting to connect to namespace: '{}'", namespaceName);
+
 
             try {
-                 // 디버깅을 위한 handshake 데이터 출력
+                // null 체크를 포함한 네임스페이스 검증
+                if (clientNamespace == null || !"/socket.io".equals(namespaceName)) {
+                    log.info("Connection failed: wrong or empty namespace: '{}' :: Client SessionId: {}",
+                            namespaceName, client.getSessionId());
+                    throw new BaseException(SOCKET_CONNECTION_FAILED);
+                }
+
+                // 디버깅을 위한 handshake 데이터 출력
                 HandshakeData handshakeData = client.getHandshakeData();
                 log.debug("Connection attempt - Query params: {}", handshakeData.getUrlParams());
                 log.debug("Connection attempt - Request URI: {}", handshakeData.getUrl());
@@ -95,12 +106,13 @@ public class SocketIoHandler {
                     throw new BaseException(USER_NOT_FOUND);
                 }
 
- 
                 // 클라이언트 데이터 설정
                 client.set("userId", userId);
                 client.set("nickname", user.getNickname());
                 client.set("profileImage", user.getProfileImage());
-                
+
+                // 로비 입장
+                lobbyService.joinLobby(client);
 
             } catch (Exception e) {
                 log.error("Connection error: ", e);

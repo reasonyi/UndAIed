@@ -1,6 +1,7 @@
 package com.ssafy.undaied.socket.init.handler;
 
 import com.corundumstudio.socketio.SocketIOClient;
+import com.corundumstudio.socketio.SocketIONamespace;
 import com.corundumstudio.socketio.SocketIOServer;
 import com.corundumstudio.socketio.annotation.OnEvent;
 import com.ssafy.undaied.socket.common.exception.SocketErrorCode;
@@ -28,14 +29,14 @@ import static com.ssafy.undaied.socket.common.constant.SocketRoom.ROOM_KEY_PREFI
 @Slf4j
 public class GameInitHandler {
 
-    private final SocketIOServer socketIOServer;
+    private final SocketIONamespace namespace;
     private final GameInitService gameInitService;
     private final RedisTemplate<String, String> redisTemplate;
     private final Map<Integer, Boolean> gameInitializationStatus = new ConcurrentHashMap<>();
 
     @PostConstruct
     public void init() {
-        socketIOServer.addNamespace("/socket.io").addEventListener("game:init", Object.class, (client, data, ackRequest) -> {
+        namespace.addEventListener("game:init", Object.class, (client, data, ackRequest) -> {
             try {
                 log.info("Game init request received.");
 
@@ -92,7 +93,7 @@ public class GameInitHandler {
 
     @PostConstruct
     public void gameInfo() {
-        socketIOServer.addEventListener("game:info", Integer.class, (client, gameId, ackRequest) -> {
+        namespace.addEventListener("game:info", Integer.class, (client, gameId, ackRequest) -> {
             try {
                 // 1. 게임 ID 검증
                 if (gameId == null) {

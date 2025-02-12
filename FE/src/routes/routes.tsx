@@ -84,10 +84,6 @@ const router = createBrowserRouter([
         path: "/gamemypage",
         element: <GameMyPage />,
       },
-      {
-        path: "/Game",
-        element: <Game />,
-      },
     ],
     errorElement: <NotFound />,
   },

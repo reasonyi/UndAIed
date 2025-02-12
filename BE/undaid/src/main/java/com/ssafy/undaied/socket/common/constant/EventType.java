@@ -3,17 +3,16 @@ package com.ssafy.undaied.socket.common.constant;
 public enum EventType {
 
     // 로비
+    ROOM_LIST_AT_LOBBY("lobby:room:list"),
+    LOBBY_CHAT("lobby:chat"),
     CREATE_ROOM_AT_LOBBY("lobby:room:create"),
-    UPDATE_LOBBY("lobby:room:update"),
-    CREATE_ROOM("room:create"),
-    LIST_ROOMS("room:list"),
-    ENTER_ROOM_AT_LOBBY("lobby:room:enter"),
-    ENTER_ROOM("room:enter"),
-    LOOBY_CHAT("lobby:chat"),
+    UPDATE_ROOM_AT_LOBBY("lobby:room:update"),
 
     // 대기방
-    LEAVE_ROOM("room:leave"),
-    UPDATE_ROOM_HOST("room:host:update"),
+    ENTER_ROOM_EMIT("room:enter:emit"),
+    ENTER_ROOM_SEND("room:enter:send"),
+    LEAVE_ROOM_EMIT("room:leave:emit"),
+    LEAVE_ROOM_SEND("room:leave:send"),
     ROOM_CHAT("room:chat"),
     START_GAME("game:start"),
 

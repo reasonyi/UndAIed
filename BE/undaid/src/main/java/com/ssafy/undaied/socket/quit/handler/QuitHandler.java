@@ -1,5 +1,6 @@
 package com.ssafy.undaied.socket.quit.handler;
 
+import com.corundumstudio.socketio.SocketIONamespace;
 import com.corundumstudio.socketio.SocketIOServer;
 import com.ssafy.undaied.socket.common.exception.SocketErrorCode;
 import com.ssafy.undaied.socket.common.exception.SocketException;
@@ -18,11 +19,11 @@ import java.util.Map;
 @Slf4j
 public class QuitHandler {
     private final QuitService quitService;
-    private final SocketIOServer socketIOServer;
+    private final SocketIONamespace namespace;
 
     @PostConstruct
     private void init() {
-        socketIOServer.addNamespace("/socket.io").addEventListener("quit:game", QuitRequestDto.class,
+        namespace.addEventListener("quit:game", QuitRequestDto.class,
                 (client, requestDto, ackRequest) -> {
                     try {
 //                        // 🔹 클라이언트 정보 가져오기 -- 나중에 살려야

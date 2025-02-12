@@ -19,7 +19,7 @@ import static com.ssafy.undaied.socket.common.constant.SocketRoom.*;
 @Slf4j
 @RequiredArgsConstructor
 public class SocketDisconnectService {
-    private static final String GAME_ROOM_PREFIX = "game_";
+
     private final RoomService roomService;
     private final LobbyService lobbyService;
     private final QuitService quitService;
