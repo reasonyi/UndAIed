@@ -33,6 +33,10 @@ function CreateRoomButton() {
 
   const navigate = useNavigate();
   const handleSubmit = (e: React.FormEvent) => {
+    if (!socket) {
+      console.log("socket이 없습니다");
+      return;
+    }
     e.preventDefault();
     socket.emit("lobby:room:create", roomInfo, (response: CreateResponse) => {
       console.log("응답입니다.", response);

@@ -7,7 +7,7 @@ import { Socket } from "socket.io-client";
 
 interface IFormProps {
   playerNum: number | undefined;
-  socket: Socket; // 부모에서 전달받을 소켓 인스턴스
+  socket: Socket | null; // 부모에서 전달받을 소켓 인스턴스
 }
 interface IForm {
   chat: string;
@@ -26,6 +26,11 @@ function ChatForm({ playerNum, socket }: IFormProps) {
     //local storage에서 토큰 가져오기, player num 가져오기기
     //axios api 작성성
     e?.preventDefault();
+
+    if (!socket) {
+      console.log("socket이 없습니다");
+      return;
+    }
 
     try {
       // 1) 서버로 메시지 전송
