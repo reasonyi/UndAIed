@@ -45,6 +45,8 @@ public class RoomService {
 
     public RoomCreateResponseDto createRoom(RoomCreateRequestDto request, SocketIOClient client) throws SocketException {
         try {
+            log.debug("Starting room creation...");
+
             if (request == null) {
                 throw new SocketException(CREATE_ROOM_FAILED);
             }
@@ -66,14 +68,8 @@ public class RoomService {
             Long roomId = jsonRedisTemplate.opsForValue().increment(ROOM_SEQUENCE_KEY);
             log.info("Generated room ID: {}", roomId);
 
-            int hostId;
-            int profileImage;
-            try {
-                hostId = Integer.parseInt(client.get("userId"));
-                profileImage = Integer.parseInt(client.get("profileImage"));
-            } catch (NumberFormatException e) {
-                throw new SocketException(USER_INFO_NOT_FOUND);
-            }
+            int hostId = (Integer) client.get("userId");
+            int profileImage = (Integer) client.get("profileImage");
 
             if (!userRepository.existsById(hostId)) {
                 throw new SocketException(USER_INFO_NOT_FOUND);
@@ -87,7 +83,7 @@ public class RoomService {
             List<RoomUser> users = new ArrayList<>();
             users.add(RoomUser.builder()
                     .enterId(0)
-                    .userId(client.get("userId"))
+                    .userId(hostId)
                     .isHost(true)
                     .nickname(nickname)
                     .profileImage(profileImage)
@@ -101,12 +97,15 @@ public class RoomService {
                     .playing(false)
                     .currentPlayers(users)
                     .build();
+            log.debug("Built Room object: {}", room);
 
             String key = ROOM_KEY_PREFIX + roomId;
+            log.debug("Generated key: {}", key);
 
             // rooms 네임스페이스에 방 정보 저장
             String roomKey = ROOM_LIST + key;  // "rooms:room:1"
             jsonRedisTemplate.opsForValue().set(roomKey, room);
+            log.debug("Saved room to Redis");
 
             // waiting 리스트에 방 키만 추가
             String waitingKey = WAITING_LIST + key;  // "waiting:room:1"
@@ -149,7 +148,7 @@ public class RoomService {
 
     public LobbyUpdateResponseDto leaveRoom(Long roomId, SocketIOClient client) throws SocketException {
         try {
-            String key = ROOM_KEY_PREFIX + roomId;
+            String key = ROOM_KEY_PREFIX + roomId; // room:1
             String roomKey = ROOM_LIST + key;  // "rooms:room:1"
             String waitingKey = WAITING_LIST + key;  // "waiting:room:1"
 
@@ -167,8 +166,7 @@ public class RoomService {
             }
 
             // 나가려는 유저가 호스트인지 확인
-            String userIdStr = client.get("userId");
-            int userId = Integer.parseInt(userIdStr);
+            int userId = (Integer) client.get("userId");
 
             boolean isHost = currentPlayers.stream()
                     .filter(user -> user.getUserId().equals(userId))  // userId로 비교
@@ -266,13 +264,14 @@ public class RoomService {
                 .currentPlayers(userResponseDtos)
                 .build();
 
-        server.getRoomOperations(key).sendEvent(LEAVE_ROOM.getValue(), responseDto);
+        server.getRoomOperations(key).sendEvent(LEAVE_ROOM_SEND.getValue(), responseDto);
         log.info("Room information sent to room {} users", key);
     }
 
     // 유저가 특정 방에 있는지 확인하는 메서드 추가
     public boolean isUserInRoom(SocketIOClient client, Long roomId) {
         String key = ROOM_KEY_PREFIX + roomId;
+        String roomKey = ROOM_LIST + key;
         Set<String> rooms = new HashSet<>(client.getAllRooms());
 
         return rooms.contains(key);
@@ -301,18 +300,8 @@ public class RoomService {
 
             // 새로운 RoomUser 생성을 위한 유저 정보 가져오기
             String nickname = client.get("nickname");
-            int userId;
-            int profileImage;
-            try {
-                userId = Integer.parseInt(client.get("userId"));
-                profileImage = Integer.parseInt(client.get("profileImage"));
-            } catch (NumberFormatException e) {
-                throw new SocketException(USER_INFO_NOT_FOUND);
-            }
-
-            if (nickname == null) {
-                throw new SocketException(USER_INFO_NOT_FOUND);
-            }
+            int userId = (Integer) client.get("userId");
+            int profileImage = (Integer) client.get("profileImage");
 
             // 현재 방의 최대 enterId를 찾아서 +1
             int newEnterId = room.getCurrentPlayers().stream()
@@ -335,7 +324,7 @@ public class RoomService {
 
             // 입장하는 사용자를 이동시키기
             client.leaveRoom(LOBBY_ROOM);
-            client.joinRoom(roomKey);  // rooms:room:1 형태의 키로 방 입장
+            client.joinRoom(key);  // rooms:room:1 형태의 키로 방 입장
         }
 
         // RoomUser를 RoomUserResponseDto로 변환
