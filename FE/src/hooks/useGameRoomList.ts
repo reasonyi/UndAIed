@@ -4,50 +4,75 @@ import { useEffect, useState, useCallback } from "react";
 import { gameMainState } from "../store/gameMainState";
 import { GameRoom } from "../types/gameRoomInfo";
 
+interface GameRoomState {
+  page: number;
+  loading: boolean;
+  hasMore: boolean;
+  totalPages: number;
+}
+
 export const useGameRooms = () => {
   const socket = useSocket();
   const [rooms, setRooms] = useRecoilState(gameMainState);
-  const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
-  const [totalPages, setTotalPages] = useState(3);
+  const [gameRoomList, setGameRoomList] = useState<GameRoomState>({
+    page: 1,
+    loading: false,
+    hasMore: true,
+    totalPages: 3,
+  });
 
-  // 웹소켓으로 방 목록 요청
+  const getCurrentPageData = useCallback(() => {
+    const startIndex = (gameRoomList.page - 1) * 10;
+    const endIndex = startIndex + 10;
+    return rooms.slice(startIndex, endIndex);
+  }, [rooms, gameRoomList.page]);
+
   const fetchMoreRooms = useCallback(async () => {
-    if (loading || !hasMore) return;
+    if (gameRoomList.loading || !gameRoomList.hasMore || !socket) return;
 
-    setLoading(true);
+    setGameRoomList((prev) => ({ ...prev, loading: true }));
     try {
-      // 웹소켓으로 특정 페이지의 방 목록 요청
-      socket.emit("lobby:room:list", { page });
+      socket.emit("lobby:room:list", { page: gameRoomList.page });
+      console.log("방 목록 요청 보냄");
     } catch (error) {
       console.error("방 목록을 불러오는데 실패했습니다:", error);
+      setGameRoomList((prev) => ({ ...prev, loading: false }));
     }
-  }, [socket, page, loading, hasMore]);
+  }, [socket, gameRoomList.page, gameRoomList.loading, gameRoomList.hasMore]);
 
-  // 웹소켓 이벤트 리스너 설정
+  // 소켓 이벤트 리스너를 위한 useEffect
   useEffect(() => {
-    // 방 목록 응답 처리
+    if (!socket) return;
+
     const handleRoomList = (response: {
       rooms: GameRoom[];
       totalPage: number;
     }) => {
-      setRooms((prev: GameRoom[]) => [...prev, ...response.rooms]);
-      setTotalPages(response.totalPage);
-      setPage((prev) => prev + 1);
-
-      if (page >= response.totalPage) {
-        setHasMore(false);
-      }
-      setLoading(false);
+      console.log(
+        "들어오자마자 실행하는 핸들 룸 리스트 ",
+        rooms,
+        response.rooms,
+        gameRoomList
+      );
+      setRooms(response.rooms);
+      setGameRoomList((prev) => ({
+        ...prev,
+        totalPages: response.totalPage,
+        page: prev.page + 1,
+        hasMore: prev.page < response.totalPage,
+        loading: false,
+      }));
     };
 
     // 방 생성 이벤트 처리
     const handleRoomCreated = (newRoom: GameRoom) => {
-      setRooms((prev: GameRoom[]) => [newRoom, ...prev]);
+      if (!newRoom.isPrivate) {
+        console.log(newRoom.isPrivate);
+        setRooms((prev: GameRoom[]) => [newRoom, ...prev]);
+      }
     };
 
-    // 방 업데이트 이벤트 처리 (인원 변경, 게임 상태 변경 등)
+    // 방 업데이트 이벤트 처리
     const handleRoomUpdated = (updatedRoom: GameRoom) => {
       setRooms((prev: GameRoom[]) =>
         prev.map((room) =>
@@ -69,24 +94,38 @@ export const useGameRooms = () => {
     socket.on("lobby:room:update", handleRoomUpdated);
     socket.on("lobby:room:delete", handleRoomDeleted);
 
-    // 컴포넌트 언마운트 시 이벤트 리스너 제거
+    // 클린업 함수
     return () => {
       socket.off("lobby:room:list", handleRoomList);
       socket.off("lobby:room:create", handleRoomCreated);
       socket.off("lobby:room:update", handleRoomUpdated);
       socket.off("lobby:room:delete", handleRoomDeleted);
     };
-  }, [socket, page, setRooms]);
+  }, [socket]); // socket만 의존성으로 가짐
 
-  // 초기 데이터 로드
-  useEffect(() => {
-    fetchMoreRooms();
-  }, []);
+  const loadNextPage = useCallback(() => {
+    if (!gameRoomList.loading && gameRoomList.hasMore && socket) {
+      setGameRoomList((prev) => ({
+        ...prev,
+        page: prev.page + 1,
+      }));
+      fetchMoreRooms();
+    }
+  }, [gameRoomList.loading, gameRoomList.hasMore, fetchMoreRooms, socket]);
 
+  // const loadNextPage = useCallback(() => {
+  //   if (!gameRoomList.loading && gameRoomList.hasMore) {
+  //     setGameRoomList((prev) => ({
+  //       ...prev,
+  //       page: prev.page + 1,
+  //     }));
+  //     fetchMoreRooms();
+  //   }
+  // }, [gameRoomList.loading, gameRoomList.hasMore, fetchMoreRooms]);
   return {
     rooms,
-    loading,
-    hasMore,
-    fetchMoreRooms,
+    loading: gameRoomList.loading,
+    hasMore: gameRoomList.hasMore,
+    fetchMoreRooms: loadNextPage,
   };
 };

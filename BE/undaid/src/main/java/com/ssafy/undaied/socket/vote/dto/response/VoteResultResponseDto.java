@@ -1,8 +1,6 @@
 package com.ssafy.undaied.socket.vote.dto.response;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -11,10 +9,15 @@ import java.util.stream.Collectors;
 
 
 @Getter
-@Builder
+@NoArgsConstructor
 public class VoteResultResponseDto {
     private final Integer number = 0;
     private String message;
+
+    @Builder
+    public VoteResultResponseDto(String message) {
+        this.message = message;
+    }
 
     public static VoteResultResponseDto notifyVoteResult(int eliminatedNumber, int receivedCount, boolean isAI, boolean isInfected) {
         String type;

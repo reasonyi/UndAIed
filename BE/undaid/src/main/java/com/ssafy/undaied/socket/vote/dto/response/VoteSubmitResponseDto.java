@@ -3,7 +3,7 @@ package com.ssafy.undaied.socket.vote.dto.response;
 import lombok.*;
 
 @Getter
-@RequiredArgsConstructor
+@NoArgsConstructor
 public class VoteSubmitResponseDto {
     private Integer number;
     private String message;

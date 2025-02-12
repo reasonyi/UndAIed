@@ -1,19 +1,16 @@
-package com.ssafy.undaied.socket.room.dto;
+package com.ssafy.undaied.socket.room.dto.response;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.*;
 
 import java.io.Serializable;
 
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Getter
-public class RoomUser implements Serializable {
-    private static final long serialVersionUID = 1L;
-
+@Getter @Setter
+public class RoomUserResponseDto {
     private Integer enterId;
-    private Integer userId;
     private Boolean isHost;
     private String nickname;
     private Integer profileImage;

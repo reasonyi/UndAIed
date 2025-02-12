@@ -29,7 +29,7 @@ public class VoteService {
     @Transactional
     public VoteSubmitResponseDto submitVote(Integer voterUserId, Integer gameId, VoteSubmitRequestDto voteSubmitRequestDto)
         throws SocketException {
-        String userNumberKey = "game:" + gameId + ":user_mapping";
+        String userNumberKey = "game:" + gameId + ":number_mapping";
 
         try {
             String gameKey = "game:" + gameId;
@@ -44,18 +44,8 @@ public class VoteService {
 
             String voterNumber = voterNumberObj.toString();
             String targetNumber = voteSubmitRequestDto.getTarget();
-            String targetUserId = null;
 
-            // targetNumber로 targetUserId 찾기
-            Map<Object, Object> userNumberMapping = redisTemplate.opsForHash().entries(userNumberKey);
-            for (Map.Entry<Object, Object> entry : userNumberMapping.entrySet()) {
-                if (entry.getValue().toString().equals(targetNumber)) {
-                    targetUserId = entry.getKey().toString();
-                    break;
-                }
-            }
-
-            if (targetUserId == null || !isValidTarget(gameId, targetNumber))
+            if (!isValidTarget(gameId, targetNumber))
                 throw new SocketException(SocketErrorCode.VOTE_INVALID_TARGET);
 
             if (!isValidVote(gameId, voterNumber))
@@ -71,9 +61,9 @@ public class VoteService {
                 throw new SocketException(SocketErrorCode.VOTE_ALREADY_SUBMITTED);
 
             // 투표 이벤트 저장을 위한 닉네임 찾기
-            String userNameKey = "game:" + gameId + "user_nicknames";
-            String voteUserName = redisTemplate.opsForHash().get(userNameKey, voterUserId).toString();
-            String targetUserName = redisTemplate.opsForHash().get(userNameKey, targetUserId).toString();
+            String userNameKey = "game:" + gameId + "number_nicknames";
+            String voteUserName = redisTemplate.opsForHash().get(userNameKey, voterNumber).toString();
+            String targetUserName = redisTemplate.opsForHash().get(userNameKey, targetNumber).toString();
 
             String voteEvent = String.format("{vote} [%s] <%s> (%s) ~%s~ %s | ",
                     voteUserName, voterNumber, targetUserName, targetNumber, LocalDateTime.now());

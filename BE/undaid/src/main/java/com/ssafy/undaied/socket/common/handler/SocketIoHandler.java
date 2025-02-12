@@ -2,6 +2,7 @@ package com.ssafy.undaied.socket.common.handler;
 
 import com.corundumstudio.socketio.AckRequest;
 import com.corundumstudio.socketio.HandshakeData;
+import com.corundumstudio.socketio.SocketIONamespace;
 import com.ssafy.undaied.global.common.exception.BaseException;
 import com.ssafy.undaied.socket.common.constant.EventType;
 import com.ssafy.undaied.socket.common.exception.SocketException;
@@ -18,6 +19,7 @@ import com.ssafy.undaied.socket.vote.dto.response.VoteSubmitResponseDto;
 import com.ssafy.undaied.socket.vote.service.VoteService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import com.corundumstudio.socketio.SocketIOServer;
@@ -37,6 +39,7 @@ import static com.ssafy.undaied.global.common.exception.ErrorCode.*;
 public class SocketIoHandler {
 
     private final SocketIOServer server;
+    private final SocketIONamespace namespace;
     private final SocketAuthenticationService authenticationService;
     private final SocketDisconnectService disconnectService;
     private final LobbyService lobbyService;
@@ -47,23 +50,36 @@ public class SocketIoHandler {
 
     @PostConstruct
     private void init() {
-        server.addConnectListener(listenConnected());
-        server.addDisconnectListener(listenDisconnected());
-        server.addListeners(gameChatHandler);
+        namespace.addConnectListener(listenConnected());
+        namespace.addDisconnectListener(listenDisconnected());
+        namespace.addListeners(gameChatHandler);
 
         addGameStartListeners();
-        addVoteSubmitListeners();
     }
 
     /**
      * 클라이언트 연결 리스너
      */
+    /**
+     * 클라이언트 연결 리스너
+     */
     public ConnectListener listenConnected() {
         return (client) -> {
-            String namespace = client.getNamespace().getName();
-            log.info("Client attempting to connect to namespace: {}", namespace);
+            // 더 자세한 디버깅을 위한 로그
+            SocketIONamespace clientNamespace = client.getNamespace();
+            String namespaceName = clientNamespace != null ? clientNamespace.getName() : "null";
+
+            log.info("Client namespace object: {}", clientNamespace);
+            log.info("Client attempting to connect to namespace: '{}'", namespaceName);
 
             try {
+                // null 체크를 포함한 네임스페이스 검증
+                if (clientNamespace == null || !"/socket.io".equals(namespaceName)) {
+                    log.info("Connection failed: wrong or empty namespace: '{}' :: Client SessionId: {}",
+                            namespaceName, client.getSessionId());
+                    throw new BaseException(SOCKET_CONNECTION_FAILED);
+                }
+
                 // 디버깅을 위한 handshake 데이터 출력
                 HandshakeData handshakeData = client.getHandshakeData();
                 log.debug("Connection attempt - Query params: {}", handshakeData.getUrlParams());
@@ -92,20 +108,14 @@ public class SocketIoHandler {
                     throw new BaseException(USER_NOT_FOUND);
                 }
 
-
                 // 클라이언트 데이터 설정
                 client.set("userId", userId);
                 client.set("nickname", user.getNickname());
                 client.set("profileImage", user.getProfileImage());
 
-//                // 로비 입장 전 네임스페이스 확인
-//                if ("/socket.io".equals(namespace)) {
-//                    lobbyService.joinLobby(client);
-//                }
-//                else{
-//                    log.info("Connection failed: wrong namespace:" + namespace + " :: Client SessionId: " + client.getSessionId());
-//                    throw new BaseException(SOCKET_CONNECTION_FAILED);
-//                }
+                // 로비 입장
+                lobbyService.joinLobby(client);
+
             } catch (Exception e) {
                 log.error("Connection error: ", e);
                 client.disconnect();
@@ -141,31 +151,5 @@ public class SocketIoHandler {
                     stageHandler.handleGameStart(gameId);
                 });
     }
-
-    public void addVoteSubmitListeners() {
-        server.addNamespace("/socket.io").addEventListener(EventType.SUBMIT_VOTE.getValue(), VoteSubmitRequestDto.class,
-                (client, data, ack) -> {
-                    try {
-                        Integer userId = client.get("userId");
-                        Integer gameId = client.get("gameId");
-
-                        VoteSubmitResponseDto responseDto = voteService.submitVote(userId, gameId, data);
-                        if (ack.isAckRequested()) {
-                            ack.sendAckData(new AckResponse(true, null, responseDto));
-                        }
-                    } catch (SocketException e) {
-                        log.error("SocketException in submitVote: {}", e.getMessage());
-                        if (ack.isAckRequested()) {
-                            ack.sendAckData(new AckResponse(false, e.getErrorCode().getMessage(), null));
-                        }
-                    } catch (Exception e) {
-                        log.error("Unexpected error in submitVote: {}", e.getMessage());
-                        if (ack.isAckRequested()) {
-                            ack.sendAckData(new AckResponse(false, "Unexpected error occurred", null));
-                        }
-                    }
-                });
-    }
-
 
 }
