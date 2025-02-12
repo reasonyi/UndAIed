@@ -1,6 +1,7 @@
 package com.ssafy.undaied.socket.vote.handler;
 
 import com.corundumstudio.socketio.SocketIOClient;
+import com.corundumstudio.socketio.SocketIONamespace;
 import com.corundumstudio.socketio.SocketIOServer;
 import com.ssafy.undaied.socket.common.exception.SocketException;
 import com.ssafy.undaied.socket.common.exception.SocketExceptionHandler;
@@ -15,22 +16,25 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
+
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class VoteHandler {
 
-    private final SocketIOServer server;
+    private final SocketIONamespace namespace;
     private final VoteService voteService;
     private final SocketExceptionHandler socketExceptionHandler;
 
     @PostConstruct
     public void init() {
-        server.addNamespace("/socket.io").addEventListener(EventType.SUBMIT_VOTE.getValue(), VoteSubmitRequestDto.class,
+        namespace.addEventListener(EventType.SUBMIT_VOTE.getValue(), VoteSubmitRequestDto.class,
                 (client, data, ack) -> {
                     try {
-                        Integer userId = client.get("userId");
-                        Integer gameId = client.get("gameId");
+                        Integer userId = 1001;
+                        Integer gameId = 1;
+//                        Integer gameId = client.get("gameId");
 
                         VoteSubmitResponseDto responseDto = voteService.submitVote(userId, gameId, data);
                         if (ack.isAckRequested()) {
@@ -62,7 +66,7 @@ public class VoteHandler {
     // 투표 결과 알림
     public void notifyVoteResult(Integer gameId) {
         VoteResultResponseDto responseDto = voteService.computeVoteResult(gameId);
-        server.getRoomOperations(String.valueOf(gameId)).sendEvent(EventType.SHOW_VOTE_RESULT.getValue(), responseDto);
+        namespace.getRoomOperations(String.valueOf(gameId)).sendEvent(EventType.SHOW_VOTE_RESULT.getValue(), responseDto);
     }
 
 }

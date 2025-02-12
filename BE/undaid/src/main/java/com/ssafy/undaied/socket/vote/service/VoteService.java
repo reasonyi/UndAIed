@@ -8,6 +8,7 @@ import com.ssafy.undaied.socket.vote.dto.request.VoteSubmitRequestDto;
 import com.ssafy.undaied.socket.vote.dto.response.VoteResultResponseDto;
 import com.ssafy.undaied.socket.vote.dto.response.VoteSubmitResponseDto;
 import lombok.RequiredArgsConstructor;
+import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
@@ -43,7 +44,7 @@ public class VoteService {
             }
 
             String voterNumber = voterNumberObj.toString();
-            String targetNumber = voteSubmitRequestDto.getTarget();
+            String targetNumber = voteSubmitRequestDto.getTarget().toString();
 
             if (!isValidTarget(gameId, targetNumber))
                 throw new SocketException(SocketErrorCode.VOTE_INVALID_TARGET);
@@ -61,10 +62,10 @@ public class VoteService {
                 throw new SocketException(SocketErrorCode.VOTE_ALREADY_SUBMITTED);
 
             // 투표 이벤트 저장을 위한 닉네임 찾기
-            String userNameKey = "game:" + gameId + "number_nicknames";
+            String userNameKey = "game:" + gameId + ":number_nicknames";
             String voteUserName = redisTemplate.opsForHash().get(userNameKey, voterNumber).toString();
             String targetUserName = redisTemplate.opsForHash().get(userNameKey, targetNumber).toString();
-
+            log.info("voteUserName: " + voteUserName + ", targetUserName: " + targetUserName);
             String voteEvent = String.format("{vote} [%s] <%s> (%s) ~%s~ %s | ",
                     voteUserName, voterNumber, targetUserName, targetNumber, LocalDateTime.now());
 
