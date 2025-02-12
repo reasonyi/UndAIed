@@ -25,7 +25,7 @@ function ReadyProfile({ nickname, icon, playerNum }: IReadyProfileProps) {
         <img className="filter brightness-75 w-3/4 h-3/4" src={icon} />
       </div>
       <div className="flex w-full text-base font-bold justify-center text-[#cccccc] mb-1">
-        익명이 아닌 닉
+        {nickname}
       </div>
       <div className="flex w-full justify-center"></div>
     </div>
