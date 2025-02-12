@@ -13,6 +13,6 @@ import lombok.Setter;
 public class RoomEnterResponseDto {
 
     private Integer enterId;
-    private Room room;
+    private RoomCreateResponseDto room;
 
 }

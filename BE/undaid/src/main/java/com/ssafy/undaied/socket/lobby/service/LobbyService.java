@@ -86,7 +86,7 @@ public class LobbyService {
 
     public LobbyUpdateResponseDto sendEventRoomEnter(RoomEnterResponseDto responseDto, SocketIOClient client) {
 
-        Room room = responseDto.getRoom();
+        RoomCreateResponseDto room = responseDto.getRoom();
 
         UpdateData updateData = UpdateData.builder()
                 .roomId(room.getRoomId())

@@ -32,12 +32,12 @@ public class SocketAuthenticationService {
             Map<String, List<String>> params = handshakeData.getUrlParams();
             log.debug("Connection attempt - URL params: {}", params);
 
-            // 먼저 auth 매개변수로 토큰을 찾음
+            // // 먼저 auth 매개변수로 토큰을 찾음
             String token = null;
-            if (params.containsKey("auth")) {
-                token = params.get("auth").get(0);
-                log.debug("Found token in URL params: {}", token);
-            }
+            // if (params.containsKey("auth")) {
+            //     token = params.get("auth").get(0);
+            //     log.debug("Found token in URL params: {}", token);
+            // }
 
             // URL 매개변수에 없다면 헤더에서 찾기
             if (token == null) {
