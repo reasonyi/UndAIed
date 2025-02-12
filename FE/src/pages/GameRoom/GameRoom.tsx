@@ -135,9 +135,6 @@ function GameRoom() {
     scrollRef.current?.scrollIntoView({ block: "end" });
   };
 
-  // ----------------------------------------------------
-  // 1) 서버에서 보내주는 room:create, room:enter, room:leave 이벤트 수신
-  // ----------------------------------------------------
   useEffect(() => {
     if (!socket) return;
 
@@ -163,8 +160,8 @@ function GameRoom() {
       }
     });
 
-    // 누군가(또는 내가) 방에서 나갔을 때 (서버에서 send ('room:leave', data))
-    socket.on("room:leave", (data: any) => {
+    // 누군가(또는 내가) 방에서 나갔을 때 (서버에서 send ('room:leave:send', data))
+    socket.on("room:leave:send", (data: any) => {
       console.log("방 퇴장 이벤트 수신:", data);
       // 예:
       // 1) 방에서 나간 사람 정보: { enterId: 2, roomId: 1 }
@@ -186,7 +183,7 @@ function GameRoom() {
     // 클린업
     return () => {
       socket.off("room:enter:send");
-      socket.off("room:leave");
+      socket.off("room:leave:send");
     };
   }, [socket]);
 
@@ -227,7 +224,7 @@ function GameRoom() {
     console.log("socket: ", socket);
     if (!socket || !playerInfo) return;
     socket.emit(
-      "room:leave",
+      "room:leave:emit",
       {
         enterId: playerInfo.id,
         roomId: Number(roomId),
@@ -286,7 +283,12 @@ function GameRoom() {
   return (
     <div className="bg-[#07070a]">
       <div className="background-gradient max-w-[90rem] mx-auto px-4 sm:px-4 md:px-6">
-        <LeftSideBar nickname={"유저 닉네임임"} icon={PlayerIcon1} />
+        <LeftSideBar
+          nickname={"유저 닉네임임"}
+          icon={PlayerIcon1}
+          socket={socket}
+          onLeaveRoom={handleLeaveRoom}
+        />
         <div className="lg:pl-[19.5rem]">
           <div className="max-w-3xl mx-auto xl:max-w-none xl:ml-0 xl:mr-[32rem]">
             <div className="chat-container flex flex-col h-screen overflow-auto">
