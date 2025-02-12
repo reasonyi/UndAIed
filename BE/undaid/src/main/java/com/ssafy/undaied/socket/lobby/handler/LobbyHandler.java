@@ -32,6 +32,7 @@ public class LobbyHandler {
                     try {
 
                         // 방에 있었다면 방에서 전부 나가고 로비에 입장
+                        roomService.clientLeaveAllRooms(client);
                         lobbyService.joinLobby(client);
 
                         LobbyRoomListResponseDto responseData = roomService.findWaitingRoomList();

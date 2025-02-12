@@ -1,10 +1,8 @@
 package com.ssafy.undaied.socket.room.service;
 
 import com.corundumstudio.socketio.SocketIOClient;
-import com.corundumstudio.socketio.SocketIOServer;
-import com.corundumstudio.socketio.handler.SocketIOException;
+import com.corundumstudio.socketio.SocketIONamespace;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ssafy.undaied.domain.user.entity.Users;
 import com.ssafy.undaied.domain.user.entity.repository.UserRepository;
 import com.ssafy.undaied.socket.common.exception.SocketException;
 import com.ssafy.undaied.socket.lobby.dto.response.LobbyRoomListResponseDto;
@@ -39,7 +37,8 @@ public class RoomService {
     private final StringRedisTemplate stringRedisTemplate;
     private final LobbyService lobbyService;
     private final UserRepository userRepository;
-    private final SocketIOServer server;
+    private final SocketIONamespace namespace;  // 추가
+//    private final SocketIOServer server;
     private final ObjectMapper objectMapper;
 
     private static final Integer PAGE_SIZE = 10;
@@ -147,6 +146,31 @@ public class RoomService {
         }
     }
 
+
+    public void clientLeaveAllRooms(SocketIOClient client) throws SocketException {
+        log.debug("Attempting to join lobby - Client ID: {}", client.getSessionId());
+        log.debug("Current rooms before joining lobby: {}", client.getAllRooms());
+
+        // 기존 방에서 모두 나가기
+        Set<String> rooms = new HashSet<>(client.getAllRooms());
+        rooms.remove("");
+        for (String room : rooms) {
+            if(room.startsWith(ROOM_KEY_PREFIX)) {
+                Long roomId = Long.parseLong(room.substring(ROOM_KEY_PREFIX.length()));
+
+                LobbyUpdateResponseDto lobbyUpdateResponseDto = leaveRoom(roomId, client);
+                if(lobbyUpdateResponseDto != null) {
+                    namespace.getRoomOperations(LOBBY_ROOM).sendEvent(UPDATE_ROOM_AT_LOBBY.getValue(), lobbyUpdateResponseDto);
+                }
+                client.leaveRoom(room);
+                log.debug("Client left room - userId: {}, room: {}", client.get("userId"), room);
+            } else {
+                client.leaveRoom(room);
+                log.debug("Client left {}", room);
+            }
+        }
+    }
+
     public LobbyUpdateResponseDto leaveRoom(Long roomId, SocketIOClient client) throws SocketException {
         try {
             String key = ROOM_KEY_PREFIX + roomId; // room:1
@@ -231,12 +255,13 @@ public class RoomService {
         }
     }
 
-    public void leaveRoom(SocketIOClient client, String room) throws SocketException {
+    public LobbyUpdateResponseDto leaveRoom(SocketIOClient client, String roomKey) throws SocketException {
         // "room:" 접두사 이후의 문자열을 추출하여 Long으로 변환
+        String room = roomKey.substring(ROOM_LIST.length());
         Long roomId = Long.parseLong(room.substring(ROOM_KEY_PREFIX.length()));
 
         // 기존의 leaveRoom 메서드 호출
-        leaveRoom(roomId, client);
+        return leaveRoom(roomId, client);
     }
 
     public void leaveRoomAlarmToAnotherClient(String key) throws SocketException {
@@ -265,7 +290,7 @@ public class RoomService {
                 .currentPlayers(userResponseDtos)
                 .build();
 
-        server.getRoomOperations(key).sendEvent(LEAVE_ROOM_SEND.getValue(), responseDto);
+        namespace.getRoomOperations(key).sendEvent(LEAVE_ROOM_SEND.getValue(), responseDto);
         log.info("Room information sent to room {} users", key);
     }
 
@@ -281,12 +306,14 @@ public class RoomService {
         boolean userExists = rooms.contains(key);
 
         if (roomData instanceof LinkedHashMap<?, ?> map) {
+            List<?> playersList = (List<?>) map.get("currentPlayers");
 
-            List<RoomUser> users = (List<RoomUser>) map.get("currentPlayers");
-
-            userExists = users.stream()
-                    .anyMatch(user -> user.getUserId().equals(client.get("userId")));
-
+            if (playersList != null) {
+                ObjectMapper mapper = new ObjectMapper();
+                userExists = playersList.stream()
+                        .map(player -> mapper.convertValue(player, RoomUser.class))
+                        .anyMatch(user -> user.getUserId().equals(client.get("userId")));
+            }
         }
 
         return userExists;
