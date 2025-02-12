@@ -1,5 +1,6 @@
 package com.ssafy.undaied.socket.common.config;
 
+import com.corundumstudio.socketio.SocketIONamespace;
 import com.corundumstudio.socketio.protocol.JacksonJsonSupport;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,6 +20,11 @@ public class SocketIoConfig {
 
     @Value("${socketio.server.port}")
     private int port;
+
+    @Bean
+    public SocketIONamespace socketIoNamespace(SocketIOServer server) {
+        return server.getNamespace("/socket.io");
+    }
 
     /**
      * Tomcat 서버와 별도로 돌아가는 netty 서버를 생성
