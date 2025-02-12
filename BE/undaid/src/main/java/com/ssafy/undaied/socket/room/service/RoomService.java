@@ -269,14 +269,37 @@ public class RoomService {
         log.info("Room information sent to room {} users", key);
     }
 
-    // 유저가 특정 방에 있는지 확인하는 메서드 추가
+    // 유저가 특정 방에 있는지 확인
     public boolean isUserInRoom(SocketIOClient client, Long roomId) {
         String key = ROOM_KEY_PREFIX + roomId;
         String roomKey = ROOM_LIST + key;
         Set<String> rooms = new HashSet<>(client.getAllRooms());
 
-        return rooms.contains(key);
+        log.debug("Attempting to get room data for key: {}", roomKey);
+        Object roomData = jsonRedisTemplate.opsForValue().get(roomKey);
+
+        boolean userExists = rooms.contains(key);
+
+        if (roomData instanceof LinkedHashMap<?, ?> map) {
+
+            List<RoomUser> users = (List<RoomUser>) map.get("currentPlayers");
+
+            userExists = users.stream()
+                    .anyMatch(user -> user.getUserId().equals(client.get("userId")));
+
+        }
+
+        return userExists;
     }
+
+    // 원활한 테스트를 위해 한 아이디로 한 방에 여러번 입장이 가능한 코드를 남겨둠.
+//    public boolean isUserInRoom(SocketIOClient client, Long roomId) {
+//        String key = ROOM_KEY_PREFIX + roomId;
+//        String roomKey = ROOM_LIST + key;
+//        Set<String> rooms = new HashSet<>(client.getAllRooms());
+//
+//        return rooms.contains(key);
+//    }
 
     public RoomEnterResponseDto enterRoom(SocketIOClient client, Long roomId, Integer password) throws SocketException {
         String key = ROOM_KEY_PREFIX + roomId;
