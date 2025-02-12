@@ -41,7 +41,7 @@ public class SocketAuthenticationService {
 
             // URL 매개변수에 없다면 헤더에서 찾기
             if (token == null) {
-                token = handshakeData.getSingleUrlParam("Authorization");
+                token = handshakeData.getHttpHeaders().get("Authorization");
                 log.debug("Found token in headers: {}", token);
             }
 
