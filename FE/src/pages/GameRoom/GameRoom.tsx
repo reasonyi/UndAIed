@@ -284,7 +284,7 @@ function GameRoom() {
     <div className="bg-[#07070a]">
       <div className="background-gradient max-w-[90rem] mx-auto px-4 sm:px-4 md:px-6">
         <LeftSideBar
-          nickname={"유저 닉네임임"}
+          nickname={playerInfo ? playerInfo.name : "연결이 끊어졌습니다."}
           icon={PlayerIcon1}
           socket={socket}
           onLeaveRoom={handleLeaveRoom}
