@@ -27,44 +27,28 @@ public class SocketAuthenticationService {
 
     public int authenticateClient(SocketIOClient client) {
         try {
-            // 디버깅을 위한 handshake 데이터 출력
             HandshakeData handshakeData = client.getHandshakeData();
-            Map<String, List<String>> params = handshakeData.getUrlParams();
-            log.debug("Connection attempt - URL params: {}", params);
+            Map<String, List<String>> authData = handshakeData.getUrlParams();
 
-            // // 먼저 auth 매개변수로 토큰을 찾음
-            String token = null;
-            // if (params.containsKey("auth")) {
-            //     token = params.get("auth").get(0);
-            //     log.debug("Found token in URL params: {}", token);
-            // }
-
-            //**임의로 수정 / 원래는 token = handshakeData.getSingleUrlParam("Authorization");
-            // URL 매개변수에 없다면 헤더에서 찾기
-            if (token == null) {
-                token = handshakeData.getHttpHeaders().get("Authorization");
-                log.debug("Found token in headers: {}", token);
+            // auth 파라미터에서 토큰 가져오기
+            if (!authData.containsKey("token")) {
+                log.error("No token found in auth data");
+                throw new BaseException(NOT_AUTHENTICATED);
             }
 
-            if (token == null) {
-                log.error("No authorization token found");
-                throw new BaseException(ErrorCode.NOT_AUTHENTICATED);
-            }
+            String token = authData.get("token").get(0);
+            log.debug("Found token in auth data: {}", token);
 
-            // Bearer 접두사 처리
-            if (!token.startsWith("Bearer ")) {
-                token = "Bearer " + token;
-            }
-
+            // 이미 Bearer prefix가 포함되어 있으므로 추가할 필요 없음
             String jwt = jwtTokenProvider.resolveToken(token);
             if (jwt == null) {
                 log.error("Failed to resolve JWT token");
-                throw new BaseException(ErrorCode.TOKEN_VALIDATION_FAILED);
+                throw new BaseException(TOKEN_VALIDATION_FAILED);
             }
 
             if (!jwtTokenProvider.validateToken(jwt)) {
                 log.error("JWT validation failed");
-                throw new BaseException(ErrorCode.TOKEN_VALIDATION_FAILED);
+                throw new BaseException(TOKEN_VALIDATION_FAILED);
             }
 
             int userId = jwtTokenProvider.getUserIdFromToken(jwt);
@@ -77,7 +61,7 @@ public class SocketAuthenticationService {
             throw e;
         } catch (Exception e) {
             log.error("Unexpected authentication error", e);
-            throw new BaseException(ErrorCode.NOT_AUTHENTICATED);
+            throw new BaseException(NOT_AUTHENTICATED);
         }
     }
 }

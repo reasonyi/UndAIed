@@ -13,7 +13,8 @@ public enum EventType {
     ENTER_ROOM_SEND("room:enter:send"),
     LEAVE_ROOM_EMIT("room:leave:emit"),
     LEAVE_ROOM_SEND("room:leave:send"),
-    ROOM_CHAT("room:chat"),
+    ROOM_CHAT_EMIT("room:chat:emit"),
+    ROOM_CHAT_SEND("room:chat:send"),
     START_GAME("game:start"),
 
     GAME_INFO("game:info"),
