@@ -71,7 +71,10 @@ function LogoutContainer() {
 
   return (
     <div className="flex flex-col w-full items-center">
-      <button className="w-[22.5rem] h-[5.5rem] flex justify-center items-center mb-10 bg-black text-white font-mono border-2 border-[#872341] rounded-sm text-3xl font-semibold">
+      <button
+        onClick={() => navigate("/game")}
+        className="w-[22.5rem] h-[5.5rem] flex justify-center items-center mb-10 bg-black text-white font-mono border-2 border-[#872341] rounded-sm text-3xl font-semibold"
+      >
         GAME START
       </button>
       <GoogleLoginButton2 onTokenReceive={handleTokenReceive} />
