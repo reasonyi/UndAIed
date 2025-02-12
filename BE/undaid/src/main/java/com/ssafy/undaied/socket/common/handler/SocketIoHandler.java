@@ -1,9 +1,12 @@
 package com.ssafy.undaied.socket.common.handler;
 
+import com.corundumstudio.socketio.AckRequest;
 import com.corundumstudio.socketio.HandshakeData;
 import com.corundumstudio.socketio.SocketIONamespace;
 import com.ssafy.undaied.global.common.exception.BaseException;
 import com.ssafy.undaied.socket.common.constant.EventType;
+import com.ssafy.undaied.socket.common.exception.SocketException;
+import com.ssafy.undaied.socket.common.response.AckResponse;
 import com.ssafy.undaied.socket.stage.handler.StageHandler;
 import com.ssafy.undaied.socket.chat.handler.GameChatHandler;
 import com.ssafy.undaied.domain.user.entity.Users;
@@ -11,6 +14,9 @@ import com.ssafy.undaied.domain.user.entity.repository.UserRepository;
 import com.ssafy.undaied.socket.common.service.SocketAuthenticationService;
 import com.ssafy.undaied.socket.common.service.SocketDisconnectService;
 import com.ssafy.undaied.socket.lobby.service.LobbyService;
+import com.ssafy.undaied.socket.vote.dto.request.VoteSubmitRequestDto;
+import com.ssafy.undaied.socket.vote.dto.response.VoteSubmitResponseDto;
+import com.ssafy.undaied.socket.vote.service.VoteService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -40,6 +46,7 @@ public class SocketIoHandler {
     private final StageHandler stageHandler;
     private final UserRepository userRepository;
     private final GameChatHandler gameChatHandler;
+    private final VoteService voteService;
 
     @PostConstruct
     private void init() {
@@ -136,7 +143,7 @@ public class SocketIoHandler {
     }
 
     public void addGameStartListeners() {
-        server.addEventListener(EventType.START_GAME.getValue(), Object.class,
+        server.addNamespace("/socket.io").addEventListener(EventType.START_GAME.getValue(), Object.class,
                 (client, data, ack) -> {
                     Integer userId = client.get("userId");
                     if (userId == null) {

@@ -1,10 +1,13 @@
 package com.ssafy.undaied.socket.vote.dto.request;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import lombok.*;
 
 @Getter
-@RequiredArgsConstructor
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
 public class VoteSubmitRequestDto {
-    Integer target;
+    private Integer target;
 }

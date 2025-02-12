@@ -7,6 +7,7 @@ import com.ssafy.undaied.socket.stage.dto.response.RoundNotifyDto;
 import com.ssafy.undaied.socket.stage.dto.response.StageNotifyDto;
 import com.ssafy.undaied.socket.stage.constant.StageType;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -17,14 +18,12 @@ import java.util.concurrent.ConcurrentHashMap;
 public class StageHandler {
 
     private final SocketIOServer server;
+    private final RedisTemplate redisTemplate;
     private final GameTimer gameTimer;
 
 //    서비스 파일들 불러봐야됨
 //    private final SubjectDebateHandler subjectDebateHandler;
 //    private final VoteService voteService;
-
-    private final Map<Integer, StageType> currentStageMap = new ConcurrentHashMap<>();
-    private final Map<Integer, Integer> currentRoundMap = new ConcurrentHashMap<>();
 
     private static final Map<StageType, Integer> STAGE_DURATIONS = Map.of(
             StageType.SUBJECT_DEBATE, 2,  // 2분
@@ -33,7 +32,8 @@ public class StageHandler {
     );
 
     public void handleGameStart(Integer gameId) {
-        currentRoundMap.put(gameId, 0);
+        String roundKey = "game:" + gameId + ":round";
+        redisTemplate.opsForValue().set(roundKey, "0");
         startStage(gameId, StageType.START);
     }
 
@@ -47,10 +47,13 @@ public class StageHandler {
         saveCurrentStage(gameId, currentStage);
 
         if (currentStage == StageType.DAY) {
+            String roundKey = "game:" + gameId + ":round";
+
             // 라운드 알림
             saveCurrentRound(gameId);
-            RoundNotifyDto roundNotifyDto = RoundNotifyDto.notifyRoundStart(currentRoundMap.get(gameId));
-            server.getRoomOperations(String.valueOf(gameId)).sendEvent(EventType.GAME_CHAT.getValue(), roundNotifyDto);
+            String currentRound = redisTemplate.opsForValue().get(roundKey).toString();
+            RoundNotifyDto roundNotifyDto = RoundNotifyDto.notifyRoundStart(currentRound);
+            server.addNamespace("/socket.io").getRoomOperations("game:"+gameId).sendEvent(EventType.GAME_CHAT.getValue(), roundNotifyDto);
 
             gameTimer.setTimer(gameId, 1, 1, () -> {
                 // 낮 알림
@@ -113,7 +116,7 @@ public class StageHandler {
 
     private void handleNotifyStartStage(Integer gameId, StageType currentStage) {
         StageNotifyDto stageNotifyDto = StageNotifyDto.notifyStartStage(currentStage);
-        server.getRoomOperations(String.valueOf(gameId)).sendEvent(EventType.GAME_CHAT.getValue(), stageNotifyDto);
+        server.addNamespace("/socket.io").getRoomOperations("game:"+gameId).sendEvent(EventType.GAME_CHAT.getValue(), stageNotifyDto);
     }
 
     private void handleStageUpdate(Integer gameId, StageType currentStage) {
@@ -141,15 +144,19 @@ public class StageHandler {
 
     private void handleNotifyEndStage(Integer gameId, StageType currentStage) {
         StageNotifyDto stageNotifyDto = StageNotifyDto.notifyEndStage(currentStage);
-        server.getRoomOperations(String.valueOf(gameId)).sendEvent(EventType.GAME_CHAT.getValue(), stageNotifyDto);
+        server.addNamespace("/socket.io").getRoomOperations("game:"+gameId).sendEvent(EventType.GAME_CHAT.getValue(), stageNotifyDto);
     }
 
     private void saveCurrentStage(Integer gameId, StageType currentStage) {
-        currentStageMap.put(gameId, currentStage);
+        String stageKey = "game:" + gameId + ":stage";
+        redisTemplate.opsForValue().set(stageKey, currentStage.getRedisValue());
     }
 
-    public StageType getCurrentStage(Integer gameId) {
-        return currentStageMap.get(gameId);
+    public String getCurrentStage(Integer gameId) {
+        String stageKey = "game:" + gameId + ":stage";
+        String currentStage = redisTemplate.opsForValue().get(stageKey).toString();
+
+        return currentStage;
     }
 
     private StageType getNextStage(StageType currentStage) {
@@ -164,7 +171,15 @@ public class StageHandler {
     }
 
     private void saveCurrentRound(Integer gameId) {
-        currentRoundMap.put(gameId, currentRoundMap.get(gameId)+1);
+        String roundKey = "game:" + gameId + ":round";
+        redisTemplate.opsForValue().increment(roundKey);
+    }
+
+    public String getCurrentRound(Integer gameId) {
+        String roundKey = "game:" + gameId + ":round";
+        String currentRound = redisTemplate.opsForValue().get(roundKey).toString();
+
+        return currentRound;
     }
 
     private void gameOver(Integer gameId) {
