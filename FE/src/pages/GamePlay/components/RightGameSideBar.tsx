@@ -1,18 +1,20 @@
 import { useMemo, useState } from "react";
-import ReadyProfile from "./ReadyProfile";
-import EmptyProfile from "./EmptyProfile";
 import { faPeopleGroup } from "@fortawesome/free-solid-svg-icons";
 import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import GameProfile from "./GameProfile";
+import DiedProfile from "./DiedProfile";
+import EmptyProfile from "../../GameRoom/components/EmptyProfile";
 
 interface Player {
   id: number;
   playerNum: number;
   name: string;
+  isDied: boolean;
   imgNum: number;
 }
 
-interface RightSideBarProps {
+interface IRightGameSideBarProps {
   /** 현재 게임 방의 유저 목록 */
   players: Player[];
   /** 플레이어 아이콘 배열 */
@@ -23,9 +25,10 @@ const peopleGroup: IconDefinition = faPeopleGroup;
 /**
  * props로 전달받은 `players` 배열에서
  * playerNum(1~6)에 해당하는 유저를 찾아서
- * ReadyProfile / EmptyProfile을 렌더링
+ * GameProfile / DiedProfile을 렌더링
  */
-function RightSideBar({ players, iconArr }: RightSideBarProps) {
+function RightGameSideBar({ players, iconArr }: IRightGameSideBarProps) {
+  //일단 펼쳐두고 나중에 배열로
   const player1 = useMemo(
     () => players.find((user) => user.playerNum === 1),
     [players]
@@ -50,6 +53,14 @@ function RightSideBar({ players, iconArr }: RightSideBarProps) {
     () => players.find((user) => user.playerNum === 6),
     [players]
   );
+  const player7 = useMemo(
+    () => players.find((user) => user.playerNum === 6),
+    [players]
+  );
+  const player8 = useMemo(
+    () => players.find((user) => user.playerNum === 6),
+    [players]
+  );
 
   const [isRightOpen, setIsRightOpen] = useState(true);
   return (
@@ -65,10 +76,11 @@ function RightSideBar({ players, iconArr }: RightSideBarProps) {
         {/* 플레이어 프로필 영역 */}
         <div className="row-start-1 px-2 py-1">
           {player1 ? (
-            <ReadyProfile
+            <GameProfile
               nickname={player1.name}
               playerNum={player1.playerNum}
               icon={iconArr[player1.imgNum]}
+              isDied={player1.isDied}
             />
           ) : (
             <EmptyProfile />
@@ -76,10 +88,11 @@ function RightSideBar({ players, iconArr }: RightSideBarProps) {
         </div>
         <div className="row-start-1 px-2 py-1">
           {player2 ? (
-            <ReadyProfile
+            <GameProfile
               nickname={player2.name}
               playerNum={player2.playerNum}
               icon={iconArr[player2.imgNum]}
+              isDied={player2.isDied}
             />
           ) : (
             <EmptyProfile />
@@ -87,10 +100,11 @@ function RightSideBar({ players, iconArr }: RightSideBarProps) {
         </div>
         <div className="row-start-1 px-2 py-1">
           {player3 ? (
-            <ReadyProfile
+            <GameProfile
               nickname={player3.name}
               playerNum={player3.playerNum}
               icon={iconArr[player3.imgNum]}
+              isDied={player3.isDied}
             />
           ) : (
             <EmptyProfile />
@@ -98,10 +112,11 @@ function RightSideBar({ players, iconArr }: RightSideBarProps) {
         </div>
         <div className="row-start-2 px-2 py-1">
           {player4 ? (
-            <ReadyProfile
+            <GameProfile
               nickname={player4.name}
               playerNum={player4.playerNum}
               icon={iconArr[player4.imgNum]}
+              isDied={player4.isDied}
             />
           ) : (
             <EmptyProfile />
@@ -109,10 +124,11 @@ function RightSideBar({ players, iconArr }: RightSideBarProps) {
         </div>
         <div className="row-start-2 px-2 py-1">
           {player5 ? (
-            <ReadyProfile
+            <GameProfile
               nickname={player5.name}
               playerNum={player5.playerNum}
               icon={iconArr[player5.imgNum]}
+              isDied={player5.isDied}
             />
           ) : (
             <EmptyProfile />
@@ -120,23 +136,43 @@ function RightSideBar({ players, iconArr }: RightSideBarProps) {
         </div>
         <div className="row-start-2 px-2 py-1">
           {player6 ? (
-            <ReadyProfile
+            <GameProfile
               nickname={player6.name}
               playerNum={player6.playerNum}
               icon={iconArr[player6.imgNum]}
+              isDied={player6.isDied}
             />
           ) : (
             <EmptyProfile />
           )}
         </div>
-
-        <div className="w-full text-base flex flex-col justify-between items-center row-start-3 row-end-5 col-span-3 text-white px-2 py-1">
-          <div className="w-full text-base flex justify-end items-center text-white px-2 py-1">
-            {players.length}/6
-          </div>
-          <div className="w-full h-[80%] text-base flex flex-col justify-center items-center bg-[rgb(7,7,10)] border-2 border-solid border-[#B4B4B4] text-white px-2 py-1">
-            <div>시스템 로그</div>
-          </div>
+        <div className="row-start-3 px-2 py-1">
+          {player7 ? (
+            <GameProfile
+              nickname={player7.name}
+              playerNum={player7.playerNum}
+              icon={iconArr[player7.imgNum]}
+              isDied={player7.isDied}
+            />
+          ) : (
+            <EmptyProfile />
+          )}
+        </div>
+        <div className="row-start-3 px-2 py-1">
+          {player8 ? (
+            <GameProfile
+              nickname={player8.name}
+              playerNum={player8.playerNum}
+              icon={iconArr[player8.imgNum]}
+              isDied={player8.isDied}
+            />
+          ) : (
+            <EmptyProfile />
+          )}
+        </div>
+        <div className="row-start-3"></div>
+        <div className="w-full text-base justify-center items-center bg-[rgb(7,7,10)] border-2 border-solid border-[#B4B4B4] col-span-3 text-white px-2 py-1">
+          <div>시스템 로그</div>
         </div>
       </div>
 
@@ -153,4 +189,4 @@ function RightSideBar({ players, iconArr }: RightSideBarProps) {
   );
 }
 
-export default RightSideBar;
+export default RightGameSideBar;

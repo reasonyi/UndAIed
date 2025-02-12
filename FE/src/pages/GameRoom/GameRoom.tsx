@@ -35,7 +35,6 @@ interface IUser {
   id: number;
   playerNum: number;
   name: string;
-  token: string;
   imgNum: number;
 }
 interface IEmitDone {
@@ -63,13 +62,6 @@ function GameRoom() {
   //socket 훅 사용
   const socket = useSocket();
 
-  //아이콘
-  const bell: IconDefinition = faBell;
-  const gear: IconDefinition = faGear;
-  const userGroup: IconDefinition = faUserGroup;
-  const doorOpen: IconDefinition = faDoorOpen;
-  const circleExclamation: IconDefinition = faCircleExclamation;
-
   // 현재 접속한 사용자(본인) playerNum 예시 (실제로는 로그인 정보나 URL 파라미터로 받는 등 구현 필요)
 
   console.log(socket);
@@ -84,7 +76,6 @@ function GameRoom() {
     id: 999,
     playerNum: 1,
     name: "DummyUser",
-    token: "dummy-token-123",
     imgNum: 1,
   });
 
@@ -94,35 +85,9 @@ function GameRoom() {
       id: 999,
       playerNum: 1,
       name: "DummyUser",
-      token: "dummy-token-123",
       imgNum: 1,
     },
   ]);
-
-  const player1 = useMemo(
-    () => users?.find((user) => user.playerNum === 1),
-    [users]
-  );
-  const player2 = useMemo(
-    () => users?.find((user) => user.playerNum === 2),
-    [users]
-  );
-  const player3 = useMemo(
-    () => users?.find((user) => user.playerNum === 3),
-    [users]
-  );
-  const player4 = useMemo(
-    () => users?.find((user) => user.playerNum === 4),
-    [users]
-  );
-  const player5 = useMemo(
-    () => users?.find((user) => user.playerNum === 5),
-    [users]
-  );
-  const player6 = useMemo(
-    () => users?.find((user) => user.playerNum === 6),
-    [users]
-  );
 
   const [messages, setMessages] = useState<IMessage[]>([]);
 
@@ -151,7 +116,6 @@ function GameRoom() {
             id: player.enterId,
             playerNum: index + 1, // 1부터 시작
             name: player.nickname,
-            token: "",
             imgNum: 1,
           }))
           .slice(0, 6);
@@ -173,7 +137,6 @@ function GameRoom() {
             id: player.enterId,
             playerNum: index + 1,
             name: player.nickname,
-            token: "",
             imgNum: 1,
           }));
         setUsers(newUsers);
@@ -188,7 +151,7 @@ function GameRoom() {
   }, [socket]);
 
   // ----------------------------------------------------
-  // 2) 클라이언트에서 서버로 이벤트 emit (방 생성, 입장, 퇴장)
+  // 클라이언트에서 서버로 이벤트 emit (방 생성, 입장, 퇴장)
   // ----------------------------------------------------
 
   const handleEnterRoom = useCallback(() => {
