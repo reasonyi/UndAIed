@@ -9,7 +9,6 @@ interface Player {
   id: number;
   playerNum: number;
   name: string;
-  token: string;
   imgNum: number;
 }
 
@@ -133,7 +132,7 @@ function RightSideBar({ players, iconArr }: RightSideBarProps) {
 
         <div className="w-full text-base flex flex-col justify-between items-center row-start-3 row-end-5 col-span-3 text-white px-2 py-1">
           <div className="w-full text-base flex justify-end items-center text-white px-2 py-1">
-            0/6
+            {players.length}/6
           </div>
           <div className="w-full h-[80%] text-base flex flex-col justify-center items-center bg-[rgb(7,7,10)] border-2 border-solid border-[#B4B4B4] text-white px-2 py-1">
             <div>시스템 로그</div>
