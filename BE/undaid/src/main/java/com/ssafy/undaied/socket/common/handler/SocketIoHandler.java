@@ -1,6 +1,5 @@
 package com.ssafy.undaied.socket.common.handler;
 
-import com.corundumstudio.socketio.AckRequest;
 import com.corundumstudio.socketio.HandshakeData;
 import com.corundumstudio.socketio.SocketIONamespace;
 import com.ssafy.undaied.global.common.exception.BaseException;
