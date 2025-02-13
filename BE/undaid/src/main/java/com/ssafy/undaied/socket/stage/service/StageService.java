@@ -1,5 +1,7 @@
 package com.ssafy.undaied.socket.stage.service;
 import com.corundumstudio.socketio.SocketIONamespace;
+import com.ssafy.undaied.socket.chat.dto.response.GameChatResponseDto;
+import com.ssafy.undaied.socket.chat.service.GameChatService;
 import com.ssafy.undaied.socket.common.constant.EventType;
 import com.ssafy.undaied.socket.common.exception.SocketException;
 import com.ssafy.undaied.socket.common.util.GameTimer;
@@ -15,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -29,11 +32,12 @@ public class StageService {
     //    서비스 파일들 불러봐야됨
     private final VoteService voteService;
     private final InfectService infectService;
+    private final GameChatService gameChatService;
 
     private static final Map<StageType, Integer> STAGE_DURATIONS = Map.of(
-            StageType.SUBJECT_DEBATE, 2,  // 2분
-            StageType.FREE_DEBATE, 2,     // 3분
-            StageType.VOTE, 2             // 30초
+            StageType.SUBJECT_DEBATE, 5,  // 2분
+            StageType.FREE_DEBATE, 5,     // 3분
+            StageType.VOTE, 30             // 30초
     );
 
     public void handleGameStart(Integer gameId) {
@@ -47,13 +51,13 @@ public class StageService {
     }
 
     private void startStage(Integer gameId, StageType currentStage) throws SocketException {
+        log.info("currentStage: " + currentStage.getRedisValue().toString());
+        saveCurrentStage(gameId, currentStage);
         // FINISH 상태일 때는 게임 종료하고 바로 리턴
-        if (currentStage == StageType.FINISH) {
+        if (currentStage == StageType.FINISH && getCurrentRound(gameId).equals("2")) {
             gameOver(gameId);
             return;
         }
-
-        saveCurrentStage(gameId, currentStage);
 
         if (currentStage == StageType.DAY) {
             String roundKey = "game:" + gameId + ":round";
@@ -65,6 +69,7 @@ public class StageService {
             if (Integer.parseInt(currentRound) > 1) {
                 try {
                     String infectedPlayerNumber = infectService.infectPlayer(gameId);
+                    log.info("InfectedPlayerNumber: " + infectedPlayerNumber);
                     // 감염된 플레이어 정보를 사용한 추가 로직
                     namespace.getRoomOperations("game:" + gameId).sendEvent(EventType.GAME_CHAT_SEND.getValue(),
                             Map.of("number", 0,
@@ -126,9 +131,10 @@ public class StageService {
 
                         if (currentStage == StageType.VOTE) {
                             // 투표 결과 알림 (2초)
-//                            VoteResultResponseDto responseDto = voteService.computeVoteResult(gameId);
                             System.out.println("투표 결과 알림");
-//                            namespace.getRoomOperations("game:"+gameId).sendEvent(EventType.GAME_CHAT_SEND.getValue(), responseDto);
+                            VoteResultResponseDto responseDto = voteService.computeVoteResult(gameId);
+                            namespace.getRoomOperations("game:"+gameId).sendEvent(EventType.GAME_CHAT_SEND.getValue(), responseDto);
+
                             gameTimer.setTimer(gameId, GameTimerConstants.VOTE_RESULT, 2, () -> {
                                 try {
                                     startStage(gameId, nextStage);
@@ -137,9 +143,12 @@ public class StageService {
                                 }
                             });
                         } else if(currentStage == StageType.SUBJECT_DEBATE) {
-                            // 주제 토론 한 번에 나옴
-                            System.out.println("주제 토론 한 번에 보여주기");
-                            gameTimer.setTimer(gameId, GameTimerConstants.VOTE_RESULT, 10, () -> {
+                            // 주제 토론 한 번에 보내주기
+                            String currentRound = getCurrentRound(gameId);
+                            List<GameChatResponseDto> subjectChatList = gameChatService.getSubjectDebateChats(gameId, currentRound);
+                            namespace.getRoomOperations("game:"+gameId).sendEvent(EventType.CHAT_SUBJECT_SEND.getValue(), subjectChatList);
+
+                            gameTimer.setTimer(gameId, GameTimerConstants.VOTE_RESULT, 5, () -> {
                                 try {
                                     startStage(gameId, nextStage);
                                 } catch (Exception e) {
@@ -180,13 +189,13 @@ public class StageService {
 //                }
                     System.out.println("낮");
 
-            case SUBJECT_DEBATE -> System.out.println("주제 토론");
+            case SUBJECT_DEBATE -> {
+                System.out.println("주제 토론");
+                gameChatService.sendSubject(gameId);
+            }
             case FREE_DEBATE -> System.out.println("자유 토론");
-//                    freeDebateHandler.onSTartFreeDebate();
-            case VOTE -> {System.out.println("투표");}
-//                voteService.computeVoteResult(gameId);}
+            case VOTE -> System.out.println("투표");
             case INFECTION -> System.out.println("감염");
-//                    infectionHandler.onStartInfectionHandler;
             case NIGHT -> System.out.println("밤");
             case FINISH -> System.out.println("게임 종료");
             case START -> System.out.println("게임 시작");
@@ -212,7 +221,7 @@ public class StageService {
 
     private StageType getNextStage(StageType currentStage) {
         return switch (currentStage) {
-            case START -> StageType.DAY;    // NIGHT 추가 해줘야 됨
+            case START, FINISH -> StageType.DAY;
             case DAY -> StageType.SUBJECT_DEBATE;
             case SUBJECT_DEBATE -> StageType.FREE_DEBATE;
             case FREE_DEBATE -> StageType.VOTE;

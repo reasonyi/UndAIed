@@ -83,7 +83,7 @@ public class GameChatService {
                 .item(SUBJECTS.get(subjectId))
                 .build();
 
-        namespace.getRoomOperations(String.valueOf(gameId)).sendEvent("send:subject", sendSubjectresponseDto);
+        namespace.getRoomOperations("game:"+gameId).sendEvent("send:subject", sendSubjectresponseDto);
 
     }
 
