@@ -14,13 +14,13 @@ import { Socket } from "socket.io-client";
 import { IPlayer } from "../../../types/gameroom";
 
 interface ILeftSideBarProps {
-  roomId: number;
-  roomTitle: string;
+  roomId?: number;
+  roomTitle?: string;
   nickname: string;
   icon: string;
   socket: Socket | null;
-  // onLeaveRoom: () => void;
-  // onGameStart: () => void;
+  onLeaveRoom: () => void;
+  onGameStart: () => void;
   player?: IPlayer;
 }
 
@@ -39,8 +39,8 @@ function LeftSideBar({
   nickname,
   icon,
   socket,
-  // onLeaveRoom,
-  // onGameStart,
+  onLeaveRoom,
+  onGameStart,
   player,
 }: ILeftSideBarProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -89,7 +89,7 @@ function LeftSideBar({
         </div>
         {player?.isHost ? (
           <button
-            // onClick={onGameStart}
+            onClick={onGameStart}
             className="w-52 h-14 bg-gradient-to-r from-black via-black to-black rounded-[5px] backdrop-blur-[12.20px] justify-center items-center inline-flex mb-6"
           >
             <div className="w-52 h-14 relative">
@@ -136,9 +136,7 @@ function LeftSideBar({
                 className="text-white p-1 w-[1.25rem] h-[1.25rem]"
               />
             </button>
-            <button
-            // onClick={onLeaveRoom}
-            >
+            <button onClick={onLeaveRoom}>
               <FontAwesomeIcon
                 icon={doorOpen}
                 className="text-white p-1 w-[1.25rem] h-[1.25rem]"
