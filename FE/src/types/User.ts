@@ -35,3 +35,19 @@ export interface UserDataResponse {
 export interface GameUserInfoProps {
   userInfo: UserData;
 }
+
+export interface ProfileUpdate {
+  sex: null;
+  profileImage: number | null;
+  avatar: number | null;
+  age: null;
+  nickname: string | null;
+}
+
+export interface ProfileFormData {
+  nickname?: string;
+  profileImage?: string;
+  sex?: string | null;
+  age?: number | null;
+  avatar?: string | null;
+}

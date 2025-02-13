@@ -4,17 +4,8 @@ import { ProfileEditModal } from "./ProfileEditModal";
 import { GameUserInfoProps } from "../../../types/User";
 
 // 8개의 아바타 이미지 import
-import playerIcon1 from "../../../assets/player-icon/player-icon-1.svg";
-import playerIcon2 from "../../../assets/player-icon/player-icon-2.svg";
-import playerIcon3 from "../../../assets/player-icon/player-icon-3.svg";
-import playerIcon4 from "../../../assets/player-icon/player-icon-4.svg";
-import playerIcon5 from "../../../assets/player-icon/player-icon-5.svg";
-import playerIcon6 from "../../../assets/player-icon/player-orange.svg";
-import playerIcon7 from "../../../assets/player-icon/player-pink.svg";
-import playerIcon8 from "../../../assets/player-icon/player-white.svg";
-import { apiClient } from "../../../api/apiClient";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { useUpdateProfile } from "../../../hooks/useUserData";
+import { PlayerIcons } from "../../Util/PlayerIcon";
 
 interface GameProfileEditorProps {
   isOpen: boolean;
@@ -36,72 +27,19 @@ export function GameProfileEditor({
   const [nickname, setNickname] = useState(userInfo.nickname);
   const [selectedProfileImage, setSelectedProfileImage] = useState(1); // 기본값 1
 
-  const avatars = [
-    { id: 1, src: playerIcon1 },
-    { id: 2, src: playerIcon2 },
-    { id: 3, src: playerIcon3 },
-    { id: 4, src: playerIcon4 },
-    { id: 5, src: playerIcon5 },
-    { id: 6, src: playerIcon6 },
-    { id: 7, src: playerIcon7 },
-    { id: 8, src: playerIcon8 },
-  ];
-
-  // const handleSave = () => {
-  //   // TODO: 저장 로직 구현
-  //   const response = apiClient
-  //     .patch("api/v1/user/profile", {
-  //       sex: null,
-  //       profile_image: selectedProfileImage,
-  //       avatar: null,
-  //       age: null,
-  //       nickname: nickname,
-  //     })
-  //     .then((response) => {
-  //       console.log(response);
-  //     })
-  //     .catch((error) => {
-  //       console.log(error);
-  //     });
-  //   onClose();
-  // };
-
-  interface ProfileUpdateDTO {
-    sex: null;
-    profileImage: number;
-    avatar: null;
-    age: null;
-    nickname: string;
-  }
-
-  const updateProfile = async (data: ProfileUpdateDTO) => {
-    const response = await apiClient.patch("api/v1/user/profile", data);
-    return response.data;
-  };
-
-  const queryClient = useQueryClient();
-  const updateProfileMutation = useMutation({
-    mutationFn: updateProfile,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["userProfile"] });
-      toast.success("프로필이 성공적으로 업데이트 되었습니다.");
-      onClose();
-    },
-    onError: (error) => {
-      toast.error("프로필 업데이트에 실패했습니다.");
-      console.error("프로필 업데이트 오류: ", error);
-    },
-  });
+  const updateProfileMutation = useUpdateProfile();
 
   const handleSave = () => {
-    console.log(selectedProfileImage);
-    updateProfileMutation.mutate({
-      sex: null,
-      profileImage: selectedProfileImage,
-      avatar: null,
-      age: null,
-      nickname: nickname,
-    });
+    updateProfileMutation.mutate(updateData);
+    onClose();
+  };
+
+  const updateData = {
+    sex: null,
+    profileImage: selectedProfileImage,
+    avatar: null,
+    age: null,
+    nickname: nickname,
   };
 
   return (
@@ -129,7 +67,7 @@ export function GameProfileEditor({
           <div>
             <label className="block text-sm mb-2">플레이어 아이콘 선택</label>
             <div className="grid grid-cols-4 gap-2">
-              {avatars.map((avatar) => (
+              {PlayerIcons.map((avatar) => (
                 <div
                   key={avatar.id}
                   onClick={() => setSelectedProfileImage(avatar.id)}
