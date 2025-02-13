@@ -243,6 +243,10 @@ function GameRoom() {
   //컴포넌트 마운트시 방에 입장
   //자기 자신을 구하기 위한 함수수
   useEffect(() => {
+    console.log(
+      "자신이 누구인지 판단하는 userEffect가 받은 num: ",
+      playerEnterId
+    );
     if (!playerEnterId) return;
     setPlayerInfo(users.find((u) => u.playerNum === playerEnterId));
   }, [playerEnterId, users]);
