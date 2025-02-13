@@ -1,5 +1,4 @@
 package com.ssafy.undaied.socket.stage.service;
-
 import com.corundumstudio.socketio.SocketIONamespace;
 import com.ssafy.undaied.socket.common.constant.EventType;
 import com.ssafy.undaied.socket.common.exception.SocketException;
