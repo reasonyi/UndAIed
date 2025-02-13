@@ -4,23 +4,15 @@ import com.corundumstudio.socketio.AckRequest;
 import com.corundumstudio.socketio.HandshakeData;
 import com.corundumstudio.socketio.SocketIONamespace;
 import com.ssafy.undaied.global.common.exception.BaseException;
-import com.ssafy.undaied.socket.common.constant.EventType;
-import com.ssafy.undaied.socket.common.exception.SocketException;
-import com.ssafy.undaied.socket.common.response.AckResponse;
 import com.ssafy.undaied.socket.room.service.RoomService;
-import com.ssafy.undaied.socket.stage.handler.StageHandler;
-import com.ssafy.undaied.socket.chat.handler.GameChatHandler;
 import com.ssafy.undaied.domain.user.entity.Users;
 import com.ssafy.undaied.domain.user.entity.repository.UserRepository;
 import com.ssafy.undaied.socket.common.service.SocketAuthenticationService;
 import com.ssafy.undaied.socket.common.service.SocketDisconnectService;
 import com.ssafy.undaied.socket.lobby.service.LobbyService;
-import com.ssafy.undaied.socket.vote.dto.request.VoteSubmitRequestDto;
-import com.ssafy.undaied.socket.vote.dto.response.VoteSubmitResponseDto;
-import com.ssafy.undaied.socket.vote.service.VoteService;
+import com.ssafy.undaied.socket.stage.service.StageService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import com.corundumstudio.socketio.SocketIOServer;
@@ -45,23 +37,16 @@ public class SocketIoHandler {
     private final SocketDisconnectService disconnectService;
     private final RoomService roomService;
     private final LobbyService lobbyService;
-    private final StageHandler stageHandler;
+    private final StageService stageService;
     private final UserRepository userRepository;
-    private final GameChatHandler gameChatHandler;
-    private final VoteService voteService;
 
     @PostConstruct
     private void init() {
 
         namespace.addConnectListener(listenConnected());
         namespace.addDisconnectListener(listenDisconnected());
-
-        addGameStartListeners();
     }
 
-    /**
-     * 클라이언트 연결 리스너
-     */
     /**
      * 클라이언트 연결 리스너
      */
@@ -143,20 +128,4 @@ public class SocketIoHandler {
             }
         };
     }
-
-    public void addGameStartListeners() {
-        server.addNamespace("/socket.io").addEventListener(EventType.START_GAME.getValue(), Object.class,
-                (client, data, ack) -> {
-                    Integer userId = client.get("userId");
-                    if (userId == null) {
-                        client.sendEvent("error", "UserId is required");
-                        return;
-                    }
-                    Integer gameId = 1; // 테스트를 위해 임시로 1로 지정
-//                            client.get("gameId");
-                    client.joinRoom(String.valueOf(gameId));
-                    stageHandler.handleGameStart(gameId);
-                });
-    }
-
 }
