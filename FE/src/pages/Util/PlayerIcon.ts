@@ -29,3 +29,14 @@ export const getPlayerIcon = (profileImageNum: number) => {
       return playerIcon1;
   }
 };
+
+export const PlayerIcons = [
+  { id: 1, src: playerIcon1 },
+  { id: 2, src: playerIcon2 },
+  { id: 3, src: playerIcon3 },
+  { id: 4, src: playerIcon4 },
+  { id: 5, src: playerIcon5 },
+  { id: 6, src: playerIcon6 },
+  { id: 7, src: playerIcon7 },
+  { id: 8, src: playerIcon8 },
+];
