@@ -40,7 +40,7 @@ function DonutChart({
     <div className="relative inline-block text-gray-500" ref={chartRef}>
       <div className="relative">
         <svg
-          className={`transform -rotate-90 py-5 w-[150px] h-[150px] md:w-[200px] md:h-[200px]`}
+          className={`transform -rotate-90 md:p-5 w-[150px] h-[150px] md:w-[250px] md:h-[250px]`}
           viewBox={`0 0 ${size} ${size}`}
         >
           {/* Background circle */}
