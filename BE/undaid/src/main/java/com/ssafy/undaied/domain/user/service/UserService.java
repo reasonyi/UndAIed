@@ -17,6 +17,7 @@ import com.ssafy.undaied.global.auth.service.OAuth2Service;
 import com.ssafy.undaied.global.auth.token.JwtTokenProvider;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -37,11 +38,13 @@ public class UserService{
 
     // 회원가입
     public Users createUser(JsonNode node, String email) {
+        String hashedProviderId = BCrypt.hashpw(node.get("sub").asText(), BCrypt.gensalt());    // BCrypt
+
         Users user = Users.builder()
                 .email(email)
                 .nickname(email.split("@")[0])
                 .provider(oAuth2Service.checkProvider(node.get("iss").asText()))
-                .providerId(node.get("sub").asText())
+                .providerId(hashedProviderId)
                 .build();
 
         userRepository.save(user);
