@@ -17,7 +17,7 @@ interface CreateRoomForm {
 }
 
 interface CreateResponse {
-  isError: boolean;
+  success: boolean;
   errorMessage: string;
   data: number;
 }
@@ -40,16 +40,16 @@ function CreateRoomButton() {
     e.preventDefault();
     socket.emit("lobby:room:create", roomInfo, (response: CreateResponse) => {
       console.log("응답입니다.", response);
-      if (response.isError) {
+      if (response.success) {
         //에러 발생 처리
-        console.log("방 생성 에러 발생", response.errorMessage, response);
-      } else {
         console.log("들어왔어");
         if (roomInfo.isPrivate) {
           navigate(`room/${response.data}?pwd=${roomInfo.roomPassword}`);
         } else {
           navigate(`room/${response.data}`);
         }
+      } else {
+        console.log("방 생성 에러 발생", response.errorMessage, response);
       }
     });
     setIsOpen(false);
