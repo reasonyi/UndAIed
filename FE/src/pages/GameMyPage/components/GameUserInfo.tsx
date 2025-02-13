@@ -19,6 +19,14 @@ export function GameUserInfo() {
     setIsOpen(!isOpen);
   };
 
+  const winningRate = userInfo
+    ? userInfo.totalWin + userInfo.totalLose > 0
+      ? Math.round(
+          (userInfo.totalWin / (userInfo.totalLose + userInfo.totalWin)) * 10000
+        ) / 100
+      : 0
+    : 0;
+
   if (isLoading) {
     return (
       <>
@@ -60,14 +68,7 @@ export function GameUserInfo() {
           <DonutChart />
         </div>
         <div className="text-center mb-3 md:mb-10 text-sm md:text-base">
-          승률 | {userInfo.totalWin}승 {userInfo.totalLose}패 |
-          {" " +
-            Math.round(
-              (userInfo.totalWin / (userInfo.totalLose + userInfo.totalWin)) *
-                10000
-            ) /
-              100}
-          %
+          승률 | {userInfo.totalWin}승 {userInfo.totalLose}패 | {winningRate}%
         </div>
         <div
           onClick={handleClick}
