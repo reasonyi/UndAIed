@@ -1,9 +1,4 @@
-interface IMessage {
-  id: number;
-  player: number;
-  text: string;
-  isMine: boolean; // true면 내가 보낸 메시지, false면 상대방 메시지
-}
+import { IMessage } from "../../../types/gameroom";
 
 interface SystemBubbleProps {
   message: IMessage;

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { atom, useRecoilState } from "recoil";
 import { useSocket } from "../../../hooks/useSocket";
 import { useNavigate } from "react-router";
+import { toast } from "sonner";
 
 // Recoil atoms
 export const createRoomModalState = atom<boolean>({
@@ -50,6 +51,7 @@ function CreateRoomButton() {
         }
       } else {
         console.log("방 생성 에러 발생", response.errorMessage, response);
+        toast.error(response.errorMessage);
       }
     });
     setIsOpen(false);
