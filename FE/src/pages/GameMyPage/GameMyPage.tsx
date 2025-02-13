@@ -5,6 +5,7 @@ import Character from "./components/Character";
 import GamePlayList from "./components/GamePlayList";
 import { useUserProfile } from "../../hooks/useUserData";
 import GameProfileEditor from "./components/GameProfileEditor";
+import { toast } from "sonner";
 
 function GameMyPage() {
   const { data: response, isLoading, error } = useUserProfile();
@@ -13,7 +14,7 @@ function GameMyPage() {
   }
 
   if (error) {
-    console.log("GamrMyPage 에러 났어요 유저 프로필을 못가져와요 ㅎㅎ", error);
+    toast("유저 프로필 호출 오류");
   }
   const userInfo = response?.data;
   console.log("유저 정보 입니다", userInfo);
