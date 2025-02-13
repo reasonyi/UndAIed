@@ -32,7 +32,9 @@ public class GameResultHandler {
     private void init() {
         namespace.addEventListener("game:result", Integer.class,
                 (client, gameId, ackRequest) -> {
-                    try {// 1️⃣ URL 파라미터에서 gameId 가져오기
+                    try {
+
+                        // 1️⃣ URL 파라미터에서 gameId 가져오기, 임시 설정. 나중에 수정 필요
                         if (gameId == null) {
                             String gameIdStr = client.getHandshakeData().getSingleUrlParam("gameId");
                             if (gameIdStr == null) {

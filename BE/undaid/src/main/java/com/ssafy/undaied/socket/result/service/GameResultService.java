@@ -26,7 +26,6 @@ public class GameResultService {
     private final RedisTemplate<String, String> redisTemplate;
     private final RedisTemplate<String, Object> jsonRedisTemplate;
     private final SocketIOServer socketIOServer;
-    private static final String ROOM_LIST = "rooms:";
 
     public GameResultResponseDto checkGameResult(SocketIOClient client, int gameId) throws SocketException {
         String gameKey = GAME_KEY_PREFIX + gameId;

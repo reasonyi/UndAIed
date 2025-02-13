@@ -12,7 +12,8 @@ import com.ssafy.undaied.socket.init.dto.response.GameInfoResponseDto;
 import com.ssafy.undaied.socket.init.dto.response.PlayerInfoDto;
 import com.ssafy.undaied.socket.init.service.GameInitService;
 import com.ssafy.undaied.socket.lobby.dto.response.LobbyUpdateResponseDto;
-import com.ssafy.undaied.socket.stage.handler.StageHandler;
+
+import com.ssafy.undaied.socket.stage.service.StageService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +39,7 @@ public class GameInitHandler {
     private final GameInitService gameInitService;
     private final RedisTemplate<String, String> redisTemplate;
     private final Map<Integer, Boolean> gameInitializationStatus = new ConcurrentHashMap<>();
-    private final StageHandler stageHandler;
+    private final StageService stageService;
 
     @PostConstruct
     public void init() {
@@ -72,7 +73,7 @@ public class GameInitHandler {
 
 
                     log.info("Checking ackRequest: {}", ackRequest);
-                    stageHandler.handleGameStart(gameId);
+                    stageService.handleGameStart(gameId);
 
 
                     sendResponse(ackRequest, true, null, gameId);
@@ -103,6 +104,10 @@ public class GameInitHandler {
         // Handle game info requests
         namespace.addEventListener("game:info", Integer.class, (client, gameId, ackRequest) -> {
             try {
+
+                //임시 저장. 수정 필요
+                gameId =1;
+
                 if (gameId == null) {
                     throw new SocketException(SocketErrorCode.GAME_NOT_FOUND);
                 }
@@ -132,7 +137,7 @@ public class GameInitHandler {
     }
 
     private void sendResponse(AckRequest ackRequest, boolean success, String errorMessage, Integer gameId) {  // Integer로 변경
-//        if (ackRequest.isAckRequested())
+        if (ackRequest.isAckRequested())
         {
             Map<String, Object> response = new HashMap<>();
             response.put("success", success);

@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.undaied.socket.common.constant.EventType;
 import com.ssafy.undaied.socket.common.exception.SocketErrorCode;
 import com.ssafy.undaied.socket.common.exception.SocketException;
+import com.ssafy.undaied.socket.common.util.GameTimer;
 import com.ssafy.undaied.socket.init.dto.response.GameInfoResponseDto;
 import com.ssafy.undaied.socket.init.dto.response.PlayerInfoDto;
 import com.ssafy.undaied.socket.lobby.dto.response.LobbyUpdateResponseDto;
@@ -36,6 +37,7 @@ public class GameInitService {
     private final SocketIOServer socketIOServer;
     private final ObjectMapper objectMapper;
     private final SocketIONamespace namespace;
+    private final GameTimer gameTimer;
 
     private static final long EXPIRE_TIME = 7200;
     private static final int REQUIRED_PLAYERS = 6;
@@ -399,9 +401,16 @@ public void initTestData() {
         String statusKey = GAME_KEY_PREFIX + gameId + ":player_status";
         Map<Object, Object> allStatus = redisTemplate.opsForHash().entries(statusKey);
 
+
+        //임시 저장. 수정 필요
         String stageKey = "game:" + gameId + ":stage";
 //        String currentStage = redisTemplate.opsForValue().get(stageKey).toString();
         String currentStage="Start";
+
+        Integer remainingTime = gameTimer.getRemainingTime(gameId);
+        log.info("Checking timer: gameId={}, remainingTime={}", gameId, remainingTime);
+
+
 
         List<PlayerInfoDto> players = allStatus.entrySet().stream()
                 .map(entry -> {
@@ -418,13 +427,13 @@ public void initTestData() {
 
         return GameInfoResponseDto.builder()
                 .currentStage(currentStage)
-                .timer(0)
+                .timer(remainingTime)
                 .players(players)
                 .build();
     }
 
     public LobbyUpdateResponseDto createLobbyUpdateResponse(int roomId) throws SocketException {
-        String roomKey = ROOM_LIST + ROOM_KEY_PREFIX + roomId;
+        String roomKey = WAITING_LIST + ROOM_KEY_PREFIX + roomId;
         Object roomObj = jsonRedisTemplate.opsForValue().get(roomKey);
         Room room = objectMapper.convertValue(roomObj, Room.class);
 
@@ -432,8 +441,10 @@ public void initTestData() {
             throw new SocketException(SocketErrorCode.ROOM_NOT_FOUND);
         }
 
+        //아래 부분 프론트엔드랑 얘기해봐야 할 것 같음.
+
         return LobbyUpdateResponseDto.builder()
-                .type("delete")
+                .type("update")
                 .data(UpdateData.builder()
                         .roomId(room.getRoomId())
                         .roomTitle(room.getRoomTitle())

@@ -3,7 +3,6 @@ package com.ssafy.undaied.socket.vote.service;
 import com.ssafy.undaied.socket.common.exception.SocketErrorCode;
 import com.ssafy.undaied.socket.common.exception.SocketException;
 import com.ssafy.undaied.socket.stage.constant.StageType;
-import com.ssafy.undaied.socket.stage.handler.StageHandler;
 import com.ssafy.undaied.socket.vote.dto.request.VoteSubmitRequestDto;
 import com.ssafy.undaied.socket.vote.dto.response.VoteResultResponseDto;
 import com.ssafy.undaied.socket.vote.dto.response.VoteSubmitResponseDto;
@@ -23,7 +22,6 @@ import java.util.*;
 public class VoteService {
 
     private final RedisTemplate redisTemplate;
-    private final StageHandler stageHandler;
 
     // 투표 제출
     @Transactional
@@ -51,10 +49,14 @@ public class VoteService {
             if (!isValidVote(gameId, voterNumber))
                 throw new SocketException(SocketErrorCode.VOTE_INVALID_PLAYER);
 
-            if (!stageHandler.getCurrentStage(gameId).equals(StageType.VOTE.getRedisValue()))
+            String stageKey = "game:" + gameId + ":stage";
+            String currentStage = redisTemplate.opsForValue().get(stageKey).toString();
+
+            if (currentStage.equals(StageType.VOTE.getRedisValue()))
                 throw new SocketException(SocketErrorCode.VOTE_STAGE_INVALID);
 
-            String currentRound = stageHandler.getCurrentRound(gameId);
+            String roundKey = "game:" + gameId + "round";
+            String currentRound = redisTemplate.opsForValue().get(roundKey).toString();
             String eventKey = "game:" + gameId + ":round" + currentRound + ":events";
 
             if (hasVoted(eventKey, voterNumber))
@@ -114,7 +116,9 @@ public class VoteService {
     // 투표 산출
     public VoteResultResponseDto computeVoteResult(Integer gameId) {
 
-        String currentRound = stageHandler.getCurrentRound(gameId);
+        String roundKey = "game:" + gameId + ":round";
+        String currentRound = redisTemplate.opsForValue().get(roundKey).toString();
+
         String eventKey = "game:" + gameId + ":round" + currentRound + ":events";
         List<String> allEvents = redisTemplate.opsForList().range(eventKey, 0, -1);
 
