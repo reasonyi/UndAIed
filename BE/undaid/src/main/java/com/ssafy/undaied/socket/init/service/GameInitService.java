@@ -51,105 +51,105 @@ public class GameInitService {
     }};
 
 //     테스트 데이터. 나중에 지우려고 함.
-@PostConstruct
-public void initTestData() {
-    int testRoomId = 456;
-    String roomKey = ROOM_LIST+ROOM_KEY_PREFIX+ testRoomId;
-
-    // 기존 데이터 삭제
-    redisTemplate.delete(roomKey + testRoomId);
-
-    // 테스트용 RoomUser 목록 생성
-    List<RoomUser> players = new ArrayList<>();
-    players.add(RoomUser.builder()
-            .userId(11)
-            .enterId(0)
-            .isHost(true)
-            .nickname("cchh6462")
-            .profileImage(1)
-            .build());
-
-    players.add(RoomUser.builder()
-            .userId(12)
-            .enterId(1)
-            .isHost(false)
-            .nickname("TestUser2")
-            .profileImage(2)
-            .build());
-
-    players.add(RoomUser.builder()
-            .userId(13)
-            .enterId(2)
-            .isHost(false)
-            .nickname("TestUser3")
-            .profileImage(3)
-            .build());
-
-    players.add(RoomUser.builder()
-            .userId(14)
-            .enterId(3)
-            .isHost(false)
-            .nickname("TestUser4")
-            .profileImage(4)
-            .build());
-
-    players.add(RoomUser.builder()
-            .userId(15)
-            .enterId(4)
-            .isHost(false)
-            .nickname("TestUser5")
-            .profileImage(5)
-            .build());
-
-    players.add(RoomUser.builder()
-            .userId(16)
-            .enterId(5)
-            .isHost(false)
-            .nickname("TestUser6")
-            .profileImage(6)
-            .build());
-
-    // Room 객체 생성 및 저장
-    Room room = Room.builder()
-            .roomId((long) testRoomId)
-            .roomTitle("Test Game Room")
-            .isPrivate(false)
-            .roomPassword(null)
-            .playing(false)
-            .currentPlayers(players)
-            .build();
-
-    jsonRedisTemplate.opsForValue().set(roomKey, room);
-
-    // 소켓 room에도 join시키기
-    namespace.getAllClients().forEach(client -> {
-        Integer userId = client.get("userId");
-        if (userId != null && userId == 11) {  // 방장
-            client.joinRoom(ROOM_KEY_PREFIX+testRoomId);
-            log.info("Host joined room - userId: {}, roomKey: {}", userId, roomKey);
-        }
-    });
-
-    log.info("Test data initialized - roomId: {}, players: {}", testRoomId, players.stream()
-            .map(user -> String.format("%s(%d)", user.getNickname(), user.getUserId()))
-            .collect(Collectors.joining(", ")));
-
-    log.info("\n=== Postman 테스트 가이드 ===\n" +
-            "1. Socket.IO 연결 설정:\n" +
-            "   URL: ws://localhost:8080\n" +
-            "   Auth:\n" +
-            "   {\n" +
-            "     \"userId\": 11,\n" +
-            "     \"nickname\": \"cchh6462\"\n" +
-            "   }\n\n" +
-            "2. 게임 시작 테스트:\n" +
-            "   이벤트명: game:init:emit\n" +
-            "=========================");
-
-    // 테스트 데이터 확인용 로그
-    Object savedRoom = jsonRedisTemplate.opsForValue().get(roomKey);
-    log.info("Saved room data: {}", savedRoom);
-}
+//@PostConstruct
+//public void initTestData() {
+//    int testRoomId = 456;
+//    String roomKey = ROOM_LIST+ROOM_KEY_PREFIX+ testRoomId;
+//
+//    // 기존 데이터 삭제
+//    redisTemplate.delete(roomKey + testRoomId);
+//
+//    // 테스트용 RoomUser 목록 생성
+//    List<RoomUser> players = new ArrayList<>();
+//    players.add(RoomUser.builder()
+//            .userId(11)
+//            .enterId(0)
+//            .isHost(true)
+//            .nickname("cchh6462")
+//            .profileImage(1)
+//            .build());
+//
+//    players.add(RoomUser.builder()
+//            .userId(12)
+//            .enterId(1)
+//            .isHost(false)
+//            .nickname("TestUser2")
+//            .profileImage(2)
+//            .build());
+//
+//    players.add(RoomUser.builder()
+//            .userId(13)
+//            .enterId(2)
+//            .isHost(false)
+//            .nickname("TestUser3")
+//            .profileImage(3)
+//            .build());
+//
+//    players.add(RoomUser.builder()
+//            .userId(14)
+//            .enterId(3)
+//            .isHost(false)
+//            .nickname("TestUser4")
+//            .profileImage(4)
+//            .build());
+//
+//    players.add(RoomUser.builder()
+//            .userId(15)
+//            .enterId(4)
+//            .isHost(false)
+//            .nickname("TestUser5")
+//            .profileImage(5)
+//            .build());
+//
+//    players.add(RoomUser.builder()
+//            .userId(16)
+//            .enterId(5)
+//            .isHost(false)
+//            .nickname("TestUser6")
+//            .profileImage(6)
+//            .build());
+//
+//    // Room 객체 생성 및 저장
+//    Room room = Room.builder()
+//            .roomId((long) testRoomId)
+//            .roomTitle("Test Game Room")
+//            .isPrivate(false)
+//            .roomPassword(null)
+//            .playing(false)
+//            .currentPlayers(players)
+//            .build();
+//
+//    jsonRedisTemplate.opsForValue().set(roomKey, room);
+//
+//    // 소켓 room에도 join시키기
+//    namespace.getAllClients().forEach(client -> {
+//        Integer userId = client.get("userId");
+//        if (userId != null && userId == 11) {  // 방장
+//            client.joinRoom(ROOM_KEY_PREFIX+testRoomId);
+//            log.info("Host joined room - userId: {}, roomKey: {}", userId, roomKey);
+//        }
+//    });
+//
+//    log.info("Test data initialized - roomId: {}, players: {}", testRoomId, players.stream()
+//            .map(user -> String.format("%s(%d)", user.getNickname(), user.getUserId()))
+//            .collect(Collectors.joining(", ")));
+//
+//    log.info("\n=== Postman 테스트 가이드 ===\n" +
+//            "1. Socket.IO 연결 설정:\n" +
+//            "   URL: ws://localhost:8080\n" +
+//            "   Auth:\n" +
+//            "   {\n" +
+//            "     \"userId\": 11,\n" +
+//            "     \"nickname\": \"cchh6462\"\n" +
+//            "   }\n\n" +
+//            "2. 게임 시작 테스트:\n" +
+//            "   이벤트명: game:init:emit\n" +
+//            "=========================");
+//
+//    // 테스트 데이터 확인용 로그
+//    Object savedRoom = jsonRedisTemplate.opsForValue().get(roomKey);
+//    log.info("Saved room data: {}", savedRoom);
+//}
 
     public int startGame(SocketIOClient client, int roomId) throws SocketException {
         Integer userId = validateAuthentication(client);
