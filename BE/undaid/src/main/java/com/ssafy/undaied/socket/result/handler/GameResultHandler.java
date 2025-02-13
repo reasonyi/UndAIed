@@ -1,6 +1,7 @@
 package com.ssafy.undaied.socket.result.handler;
 
 import com.corundumstudio.socketio.SocketIOClient;
+import com.corundumstudio.socketio.SocketIONamespace;
 import com.corundumstudio.socketio.SocketIOServer;
 import com.corundumstudio.socketio.annotation.OnEvent;
 import com.ssafy.undaied.socket.common.exception.SocketErrorCode;
@@ -25,11 +26,11 @@ public class GameResultHandler {
 
     private final GameResultService gameResultService;
     private final RedisTemplate<String, String> redisTemplate;
-    private final SocketIOServer socketIOServer;
+    private final SocketIONamespace namespace;
 
     @PostConstruct
     private void init() {
-        socketIOServer.addNamespace("/socket.io").addEventListener("game:result", Integer.class,
+        namespace.addEventListener("game:result", Integer.class,
                 (client, gameId, ackRequest) -> {
                     try {// 1️⃣ URL 파라미터에서 gameId 가져오기
                         if (gameId == null) {

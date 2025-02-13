@@ -14,13 +14,21 @@ public enum EventType {
     LEAVE_ROOM_EMIT("room:leave:emit"),
     LEAVE_ROOM_SEND("room:leave:send"),
     ROOM_CHAT("room:chat"),
+
+    GAME_INIT_EMIT("game:init:emit"),
+
+    GAME_INIT_SEND("game:init:send"),
     START_GAME("game:start"),
 
     GAME_INFO("game:info"),
 
     // 게임진행(낮)
-    SEND_SUBJECT("send:subject"),
-    GAME_CHAT("chat:game"),
+    SEND_SUBJECT("chat:subject"),
+    CHAT_SUBJECT_EMIT("chat:subject:emit"),
+
+    CHAT_SUBJECT_SEND("chat:subject:send"),
+    CHAT_FREE_EMIT("chat:free:emit"),
+    CHAT_FREE_SEND("chat:free:send"),
 
     // 투표
     SUBMIT_VOTE ("vote:submit"),

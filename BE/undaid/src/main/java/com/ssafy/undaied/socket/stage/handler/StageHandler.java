@@ -1,5 +1,6 @@
 package com.ssafy.undaied.socket.stage.handler;
 
+import com.corundumstudio.socketio.SocketIONamespace;
 import com.corundumstudio.socketio.SocketIOServer;
 import com.ssafy.undaied.socket.common.constant.EventType;
 import com.ssafy.undaied.socket.common.util.GameTimer;
@@ -16,6 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequiredArgsConstructor
 public class StageHandler {
 
+    private final SocketIONamespace namespace;
     private final SocketIOServer server;
     private final GameTimer gameTimer;
 
@@ -50,7 +52,7 @@ public class StageHandler {
             // 라운드 알림
             saveCurrentRound(gameId);
             RoundNotifyDto roundNotifyDto = RoundNotifyDto.notifyRoundStart(currentRoundMap.get(gameId));
-            server.getRoomOperations(String.valueOf(gameId)).sendEvent(EventType.GAME_CHAT.getValue(), roundNotifyDto);
+            namespace.getRoomOperations("game:"+gameId).sendEvent(EventType.CHAT_FREE_EMIT.getValue(), roundNotifyDto);
 
             gameTimer.setTimer(gameId, 1, 1, () -> {
                 // 낮 알림
@@ -113,7 +115,7 @@ public class StageHandler {
 
     private void handleNotifyStartStage(Integer gameId, StageType currentStage) {
         StageNotifyDto stageNotifyDto = StageNotifyDto.notifyStartStage(currentStage);
-        server.getRoomOperations(String.valueOf(gameId)).sendEvent(EventType.GAME_CHAT.getValue(), stageNotifyDto);
+        namespace.getRoomOperations(String.valueOf(gameId)).sendEvent(EventType.CHAT_FREE_EMIT.getValue(), stageNotifyDto);
     }
 
     private void handleStageUpdate(Integer gameId, StageType currentStage) {
@@ -141,7 +143,7 @@ public class StageHandler {
 
     private void handleNotifyEndStage(Integer gameId, StageType currentStage) {
         StageNotifyDto stageNotifyDto = StageNotifyDto.notifyEndStage(currentStage);
-        server.getRoomOperations(String.valueOf(gameId)).sendEvent(EventType.GAME_CHAT.getValue(), stageNotifyDto);
+        server.getRoomOperations(String.valueOf(gameId)).sendEvent(EventType.CHAT_FREE_EMIT.getValue(), stageNotifyDto);
     }
 
     private void saveCurrentStage(Integer gameId, StageType currentStage) {

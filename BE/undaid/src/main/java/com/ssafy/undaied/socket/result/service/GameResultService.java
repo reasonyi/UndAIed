@@ -17,6 +17,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.ssafy.undaied.socket.common.constant.SocketRoom.GAME_KEY_PREFIX;
+import static com.ssafy.undaied.socket.common.constant.SocketRoom.ROOM_KEY_PREFIX;
 
 @Service
 @RequiredArgsConstructor
@@ -152,7 +153,7 @@ public class GameResultService {
             log.info("User {} left game room: game:{}", client.get("userId"), gameId);
 
             // 🔹 원래 방(room:{roomId})으로 복귀
-            client.joinRoom(ROOM_LIST + roomId);
+            client.joinRoom(ROOM_KEY_PREFIX + roomId);
             log.info("User {} joined back to room: room:{}", client.get("userId"), roomId);
             return true;
         }

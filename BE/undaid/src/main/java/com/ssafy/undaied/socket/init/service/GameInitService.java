@@ -1,12 +1,16 @@
 package com.ssafy.undaied.socket.init.service;
 
 import com.corundumstudio.socketio.SocketIOClient;
+import com.corundumstudio.socketio.SocketIONamespace;
 import com.corundumstudio.socketio.SocketIOServer;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ssafy.undaied.socket.common.constant.EventType;
 import com.ssafy.undaied.socket.common.exception.SocketErrorCode;
 import com.ssafy.undaied.socket.common.exception.SocketException;
 import com.ssafy.undaied.socket.init.dto.response.GameInfoResponseDto;
 import com.ssafy.undaied.socket.init.dto.response.PlayerInfoDto;
+import com.ssafy.undaied.socket.lobby.dto.response.LobbyUpdateResponseDto;
+import com.ssafy.undaied.socket.lobby.dto.response.UpdateData;
 import com.ssafy.undaied.socket.room.dto.Room;
 import com.ssafy.undaied.socket.room.dto.RoomUser;
 import jakarta.annotation.PostConstruct;
@@ -31,7 +35,7 @@ public class GameInitService {
     private final RedisTemplate<String, Object> jsonRedisTemplate;
     private final SocketIOServer socketIOServer;
     private final ObjectMapper objectMapper;
-    private static final String ROOM_LIST = "rooms:";
+    private final SocketIONamespace namespace;
 
     private static final long EXPIRE_TIME = 7200;
     private static final int REQUIRED_PLAYERS = 6;
@@ -48,10 +52,10 @@ public class GameInitService {
 //@PostConstruct
 //public void initTestData() {
 //    int testRoomId = 456;
-//    String roomKey = ROOM_LIST + testRoomId;
+//    String roomKey = ROOM_LIST+ROOM_KEY_PREFIX+ testRoomId;
 //
 //    // 기존 데이터 삭제
-//    redisTemplate.delete(roomKey);
+//    redisTemplate.delete(roomKey + testRoomId);
 //
 //    // 테스트용 RoomUser 목록 생성
 //    List<RoomUser> players = new ArrayList<>();
@@ -116,10 +120,10 @@ public class GameInitService {
 //    jsonRedisTemplate.opsForValue().set(roomKey, room);
 //
 //    // 소켓 room에도 join시키기
-//    socketIOServer.getAllClients().forEach(client -> {
+//    namespace.getAllClients().forEach(client -> {
 //        Integer userId = client.get("userId");
 //        if (userId != null && userId == 11) {  // 방장
-//            client.joinRoom(roomKey);
+//            client.joinRoom(ROOM_KEY_PREFIX+testRoomId);
 //            log.info("Host joined room - userId: {}, roomKey: {}", userId, roomKey);
 //        }
 //    });
@@ -137,8 +141,7 @@ public class GameInitService {
 //            "     \"nickname\": \"cchh6462\"\n" +
 //            "   }\n\n" +
 //            "2. 게임 시작 테스트:\n" +
-//            "   이벤트명: game:init\n" +
-//            "   데이터 필요 없음 (빈 데이터로 emit)\n" +
+//            "   이벤트명: game:init:emit\n" +
 //            "=========================");
 //
 //    // 테스트 데이터 확인용 로그
@@ -146,7 +149,7 @@ public class GameInitService {
 //    log.info("Saved room data: {}", savedRoom);
 //}
 
-    public GameInfoResponseDto startGame(SocketIOClient client, int roomId) throws SocketException {
+    public int startGame(SocketIOClient client, int roomId) throws SocketException {
         Integer userId = validateAuthentication(client);
         Room room = getRoomInfo(roomId);
 
@@ -168,17 +171,16 @@ public class GameInitService {
         savePlayersAndAssignNumbers(gameId, players, room, selectedAIs);
 
         handleSocketConnections(gameId, roomId);
-        broadcastGameInit(gameId);
 
         log.info("Game successfully initialized - gameId: {}, roomKey: {}, players: {}",
                 gameId,
-                ROOM_LIST + roomId,
+                ROOM_LIST+ ROOM_KEY_PREFIX + roomId,
                 room.getCurrentPlayers().stream()
                         .map(user -> String.format("%s(%d)", user.getNickname(), user.getUserId()))
                         .collect(Collectors.joining(", "))
         );
 
-        return createGameInfoResponse(gameId);
+        return gameId;
     }
 
     // AI 3개 중 2개를 랜덤 선택하는 메서드
@@ -202,7 +204,7 @@ public class GameInitService {
     }
 
     private Room getRoomInfo(int roomId) throws SocketException {
-        String roomKey = ROOM_LIST + roomId;
+        String roomKey = ROOM_LIST+ ROOM_KEY_PREFIX + roomId;
         Object roomObj = jsonRedisTemplate.opsForValue().get(roomKey);
 
         if (roomObj == null) {
@@ -250,7 +252,7 @@ public class GameInitService {
     }
 
     private void handleSocketConnections(int gameId, int roomId) {
-        String roomKey = ROOM_LIST + roomId;
+        String roomKey = ROOM_LIST+ ROOM_KEY_PREFIX + roomId;
         Object roomObj = jsonRedisTemplate.opsForValue().get(roomKey);
 
         if (roomObj == null) {
@@ -265,12 +267,12 @@ public class GameInitService {
                     .map(RoomUser::getUserId)
                     .collect(Collectors.toList());
 
-            socketIOServer.getAllClients().forEach(client -> {
+            namespace.getAllClients().forEach(client -> {
                 Integer clientUserId = client.get("userId");
                 if (clientUserId != null && roomUserIds.contains(clientUserId)) {
                     client.set("gameId", gameId);
                     client.joinRoom(GAME_KEY_PREFIX + gameId);
-                    client.leaveRoom(ROOM_LIST + roomId);
+                    client.leaveRoom(ROOM_KEY_PREFIX + roomId);
                     log.info("Player joined game room - userId: {}, gameId: {}, nickname: {}",
                             clientUserId,
                             gameId,
@@ -357,15 +359,26 @@ public class GameInitService {
         status.put("isInfected", String.valueOf(isInfected));
         status.put("isInGame", String.valueOf(isInGame));
         redisTemplate.opsForHash().put(statusKey, number, status.toString());
-
-        String savedStatus = redisTemplate.opsForHash().get(statusKey, number).toString();
-        log.debug("Saved player status - key: {}, number: {}, status: {}", statusKey, number, savedStatus);
     }
 
-    private void broadcastGameInit(int gameId) {
+    public void broadcastGameInit(int gameId) {
+        log.info("Starting broadcastGameInit for gameId: {}", gameId);
+
+        // 연결된 클라이언트 확인
+        Collection<SocketIOClient> clients = namespace.getRoomOperations(GAME_KEY_PREFIX + gameId).getClients();
+        log.info("Clients in game room {}: {}", GAME_KEY_PREFIX + gameId, clients.size());
+
         GameInfoResponseDto responseDto = createGameInfoResponse(gameId);
-        socketIOServer.getRoomOperations(GAME_KEY_PREFIX + gameId)
-                .sendEvent("game:init", responseDto);
+        log.info("Broadcasting GameInfoResponseDto: {}", responseDto);
+
+        // 세부 내용 로깅
+        log.info("Game Info Details - gameId: {}", gameId);
+        log.info("Current Stage: {}", responseDto.getCurrentStage());
+        log.info("Timer: {}", responseDto.getTimer());
+        log.info("Players count: {}", responseDto.getPlayers().size());
+
+        namespace.getRoomOperations(GAME_KEY_PREFIX + gameId)
+                .sendEvent(EventType.GAME_INIT_SEND.getValue(), responseDto);
     }
 
     private Map<Integer, String> createNumberNicknames() {
@@ -386,6 +399,10 @@ public class GameInitService {
         String statusKey = GAME_KEY_PREFIX + gameId + ":player_status";
         Map<Object, Object> allStatus = redisTemplate.opsForHash().entries(statusKey);
 
+        String stageKey = "game:" + gameId + ":stage";
+//        String currentStage = redisTemplate.opsForValue().get(stageKey).toString();
+        String currentStage="Start";
+
         List<PlayerInfoDto> players = allStatus.entrySet().stream()
                 .map(entry -> {
                     String status = entry.getValue().toString();
@@ -400,7 +417,31 @@ public class GameInitService {
                 .collect(Collectors.toList());
 
         return GameInfoResponseDto.builder()
+                .currentStage(currentStage)
+                .timer(0)
                 .players(players)
                 .build();
     }
+
+    public LobbyUpdateResponseDto createLobbyUpdateResponse(int roomId) throws SocketException {
+        String roomKey = ROOM_LIST + ROOM_KEY_PREFIX + roomId;
+        Object roomObj = jsonRedisTemplate.opsForValue().get(roomKey);
+        Room room = objectMapper.convertValue(roomObj, Room.class);
+
+        if (room == null) {
+            throw new SocketException(SocketErrorCode.ROOM_NOT_FOUND);
+        }
+
+        return LobbyUpdateResponseDto.builder()
+                .type("delete")
+                .data(UpdateData.builder()
+                        .roomId(room.getRoomId())
+                        .roomTitle(room.getRoomTitle())
+                        .isPrivate(room.getIsPrivate())
+                        .currentPlayerNum(room.getCurrentPlayers().size())
+                        .playing(true)  // 게임 시작했으므로 true로 설정
+                        .build())
+                .build();
+    }
+
 }
