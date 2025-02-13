@@ -3,7 +3,6 @@ package com.ssafy.undaied.socket.vote.service;
 import com.ssafy.undaied.socket.common.exception.SocketErrorCode;
 import com.ssafy.undaied.socket.common.exception.SocketException;
 import com.ssafy.undaied.socket.stage.constant.StageType;
-import com.ssafy.undaied.socket.stage.handler.StageHandler;
 import com.ssafy.undaied.socket.vote.dto.request.VoteSubmitRequestDto;
 import com.ssafy.undaied.socket.vote.dto.response.VoteResultResponseDto;
 import com.ssafy.undaied.socket.vote.dto.response.VoteSubmitResponseDto;
