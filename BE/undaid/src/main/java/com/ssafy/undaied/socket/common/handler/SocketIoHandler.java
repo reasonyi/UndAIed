@@ -7,6 +7,7 @@ import com.ssafy.undaied.global.common.exception.BaseException;
 import com.ssafy.undaied.socket.common.constant.EventType;
 import com.ssafy.undaied.socket.common.exception.SocketException;
 import com.ssafy.undaied.socket.common.response.AckResponse;
+import com.ssafy.undaied.socket.room.service.RoomService;
 import com.ssafy.undaied.socket.stage.handler.StageHandler;
 import com.ssafy.undaied.socket.chat.handler.GameChatHandler;
 import com.ssafy.undaied.domain.user.entity.Users;
@@ -42,6 +43,7 @@ public class SocketIoHandler {
     private final SocketIONamespace namespace;
     private final SocketAuthenticationService authenticationService;
     private final SocketDisconnectService disconnectService;
+    private final RoomService roomService;
     private final LobbyService lobbyService;
     private final StageHandler stageHandler;
     private final UserRepository userRepository;
@@ -117,6 +119,9 @@ public class SocketIoHandler {
                 client.set("userId", userId);
                 client.set("nickname", user.getNickname());
                 client.set("profileImage", user.getProfileImage());
+
+                roomService.clientLeaveAllRooms(client);
+                lobbyService.joinLobby(client);
 
             } catch (Exception e) {
                 log.error("Connection error: ", e);
