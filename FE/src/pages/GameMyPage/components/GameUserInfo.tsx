@@ -18,7 +18,6 @@ export function GameUserInfo() {
   const handleClick = () => {
     setIsOpen(!isOpen);
   };
-
   const winningRate = userInfo
     ? userInfo.totalWin + userInfo.totalLose > 0
       ? Math.round(
@@ -64,8 +63,8 @@ export function GameUserInfo() {
       {/* Stats Section */}
       <div className={`${blockStyle} px-6 md:px-10 pb-10 pt-8`}>
         <div className="text-center">전적</div>
-        <div className="relative w-36 h-36 md:mb-10 md:mt-10 md:w-48 md:h-48 mx-auto">
-          <DonutChart />
+        <div className="flex justify-center items-center w-36 h-36 md:mb-10 md:mt-10 md:w-48 md:h-48 mx-auto">
+          <DonutChart percent={winningRate} />
         </div>
         <div className="text-center mb-3 md:mb-10 text-sm md:text-base">
           승률 | {userInfo.totalWin}승 {userInfo.totalLose}패 | {winningRate}%
