@@ -8,6 +8,8 @@ import com.ssafy.undaied.socket.infect.service.InfectService;
 import com.ssafy.undaied.socket.stage.constant.StageType;
 import com.ssafy.undaied.socket.stage.dto.response.RoundNotifyDto;
 import com.ssafy.undaied.socket.stage.dto.response.StageNotifyDto;
+import com.ssafy.undaied.socket.vote.dto.response.VoteResultResponseDto;
+import com.ssafy.undaied.socket.vote.service.VoteService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -25,7 +27,7 @@ public class StageService {
     private final GameTimer gameTimer;
 
     //    서비스 파일들 불러봐야됨
-//    private final VoteService voteService;
+    private final VoteService voteService;
     private final InfectService infectService;
 
     private static final Map<StageType, Integer> STAGE_DURATIONS = Map.of(
@@ -60,16 +62,17 @@ public class StageService {
             String currentRound = redisTemplate.opsForValue().get(roundKey).toString();
             // 라운드 알림
             RoundNotifyDto roundNotifyDto = RoundNotifyDto.notifyRoundStart(currentRound);
-
-            try {
-                String infectedPlayerNumber = infectService.infectPlayer(gameId);
-                // 감염된 플레이어 정보를 사용한 추가 로직
-                namespace.getRoomOperations("game:"+gameId).sendEvent(EventType.GAME_CHAT_SEND.getValue(),
-                        Map.of("number", 0,
-                                "content", "밤 사이에 인간 플레이어가 AI에게 감염되었습니다."));
-            } catch (SocketException e) {
-                log.error("Infection stage error: {}", e.getMessage());
-                throw e;  // 상위로 예외를 전파
+            if (Integer.parseInt(currentRound) > 1) {
+                try {
+                    String infectedPlayerNumber = infectService.infectPlayer(gameId);
+                    // 감염된 플레이어 정보를 사용한 추가 로직
+                    namespace.getRoomOperations("game:" + gameId).sendEvent(EventType.GAME_CHAT_SEND.getValue(),
+                            Map.of("number", 0,
+                                    "content", "밤 사이에 인간 플레이어가 AI에게 감염되었습니다."));
+                } catch (SocketException e) {
+                    log.error("Infection stage error: {}", e.getMessage());
+                    throw e;  // 상위로 예외를 전파
+                }
             }
 
             namespace.getRoomOperations("game:"+gameId).sendEvent(EventType.GAME_CHAT_EMIT.getValue(), roundNotifyDto);
@@ -123,8 +126,9 @@ public class StageService {
 
                         if (currentStage == StageType.VOTE) {
                             // 투표 결과 알림 (2초)
-//                            voteService.computeVoteResult(gameId);
+//                            VoteResultResponseDto responseDto = voteService.computeVoteResult(gameId);
                             System.out.println("투표 결과 알림");
+//                            namespace.getRoomOperations("game:"+gameId).sendEvent(EventType.GAME_CHAT_SEND.getValue(), responseDto);
                             gameTimer.setTimer(gameId, GameTimerConstants.VOTE_RESULT, 2, () -> {
                                 try {
                                     startStage(gameId, nextStage);
@@ -132,7 +136,18 @@ public class StageService {
                                     handleGameError(gameId, e);
                                 }
                             });
-                        } else {
+                        } else if(currentStage == StageType.SUBJECT_DEBATE) {
+                            // 주제 토론 한 번에 나옴
+                            System.out.println("주제 토론 한 번에 보여주기");
+                            gameTimer.setTimer(gameId, GameTimerConstants.VOTE_RESULT, 10, () -> {
+                                try {
+                                    startStage(gameId, nextStage);
+                                } catch (Exception e) {
+                                    handleGameError(gameId, e);
+                                }
+                            });
+                        }
+                        else {
                             try {
                                 startStage(gameId, nextStage);
                             } catch (Exception e) {
@@ -231,6 +246,8 @@ public class StageService {
     private void gameOver(Integer gameId) {
         // 게임 종료 로직
         System.out.println("게임 종료");
+        // gameTimer에서 타이머 데이터 삭제
+        gameTimer.cleanupGame(gameId);
     }
 
 }
