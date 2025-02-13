@@ -90,6 +90,7 @@ public class UserService{
                 .nickname(user.getNickname())
                 .totalWin(user.getTotalWin())
                 .totalLose(user.getTotalLose())
+                .profileImage(user.getProfileImage())
                 .build();
 
         tokenValidationDto.setUserLoginResponseDto(userLoginResponseDto);

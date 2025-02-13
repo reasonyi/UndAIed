@@ -15,4 +15,5 @@ public class UserLoginResponseDto {
     private String nickname;
     private int totalWin;
     private int totalLose;
+    private int profileImage;
 }
