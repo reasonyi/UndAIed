@@ -4,7 +4,7 @@ app = FastAPI()
 
 @app.get("/api/ai/")  # "/" -> "/api/ai/"로 변경
 def read_root():
-    return {"Hello": "World"}
+    return {"Hello": "World!!!"}
 
 @app.get("/api/ai/items/{item_id}")  # "/items/" -> "/api/ai/items/"로 변경
 def read_item(item_id: int, q: str | None = None):
