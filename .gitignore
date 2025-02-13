@@ -208,3 +208,7 @@ mysql/pid
 
 #Project structure
 tree_project_*
+
+# redis
+!redis/var/
+redis/var/run/redis/redis-server.pid
