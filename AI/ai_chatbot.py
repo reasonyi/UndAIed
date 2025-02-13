@@ -1,7 +1,7 @@
 from fastapi import FastAPI, WebSocket
 from fastapi.templating import Jinja2Templates
 from fastapi import Request
-from AI_models.Gemini import init_genimi
+from models.Gemini import init_genimi
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
@@ -22,3 +22,8 @@ async def websocket_endpoint(websocket: WebSocket):
 
         AI_message = gemini_bot.generate_content(user_message)
         await websocket.send_text(f"{AI_message.text}")
+
+
+@app.get("/api/ai/items/{item_id}")  # "/items/" -> "/api/ai/items/"로 변경
+def read_item(item_id: int, q: str | None = None):
+    return {"item_id": item_id, "q": q}

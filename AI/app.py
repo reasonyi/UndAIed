@@ -1,19 +1,23 @@
 from fastapi import FastAPI
+from models.Gemini import init_genimi
+from datetime import datetime
+
 
 app = FastAPI()
+gemini_bot = init_genimi()
 
-@app.get("/api/ai/")  # "/" -> "/api/ai/"로 변경
-def read_root():
-    return {"Hello": "World!!!"}
 
-@app.get("/api/ai/items/{item_id}")  # "/items/" -> "/api/ai/items/"로 변경
-def read_item(item_id: int, q: str | None = None):
-    return {"item_id": item_id, "q": q}
-
-# health check 추가
-@app.get("/health")
-def health_check():
-    return {"status": "ok"}
-
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+@app.post("/api/ai/{room_number}/")
+def create_message(room_number: int, message: dict):
+    print(message)
+    # AI_message = gemini_bot.generate_content(message)
+    AI_message = "hello!!!"
+    precise_timestamp = datetime.now().isoformat()
+    event_log = "AI 대답 생성 완료"
+    return {
+        "timeStamp": f"{precise_timestamp} - {event_log}",
+        "AI_code" : 1,
+        "status": 200,
+        "room_number": room_number,
+        "message": AI_message,
+    }
