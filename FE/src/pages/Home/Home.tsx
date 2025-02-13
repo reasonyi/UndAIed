@@ -34,7 +34,7 @@ function Home() {
 
   const [offset, setOffset] = useState(0);
   const [scrollRatio, setScrollRatio] = useState(0);
-  const INFO_VIEWPORT = 3;
+  const INFO_VIEWPORT = 2;
   const [infoScrollRatio, setInfoScrollRatio] = useState(0);
 
   const userInfo = useRecoilValue(userState);
@@ -88,7 +88,7 @@ function Home() {
       <Header scrollRatio={scrollRatio} />
       <HeaderTemp />
       <div className="on-scroll flex w-screen min-h-[calc(100vh-3.5rem)]">
-        <div className="w-[1px] h-[400vh] primary-bg-black"></div>
+        <div className="w-[1px] h-[300vh] primary-bg-black"></div>
         <div className="grow flex flex-col sticky top-[3.5rem] overflow-hidden h-[calc(100vh-3.5rem)] primary-bg-black">
           <div className="flex flex-col flex-grow w-full max-w-screen-md self-center pt-8 pb-4 px-4">
             <span className="text-white mb-8 text-4xl font-extrabold leading-none tracking-tight">
