@@ -6,101 +6,17 @@ import GamePlayList from "./components/GamePlayList";
 import { useUserProfile } from "../../hooks/useUserData";
 import GameProfileEditor from "./components/GameProfileEditor";
 import { toast } from "sonner";
+import "../GameMain/components/style.css";
 
 function GameMyPage() {
   const { data: response, isLoading, error } = useUserProfile();
   if (isLoading) {
     console.log("is Loading");
   }
-
   if (error) {
     toast("유저 프로필 호출 오류");
   }
-  const userInfo = response?.data;
-  console.log("유저 정보 입니다", userInfo);
-  // const userInfo = {
-  //   nickname: "저AI아닌데요",
-  //   profileImage: 2,
-  //   avatar: 1,
-  //   sex: true,
-  //   age: 27,
-  //   totalWin: 15,
-  //   totalLose: 13,
-  //   game: [
-  //     {
-  //       gameId: 1,
-  //       roomTitle: "방 제목",
-  //       startedAt: "2025-01-22T15:25:29.2762331",
-  //       playTime: "00:20:36",
-  //     },
-  //     {
-  //       gameId: 4,
-  //       roomTitle: "방 제목",
-  //       startedAt: "2025-01-22T15:25:29.2762331",
-  //       playTime: "00:20:36",
-  //     },
-  //     {
-  //       gameId: 1,
-  //       roomTitle: "방 제목",
-  //       startedAt: "2025-01-22T15:25:29.2762331",
-  //       playTime: "00:20:36",
-  //     },
-  //     {
-  //       gameId: 4,
-  //       roomTitle: "방 제목",
-  //       startedAt: "2025-01-22T15:25:29.2762331",
-  //       playTime: "00:20:36",
-  //     },
-  //     {
-  //       gameId: 1,
-  //       roomTitle: "방 제목",
-  //       startedAt: "2025-01-22T15:25:29.2762331",
-  //       playTime: "00:20:36",
-  //     },
-  //     {
-  //       gameId: 4,
-  //       roomTitle: "방 제목",
-  //       startedAt: "2025-01-22T15:25:29.2762331",
-  //       playTime: "00:20:36",
-  //     },
-  //     {
-  //       gameId: 1,
-  //       roomTitle: "방 제목",
-  //       startedAt: "2025-01-22T15:25:29.2762331",
-  //       playTime: "00:20:36",
-  //     },
-  //     {
-  //       gameId: 4,
-  //       roomTitle: "방 제목",
-  //       startedAt: "2025-01-22T15:25:29.2762331",
-  //       playTime: "00:20:36",
-  //     },
-  //     {
-  //       gameId: 1,
-  //       roomTitle: "방 제목",
-  //       startedAt: "2025-01-22T15:25:29.2762331",
-  //       playTime: "00:20:36",
-  //     },
-  //     {
-  //       gameId: 4,
-  //       roomTitle: "방 제목",
-  //       startedAt: "2025-01-22T15:25:29.2762331",
-  //       playTime: "00:20:36",
-  //     },
-  //     {
-  //       gameId: 1,
-  //       roomTitle: "방 제목",
-  //       startedAt: "2025-01-22T15:25:29.2762331",
-  //       playTime: "00:20:36",
-  //     },
-  //     {
-  //       gameId: 4,
-  //       roomTitle: "방 제목",
-  //       startedAt: "2025-01-22T15:25:29.2762331",
-  //       playTime: "00:20:36",
-  //     },
-  //   ],
-  // };
+
   return (
     <div className="bg-black min-h-screen w-full">
       <div
@@ -111,9 +27,15 @@ function GameMyPage() {
         <div className="relative mx-auto h-full flex flex-col">
           <GameHeader />
           <div className="h-full grid grid-cols-1 justify-items-center md:grid-cols-3 gap-4 md:gap-8">
-            <GameUserInfo />
-            <Character />
-            <GamePlayList />
+            <div className="slide-in-left">
+              <GameUserInfo />
+            </div>
+            <div className="slide-in-center">
+              <Character />
+            </div>
+            <div className="slide-in-right">
+              <GamePlayList />
+            </div>
           </div>
         </div>
       </div>
