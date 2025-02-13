@@ -5,16 +5,9 @@ import com.corundumstudio.socketio.SocketIOClient;
 import com.ssafy.undaied.global.auth.token.JwtTokenProvider;
 import com.ssafy.undaied.global.common.exception.BaseException;
 import com.ssafy.undaied.global.common.exception.ErrorCode;
-import io.netty.handler.codec.http.HttpHeaders;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import static com.ssafy.undaied.global.common.exception.ErrorCode.NOT_AUTHENTICATED;
 import static com.ssafy.undaied.global.common.exception.ErrorCode.TOKEN_VALIDATION_FAILED;
@@ -23,50 +16,39 @@ import static com.ssafy.undaied.global.common.exception.ErrorCode.TOKEN_VALIDATI
 @Slf4j
 @RequiredArgsConstructor
 public class SocketAuthenticationService {
+
     private final JwtTokenProvider jwtTokenProvider;
 
     public int authenticateClient(SocketIOClient client) {
         try {
-            // 디버깅을 위한 handshake 데이터 출력
+            // 1. Socket.io handshake data
             HandshakeData handshakeData = client.getHandshakeData();
-            Map<String, List<String>> params = handshakeData.getUrlParams();
-            log.debug("Connection attempt - URL params: {}", params);
-
-            // // 먼저 auth 매개변수로 토큰을 찾음
-            String token = null;
-            // if (params.containsKey("auth")) {
-            //     token = params.get("auth").get(0);
-            //     log.debug("Found token in URL params: {}", token);
-            // }
-
-            //**임의로 수정 / 원래는 token = handshakeData.getSingleUrlParam("Authorization");
-            // URL 매개변수에 없다면 헤더에서 찾기
-            if (token == null) {
-                token = handshakeData.getHttpHeaders().get("Authorization");
-                log.debug("Found token in headers: {}", token);
-            }
+            // 2. 쿼리 파라미터 "auth"에서 토큰 추출
+            String token = handshakeData.getSingleUrlParam("auth");
 
             if (token == null) {
-                log.error("No authorization token found");
-                throw new BaseException(ErrorCode.NOT_AUTHENTICATED);
+                log.error("No auth parameter found in query");
+                throw new BaseException(NOT_AUTHENTICATED);
             }
 
-            // Bearer 접두사 처리
-            if (!token.startsWith("Bearer ")) {
-                token = "Bearer " + token;
-            }
+            log.debug("Found auth param: {}", token);
 
+            // 3. "Bearer " 접두사가 포함되어 있다면, JwtTokenProvider에서 제거
+            //    (JwtTokenProvider.resolveToken()이 알아서 처리한다고 가정)
             String jwt = jwtTokenProvider.resolveToken(token);
+
             if (jwt == null) {
                 log.error("Failed to resolve JWT token");
-                throw new BaseException(ErrorCode.TOKEN_VALIDATION_FAILED);
+                throw new BaseException(TOKEN_VALIDATION_FAILED);
             }
 
+            // 4. 토큰 유효성 검증
             if (!jwtTokenProvider.validateToken(jwt)) {
                 log.error("JWT validation failed");
-                throw new BaseException(ErrorCode.TOKEN_VALIDATION_FAILED);
+                throw new BaseException(TOKEN_VALIDATION_FAILED);
             }
 
+            // 5. 토큰에서 userId 추출
             int userId = jwtTokenProvider.getUserIdFromToken(jwt);
             log.debug("Successfully authenticated user ID: {}", userId);
 
@@ -77,7 +59,7 @@ public class SocketAuthenticationService {
             throw e;
         } catch (Exception e) {
             log.error("Unexpected authentication error", e);
-            throw new BaseException(ErrorCode.NOT_AUTHENTICATED);
+            throw new BaseException(NOT_AUTHENTICATED);
         }
     }
 }

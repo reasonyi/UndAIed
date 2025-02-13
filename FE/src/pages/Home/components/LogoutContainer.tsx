@@ -12,7 +12,10 @@ function LogoutContainer() {
   const handleTokenReceive = async (token: string) => {
     try {
       // 서버로 토큰 전송
-      const response = await axios.post("http://localhost:8080/api/v1/user", { token });
+      const response = await axios.post(
+        import.meta.env.VITE_API_URL + "/api/v1/user",
+        { token }
+      );
       // 서버 응답 확인
       console.log("서버 응답:", response.data);
 
@@ -68,18 +71,21 @@ function LogoutContainer() {
 
   return (
     <div className="flex flex-col w-full items-center">
-      <button className="w-[22.5rem] h-[5.5rem] flex justify-center items-center mb-10 bg-black text-white font-mono border-2 border-[#872341] rounded-sm text-3xl font-semibold">
+      <button
+        onClick={() => navigate("/game")}
+        className="w-[22.5rem] h-[5.5rem] flex justify-center items-center mb-10 bg-black text-white font-mono border-2 border-[#872341] rounded-sm text-3xl font-semibold"
+      >
         GAME START
       </button>
       <GoogleLoginButton2 onTokenReceive={handleTokenReceive} />
       {/* <GoogleLoginButton onTokenReceive={handleTokenReceive} /> */}
-      <button className="w-[22.5rem] h-9 border border-[#dadce0] bg-white rounded-[20px] flex items-center justify-between px-3 mt-5">
+      {/* <button className="w-[22.5rem] h-9 border border-[#dadce0] bg-white rounded-[20px] flex items-center justify-between px-3 mt-5">
         <div></div>
         <div className="text-[#3c4043] text-sm font-medium font-['Roboto']">
           가입하기
         </div>
         <div></div>
-      </button>
+      </button> */}
     </div>
   );
 }

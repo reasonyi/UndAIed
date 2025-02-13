@@ -1,12 +1,12 @@
 FROM python:3.12.8
 
-WORKDIR /app
+WORKDIR /AI
 
-COPY ./requirements.txt /app/requirements.txt
+COPY ./requirements.txt /AI/requirements.txt
 
-RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt
+RUN pip install --no-cache-dir --upgrade -r /AI/requirements.txt
 
-COPY . /app
+COPY . /AI
 
 EXPOSE 8000
 

@@ -1,14 +1,14 @@
-import { useContext } from "react";
-import { SocketContext } from "../components/SocketContext";
+// import { useContext } from "react";
+// import { SocketContext } from "../components/SocketContext";
 
-export const useSocket = () => {
-  const socket = useContext(SocketContext);
-  if (!socket) {
-    throw new Error("useSocket must be used within a SocketProvider.");
-  }
-  return socket;
-};
-
+// export const useSocket = () => {
+//   const socket = useContext(SocketContext);
+//   console.log("useSocket 시도");
+//   if (!socket) {
+//     throw new Error("useSocket must be used within a SocketProvider.");
+//   }
+//   return socket;
+// };
 
 // 1차 수정
 // import { useContext, useEffect } from "react";
@@ -16,7 +16,7 @@ export const useSocket = () => {
 
 // export const useSocket = () => {
 //   const context = useContext(SocketContext);
-  
+
 //   if (!context) {
 //     throw new Error("useSocket must be used within a SocketProvider");
 //   }
@@ -44,7 +44,7 @@ export const useSocket = () => {
 // export const useSocket = () => {
 //   const context = useContext(SocketContext);
 //   const [isLoading, setIsLoading] = useState(true);
-  
+
 //   if (!context) {
 //     throw new Error("useSocket must be used within a SocketProvider");
 //   }
@@ -78,7 +78,7 @@ export const useSocket = () => {
 // export const useSocket = () => {
 //   const context = useContext(SocketContext);
 //   const [isLoading, setIsLoading] = useState(true);
-  
+
 //   if (!context) {
 //     throw new Error("useSocket must be used within a SocketProvider");
 //   }
@@ -90,7 +90,7 @@ export const useSocket = () => {
 //       try {
 //         // 토큰 가져오기 (localStorage나 다른 상태 관리에서)
 //         const token = sessionStorage.getItem('userPersist');
-        
+
 //         const newSocket = io('wss://i12b212.p.ssafy.io', {
 //           path: '/socket.io',
 //           transports: ['websocket'],
@@ -133,81 +133,79 @@ export const useSocket = () => {
 // };
 
 // 4차수정
-// import { useContext, useEffect, useState } from "react";
-// import { SocketContext } from "../components/SocketContext";
-// import { io } from "socket.io-client";
+import { useContext, useEffect, useState } from "react";
+import { SocketContext } from "../components/SocketContext";
 
-// export const useSocket = () => {
-//   const context = useContext(SocketContext);
-//   const [isLoading, setIsLoading] = useState(true);
-  
-//   if (!context) {
-//     throw new Error("useSocket must be used within a SocketProvider");
-//   }
+export const useSocket = () => {
+  const context = useContext(SocketContext);
+  const [isLoading, setIsLoading] = useState(true);
 
-//   const { socket, isConnected, connect } = context;
+  if (!context) {
+    throw new Error("useSocket must be used within a SocketProvider");
+  }
 
-//   useEffect(() => {
-//     if (!socket && !isConnected) {
-//       try {
-//         const userDataString = localStorage.getItem('userPersist');
-//         if (!userDataString) {
-//           // throw new Error('No authentication token found');
-//           setIsLoading(false); // 에러를 던지지 않고 로딩만 완료
-//           return;
-//         }
-//         // console.log(userDataString)
-//         const userData = JSON.parse(userDataString);
-//         // console.log(userData)
-//         const token = userData?.userState?.token;
+  const { socket, isConnected, connect } = context;
 
-//         if (!token) {
-//           // throw new Error('Invalid token format');
-//           setIsLoading(false);
-//           return;
-//         }
+  useEffect(() => {
+    if (!socket && !isConnected) {
+      try {
+        const userDataString = localStorage.getItem("userPersist");
+        if (!userDataString) {
+          // throw new Error('No authentication token found');
+          setIsLoading(false); // 에러를 던지지 않고 로딩만 완료
+          return;
+        }
+        // console.log(userDataString)
+        const userData = JSON.parse(userDataString);
+        // console.log(userData)
+        const token = userData?.userState?.token;
 
-//         console.log('Attempting socket connection with token');
-//         connect();
+        if (!token) {
+          // throw new Error('Invalid token format');
+          setIsLoading(false);
+          return;
+        }
 
-//       } catch (error) {
-//         console.error("Socket connection failed:", error);
-//         setIsLoading(false);
-//       }
-//     } else if (isConnected) {
-//       setIsLoading(false);
-//     }
-//   }, [socket, isConnected, connect]);
+        console.log("Attempting socket connection with token");
+        connect();
+      } catch (error) {
+        console.error("Socket connection failed:", error);
+        setIsLoading(false);
+      }
+    } else if (isConnected) {
+      setIsLoading(false);
+    }
+  }, [socket, isConnected, connect]);
 
-//   // 소켓 연결 상태 모니터링
-//   useEffect(() => {
-//     if (socket) {
-//       socket.on('disconnect', () => {
-//         console.log('Socket disconnected');
-//         setIsLoading(true);
-//       });
+  // 소켓 연결 상태 모니터링
+  useEffect(() => {
+    if (socket) {
+      socket.on("disconnect", () => {
+        console.log("Socket disconnected");
+        setIsLoading(true);
+      });
 
-//       socket.on('connect', () => {
-//         console.log('Socket connected');
-//         setIsLoading(false);
-//       });
+      socket.on("connect", () => {
+        console.log("Socket connected");
+        setIsLoading(false);
+      });
 
-//       socket.on('connect_error', (error) => {
-//         console.error('Socket connection error:', error);
-//         setIsLoading(false);
-//       });
+      socket.on("connect_error", (error) => {
+        console.error("Socket connection error:", error);
+        setIsLoading(false);
+      });
 
-//       return () => {
-//         socket.off('disconnect');
-//         socket.off('connect');
-//         socket.off('connect_error');
-//       };
-//     }
-//   }, [socket]);
+      return () => {
+        socket.off("disconnect");
+        socket.off("connect");
+        socket.off("connect_error");
+      };
+    }
+  }, [socket]);
 
-//   if (isLoading) {
-//     return null;
-//   }
+  if (isLoading) {
+    return null;
+  }
 
-//   return socket;
-// };
+  return socket;
+};

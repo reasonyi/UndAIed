@@ -6,11 +6,10 @@ import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 interface Player {
-  id: number;
   playerNum: number;
   name: string;
-  token: string;
-  imgNum: number;
+  profileImage: number;
+  isHost: boolean;
 }
 
 interface RightSideBarProps {
@@ -65,66 +64,66 @@ function RightSideBar({ players, iconArr }: RightSideBarProps) {
       >
         {/* 플레이어 프로필 영역 */}
         <div className="row-start-1 px-2 py-1">
-          {player1 ? (
+          {players[0] ? (
             <ReadyProfile
-              nickname={player1.name}
-              playerNum={player1.playerNum}
-              icon={iconArr[player1.imgNum]}
+              nickname={players[0].name}
+              playerNum={players[0].playerNum}
+              icon={iconArr[players[0].profileImage]}
             />
           ) : (
             <EmptyProfile />
           )}
         </div>
         <div className="row-start-1 px-2 py-1">
-          {player2 ? (
+          {players[1] ? (
             <ReadyProfile
-              nickname={player2.name}
-              playerNum={player2.playerNum}
-              icon={iconArr[player2.imgNum]}
+              nickname={players[1].name}
+              playerNum={players[1].playerNum}
+              icon={iconArr[players[1].profileImage]}
             />
           ) : (
             <EmptyProfile />
           )}
         </div>
         <div className="row-start-1 px-2 py-1">
-          {player3 ? (
+          {players[2] ? (
             <ReadyProfile
-              nickname={player3.name}
-              playerNum={player3.playerNum}
-              icon={iconArr[player3.imgNum]}
+              nickname={players[2].name}
+              playerNum={players[2].playerNum}
+              icon={iconArr[players[2].profileImage]}
             />
           ) : (
             <EmptyProfile />
           )}
         </div>
         <div className="row-start-2 px-2 py-1">
-          {player4 ? (
+          {players[3] ? (
             <ReadyProfile
-              nickname={player4.name}
-              playerNum={player4.playerNum}
-              icon={iconArr[player4.imgNum]}
+              nickname={players[3].name}
+              playerNum={players[3].playerNum}
+              icon={iconArr[players[3].profileImage]}
             />
           ) : (
             <EmptyProfile />
           )}
         </div>
         <div className="row-start-2 px-2 py-1">
-          {player5 ? (
+          {players[4] ? (
             <ReadyProfile
-              nickname={player5.name}
-              playerNum={player5.playerNum}
-              icon={iconArr[player5.imgNum]}
+              nickname={players[4].name}
+              playerNum={players[4].playerNum}
+              icon={iconArr[players[4].profileImage]}
             />
           ) : (
             <EmptyProfile />
           )}
         </div>
         <div className="row-start-2 px-2 py-1">
-          {player6 ? (
+          {players[5] ? (
             <ReadyProfile
-              nickname={player6.name}
-              playerNum={player6.playerNum}
-              icon={iconArr[player6.imgNum]}
+              nickname={players[5].name}
+              playerNum={players[5].playerNum}
+              icon={iconArr[players[5].profileImage]}
             />
           ) : (
             <EmptyProfile />
@@ -133,7 +132,7 @@ function RightSideBar({ players, iconArr }: RightSideBarProps) {
 
         <div className="w-full text-base flex flex-col justify-between items-center row-start-3 row-end-5 col-span-3 text-white px-2 py-1">
           <div className="w-full text-base flex justify-end items-center text-white px-2 py-1">
-            0/6
+            {players.length}/6
           </div>
           <div className="w-full h-[80%] text-base flex flex-col justify-center items-center bg-[rgb(7,7,10)] border-2 border-solid border-[#B4B4B4] text-white px-2 py-1">
             <div>시스템 로그</div>
