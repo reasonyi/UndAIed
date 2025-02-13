@@ -5,10 +5,6 @@ import { useUpdateProfile, useUserProfile } from "../../../hooks/useUserData";
 import { useState } from "react";
 
 function Character() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedIndex, setSelectedIndex] = useState(1);
-  const [isRotating, setIsRotating] = useState(false);
-
   const blockStyle =
     "bg-[#0000006c] border border-[#f74a5c]/40 backdrop-blur-[12.20px] text-[#fffbfb] rounded-[5px] transition-all duration-200";
   const blockHover =
@@ -16,8 +12,9 @@ function Character() {
   const blockActive =
     "active:bg-[#f837644e] active:border-[#f837644e] active:shadow-sm";
 
-  const { data: response, isLoading, error } = useUserProfile();
-  const avatar = response?.data.avatar;
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(1);
+  const [isRotating, setIsRotating] = useState(false);
 
   const getCharacterImage = (avatar: number) => {
     switch (avatar) {
@@ -31,7 +28,6 @@ function Character() {
         return CharacterImage1; // 기본 이미지
     }
   };
-
   const characters = [
     { id: 1, name: "Character 1", image: CharacterImage1 },
     { id: 2, name: "Character 2", image: CharacterImage2 },
@@ -58,7 +54,6 @@ function Character() {
     setSelectedIndex((prev) => (prev === 0 ? characters.length - 1 : prev - 1));
     setTimeout(() => setIsRotating(false), 500);
   };
-
   const rotateRight = () => {
     if (isRotating) return;
     setIsRotating(true);
@@ -94,8 +89,8 @@ function Character() {
     return positions.left;
   };
 
-  if (isLoading) return <div>로딩중</div>;
-  if (error) return <div>에러났어요</div>;
+  const { data: response, isLoading, error } = useUserProfile();
+  const avatar = response?.data.avatar;
 
   const updateProfileMutation = useUpdateProfile();
 
@@ -108,9 +103,11 @@ function Character() {
   };
 
   const handleSave = () => {
-    console.log(updateData.avatar);
     updateProfileMutation.mutate(updateData);
   };
+
+  if (isLoading) return <div>로딩중</div>;
+  if (error) return <div>에러났어요</div>;
 
   return (
     <>
