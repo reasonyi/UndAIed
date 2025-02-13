@@ -35,13 +35,12 @@ function DonutChart({
     ? circumference - (circumference * percent) / 100
     : circumference;
 
+  console.log(size);
   return (
     <div className="relative inline-block text-gray-500" ref={chartRef}>
       <div className="relative">
         <svg
-          className="transform -rotate-90"
-          width={size}
-          height={size}
+          className={`transform -rotate-90 md:p-5 w-[150px] h-[150px] md:w-[250px] md:h-[250px]`}
           viewBox={`0 0 ${size} ${size}`}
         >
           {/* Background circle */}
