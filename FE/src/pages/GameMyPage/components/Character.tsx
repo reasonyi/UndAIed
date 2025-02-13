@@ -1,7 +1,7 @@
 import CharacterImage1 from "../../../assets/character/character-demo.png";
 import CharacterImage2 from "../../../assets/character/character-demo.png";
 import CharacterImage3 from "../../../assets/character/character-demo.png";
-import { useUserProfile } from "../../../hooks/useUserData";
+import { useUpdateProfile, useUserProfile } from "../../../hooks/useUserData";
 import { useState } from "react";
 
 function Character() {
@@ -65,7 +65,6 @@ function Character() {
     setSelectedIndex((prev) => (prev === characters.length - 1 ? 0 : prev + 1));
     setTimeout(() => setIsRotating(false), 500);
   };
-
   const getCharacterStyles = (index: number) => {
     const positions = {
       left: {
@@ -97,6 +96,21 @@ function Character() {
 
   if (isLoading) return <div>로딩중</div>;
   if (error) return <div>에러났어요</div>;
+
+  const updateProfileMutation = useUpdateProfile();
+
+  const updateData = {
+    sex: null,
+    profileImage: null,
+    avatar: selectedIndex + 1,
+    age: null,
+    nickname: null,
+  };
+
+  const handleSave = () => {
+    console.log(updateData.avatar);
+    updateProfileMutation.mutate(updateData);
+  };
 
   return (
     <>
@@ -187,6 +201,7 @@ function Character() {
           <button
             onClick={() => {
               // 캐릭터 선택 로직
+              handleSave();
               setIsModalOpen(false);
             }}
             className={`absolute bottom-14 px-8 py-3 z-30
