@@ -1,6 +1,5 @@
 package com.ssafy.undaied.socket.common.util;
 
-import com.ssafy.undaied.socket.stage.constant.StageType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -12,10 +11,13 @@ import java.util.concurrent.*;
 public class GameTimer {
     private final Map<String, ScheduledFuture<?>> timers = new ConcurrentHashMap<>();
     private final Map<String, Integer> timerInfos = new ConcurrentHashMap<>();
+    private final Map<Integer, String> currentTimerKeys = new ConcurrentHashMap<>();  // gameId -> currentTimerKey
+
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     public void setTimer(Integer gameId, Integer timerId, int duration, Runnable callback) {
         String timerKey = gameId + "_" + timerId;
+        currentTimerKeys.put(gameId, timerKey);  // 현재 타이머 키 저장
         cancelTimer(timerKey);
 
         // 타이머 정보 Map에 저장
@@ -46,13 +48,24 @@ public class GameTimer {
     }
 
     public Integer getRemainingTime(Integer gameId) {
-        // gameId에 해당하는 모든 타이머 키 중에서
-        // 가장 최근에 설정된 타이머의 남은 시간 반환
-        return timerInfos.entrySet().stream()
-                .filter(entry -> entry.getKey().startsWith(gameId+"_"))
-                .map(Map.Entry::getValue)
-                .findFirst()
-                .orElse(0); // 실행 중인 타이머가 없으면 0 반환
+        String currentKey = currentTimerKeys.get(gameId);
+        return currentKey != null ? timerInfos.getOrDefault(currentKey, 0) : 0;
+    }
+
+    // 게임 종료 시 해당 게임의 모든 타이머 정리
+    public void cleanupGame(Integer gameId) {
+        // 게임의 모든 타이머 찾아서 취소
+        String prefix = gameId + "_";
+        timers.entrySet().stream()
+                .filter(entry -> entry.getKey().startsWith(prefix))
+                .forEach(entry -> {
+                    entry.getValue().cancel(false);
+                    timers.remove(entry.getKey());
+                    timerInfos.remove(entry.getKey());
+                });
+
+        // currentTimerKeys에서도 제거
+        currentTimerKeys.remove(gameId);
     }
 }
 
