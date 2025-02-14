@@ -1,6 +1,5 @@
 package com.ssafy.undaied.socket.common.handler;
 
-import com.corundumstudio.socketio.AckRequest;
 import com.corundumstudio.socketio.HandshakeData;
 import com.corundumstudio.socketio.SocketIONamespace;
 import com.ssafy.undaied.global.common.exception.BaseException;
@@ -44,7 +43,16 @@ public class SocketIoHandler {
     private void init() {
 
         namespace.addConnectListener(listenConnected());
-        namespace.addDisconnectListener(listenDisconnected());
+        namespace.addDisconnectListener(listenDisconnected());namespace.addDisconnectListener(listenDisconnected());
+
+        // disconnecting 이벤트 리스너 추가
+        namespace.addEventListener("disconnecting", Object.class, (client, data, ackRequest) -> {
+            try {
+                disconnectService.handleDisconnect(client);
+            } catch (Exception e) {
+                throw new BaseException(SOCKET_EVENT_ERROR);
+            }
+        });
     }
 
     /**

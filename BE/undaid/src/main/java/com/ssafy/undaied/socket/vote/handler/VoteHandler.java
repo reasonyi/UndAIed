@@ -31,7 +31,7 @@ public class VoteHandler {
         namespace.addEventListener(EventType.SUBMIT_VOTE.getValue(), VoteSubmitRequestDto.class,
                 (client, data, ack) -> {
                     try {
-                        Integer userId = 1001;
+                        Integer userId = client.get("userId");
                         Integer gameId = 1;
 //                        Integer gameId = client.get("gameId");
 

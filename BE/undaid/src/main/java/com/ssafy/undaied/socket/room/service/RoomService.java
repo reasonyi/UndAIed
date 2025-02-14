@@ -331,6 +331,7 @@ public class RoomService {
     public RoomEnterResponseDto enterRoom(SocketIOClient client, Long roomId, Integer password) throws SocketException {
         String key = ROOM_KEY_PREFIX + roomId;
         String roomKey = ROOM_LIST + key;  // "rooms:room:1"
+        log.debug("User enter room try - userId: {}, room: {}", client.get("userId"), key);
 
         // Redis에서 rooms: 네임스페이스의 방 정보 조회
         Object roomObj = jsonRedisTemplate.opsForValue().get(roomKey);
