@@ -1,5 +1,6 @@
 package com.ssafy.undaied.socket.init.service;
 
+import com.corundumstudio.socketio.AckRequest;
 import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.SocketIONamespace;
 import com.corundumstudio.socketio.SocketIOServer;
@@ -323,7 +324,6 @@ public class GameInitService {
             redisTemplate.opsForHash().put(userNicknameKey, userId.toString(), nickname);
         }
 
-
         // AI 역할 매핑 후 랜덤 선택
         List<String> aiRoles = new ArrayList<>(List.of("ai1", "ai2", "ai3"));
         Collections.shuffle(aiRoles);
@@ -347,9 +347,14 @@ public class GameInitService {
         redisTemplate.opsForHash().put(userNicknameKey, "ai1", "AI-1");
         redisTemplate.opsForHash().put(userNicknameKey, "ai2", "AI-2");
 
-        createNumberNicknames().forEach((number, nickname) ->
-                redisTemplate.opsForHash().put(numberNicknameKey, number.toString(), nickname));
+        room.getCurrentPlayers().forEach(player -> {
+                    Integer assignedNumber = Integer.parseInt(
+                            (String) redisTemplate.opsForHash().get(mappingKey, player.getUserId().toString())
+                    );
 
+                    // "번호 → 닉네임" 매핑을 Redis에 저장
+                    redisTemplate.opsForHash().put(numberNicknameKey, assignedNumber.toString(), player.getNickname());
+                });
         Arrays.asList(mappingKey, playersKey, aiKey, userNicknameKey, numberNicknameKey, statusKey)
                 .forEach(key -> redisTemplate.expire(key, EXPIRE_TIME, TimeUnit.SECONDS));
     }
@@ -363,24 +368,24 @@ public class GameInitService {
         redisTemplate.opsForHash().put(statusKey, number, status.toString());
     }
 
-    public void broadcastGameInit(int gameId) {
+
+    // 게임 정보를 특정 요청에 대한 응답으로 전송 (ackRequest가 있는 경우)
+    public void sendGameInfo(Integer gameId, GameInfoResponseDto gameInfo) {
+
+        // 2. 다른 모든 클라이언트에게도 최신 정보 브로드캐스트
+        namespace.getRoomOperations(GAME_KEY_PREFIX + gameId)
+                .sendEvent("game:info:send", gameInfo);
+    }
+
+    public void broadcastGameInit(Integer gameId) {
         log.info("Starting broadcastGameInit for gameId: {}", gameId);
 
         // 연결된 클라이언트 확인
         Collection<SocketIOClient> clients = namespace.getRoomOperations(GAME_KEY_PREFIX + gameId).getClients();
         log.info("Clients in game room {}: {}", GAME_KEY_PREFIX + gameId, clients.size());
 
-        GameInfoResponseDto responseDto = createGameInfoResponse(gameId);
-        log.info("Broadcasting GameInfoResponseDto: {}", responseDto);
-
-        // 세부 내용 로깅
-        log.info("Game Info Details - gameId: {}", gameId);
-        log.info("Current Stage: {}", responseDto.getCurrentStage());
-        log.info("Timer: {}", responseDto.getTimer());
-        log.info("Players count: {}", responseDto.getPlayers().size());
-
         namespace.getRoomOperations(GAME_KEY_PREFIX + gameId)
-                .sendEvent(EventType.GAME_INIT_SEND.getValue(), responseDto);
+                .sendEvent(EventType.GAME_INIT_SEND.getValue(), gameId);
     }
 
     private Map<Integer, String> createNumberNicknames() {
