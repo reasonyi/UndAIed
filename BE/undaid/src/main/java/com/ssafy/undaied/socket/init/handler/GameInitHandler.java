@@ -46,7 +46,7 @@ public class GameInitHandler {
     public void init() {
         namespace.addEventListener("game:init:emit", Object.class, (client, data, ackRequest) -> {
             try {
-                log.info("Game init request received.");
+                log.info("게임 초기화 요청 확인");
 
                 // 클라이언트가 속한 방 찾기
                 Set<String> rooms = client.getAllRooms();
@@ -58,7 +58,7 @@ public class GameInitHandler {
                 // roomKey에서 roomId 추출 (예: "room:456" -> 456)
                 int roomId = Integer.parseInt(roomKey.substring(ROOM_KEY_PREFIX.length()));
 
-                log.info("Game initialization requested - roomId: {}", roomId);
+                log.info("방 번호 확인 roomId: {}", roomId);
 
                 if (gameInitializationStatus.putIfAbsent(roomId, true) != null) {
                     throw new SocketException(SocketErrorCode.GAME_ALREADY_INITIALIZING);
@@ -67,20 +67,22 @@ public class GameInitHandler {
                 try {
                     int gameId = gameInitService.startGame(client, roomId);
 
-                    log.info("Checking ackRequest: {}", ackRequest);
-                    stageService.handleGameStart(gameId);
-
-                    log.info("After sending ACK response");
-
+                    
                     // ✅ 로비 업데이트 이벤트 전송
                     LobbyUpdateResponseDto updateResponseDto = gameInitService.createLobbyUpdateResponse(roomId);
                     namespace.getRoomOperations(LOBBY_ROOM)
                             .sendEvent(UPDATE_ROOM_AT_LOBBY.getValue(), updateResponseDto);
+                    log.info("방 목록 업데이트 및 대기방 삭제");
 
                     gameInitService.broadcastGameInit(gameId);
-                    log.info("Game initialization completed - gameId: {}, roomId: {}", gameId, roomId);
+                    log.info("게임 초기화 완료 - gameId: {}, roomId: {}", gameId, roomId);
 
+                    log.info("ACK 요청 확인: {}", ackRequest);
                     sendResponse(ackRequest, true, null);
+                    log.info("ACK 요청 보냄");
+
+                    log.info("게임 시작");
+                    stageService.handleGameStart(gameId);
 
                 } finally {
                     gameInitializationStatus.remove(roomId);
