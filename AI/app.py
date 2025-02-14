@@ -31,19 +31,20 @@
 
 from fastapi import FastAPI
 from pydantic import BaseModel
+from typing import List
 
 app = FastAPI()
 
-
 class AISelect(BaseModel):
-    ai_id: int
-
+    aiId: int | str  # aiId가 문자열("3")이나 정수(1) 모두 가능하도록
+    number: int
 
 class MessageRequest(BaseModel):
-    selected_ai: AISelect
+    selectedAIs: List[AISelect]  # AISelect 객체의 리스트
     message: str
-
 
 @app.post("/api/ai/{game_id}/")
 def create_message(game_id: int, request: MessageRequest):
-    return {"hello": "world"}
+    return {
+        "hello": "world"
+    }
