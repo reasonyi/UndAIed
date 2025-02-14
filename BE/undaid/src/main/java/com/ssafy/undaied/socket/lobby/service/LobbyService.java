@@ -28,7 +28,7 @@ public class LobbyService {
     public void joinLobby(SocketIOClient client) {
         // 로비에 입장
         client.joinRoom(LOBBY_ROOM);
-        log.debug("Joined lobby - Current rooms: {}", client.getAllRooms());
+        log.info("클라이언트 로비 입장 - userId:{}, 현재 방 목록: {}", client.get("userId"), client.getAllRooms());
     }
 
     /**
