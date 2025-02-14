@@ -148,8 +148,8 @@ public class RoomService {
 
 
     public void clientLeaveAllRooms(SocketIOClient client) throws SocketException {
-        log.debug("Attempting to join lobby - Client ID: {}", client.getSessionId());
-        log.debug("Current rooms before joining lobby: {}", client.getAllRooms());
+        log.debug("클라이언트가 모든 방에서 나가기를 시도합니다. - Client ID: {}", client.getSessionId());
+        log.debug("모든 방에서 나가기 전 현재 입장되어있는 방: {}", client.getAllRooms());
 
         // 기존 방에서 모두 나가기
         Set<String> rooms = new HashSet<>(client.getAllRooms());
@@ -163,16 +163,17 @@ public class RoomService {
                     namespace.getRoomOperations(LOBBY_ROOM).sendEvent(UPDATE_ROOM_AT_LOBBY.getValue(), lobbyUpdateResponseDto);
                 }
                 client.leaveRoom(room);
-                log.debug("Client left room - userId: {}, room: {}", client.get("userId"), room);
             } else {
                 client.leaveRoom(room);
-                log.debug("Client left {}", room);
             }
+            log.info("클라이언트가 방을 나갔습니다. - userId: {}, room: {}", client.get("userId"), room);
         }
     }
 
     public LobbyUpdateResponseDto leaveRoom(Long roomId, SocketIOClient client) throws SocketException {
         try {
+            log.debug("클라이언트가 대기방을 나가기를 시도합니다. - userId: {}, roomId: {}", client.get("userId"), roomId);
+
             String key = ROOM_KEY_PREFIX + roomId; // room:1
             String roomKey = ROOM_LIST + key;  // "rooms:room:1"
             String waitingKey = WAITING_LIST + key;  // "waiting:room:1"
@@ -181,16 +182,20 @@ public class RoomService {
             Object roomObj = jsonRedisTemplate.opsForValue().get(roomKey);
             Room room = objectMapper.convertValue(roomObj, Room.class);
             if (room == null) {
+                log.error("찾는 방이 없습니다. - roomId: {}", roomId);
                 throw new SocketException(ROOM_NOT_FOUND);
             }
 
             List<RoomUser> currentPlayers = room.getCurrentPlayers();
             // 나가려는 유저가 방에 있는지 확인
             if (!isUserInRoom(client, roomId)) {
+                log.error("나가려는 유저가 나가려는 방에 없습니다. - userId: {}, roomId: {}", client.get("userId"), roomId);
                 throw new SocketException(USER_NOT_IN_ROOM);
             }
+            log.debug("나가려는 유저가 나가려는 방에 있는것을 확인했습니다!");
 
             // 나가려는 유저가 호스트인지 확인
+            log.debug("나가려는 유저가 방장인지 확인 중...");
             int userId = (Integer) client.get("userId");
 
             boolean isHost = currentPlayers.stream()
@@ -199,6 +204,13 @@ public class RoomService {
                     .map(RoomUser::getIsHost)
                     .orElse(false);
 
+            if(isHost) {
+                log.debug("나가려는 유저는 방장입니다!");
+            } else {
+                log.debug("나가려는 유저는 방장이 아닙니다!");
+            }
+
+            log.debug("현재 플레이어 목록에서 해당 유저 제거 시도 중...");
             // 현재 플레이어 목록에서 해당 유저 제거
             currentPlayers.removeIf(user -> user.getUserId().equals(userId));
 
@@ -219,38 +231,44 @@ public class RoomService {
 
             // 만약 나간 유저가 호스트였고, 남은 유저가 있다면 첫 번째 유저를 호스트로 지정
             if (isHost && !currentPlayers.isEmpty()) {
+                log.debug("방에 남아있는 유저 중 첫 번째 유저를 방장으로 지정합니다.");
                 currentPlayers.get(0).setIsHost(true);
             }
 
             // 방에서 내보내기
-            client.leaveRoom(roomKey);  // rooms:room:1 형태의 키로 방 나가기
+            client.leaveRoom(key);  // room:1 형태의 키로 방 나가기
+            log.debug("클라이언트를 소켓 room에서 내보냈습니다. - key: {}", key);
 
             // 방에 남은 유저가 없으면 rooms:와 waiting: 모두에서 방 삭제
             if (currentPlayers.isEmpty()) {
+                log.debug("방에 남아있는 유저가 없어 redis에서 방 삭제를 시도 중 - roomKey: {}", roomKey);
                 jsonRedisTemplate.delete(roomKey);  // rooms:room:1 삭제
                 // waiting:에 해당 방이 있는지 확인 후 삭제
                 if (Boolean.TRUE.equals(jsonRedisTemplate.hasKey(waitingKey))) {
+                    log.debug("삭제하려는 방을 대기중인 방 목록에서 삭제 시도 중 - waitingKey: {}", waitingKey);
                     jsonRedisTemplate.delete(waitingKey);
                 }
-                log.info("Room deleted - ID: {}", roomId);
+                log.info("방이 삭제되었습니다. - roomId: {}", roomId);
                 updateResponseDto.setType("delete");
             } else {
                 // 방 정보 업데이트 (rooms: 네임스페이스)
+                log.debug("방에 유저가 남아있어 정보 업데이트를 진행합니다. - roomKey: {}", roomKey);
                 room.setCurrentPlayers(currentPlayers);
                 jsonRedisTemplate.opsForValue().set(roomKey, room);
-                log.info("User left room - Room ID: {}, User ID: {}", roomId, client.get("userId"));
                 // 방 안에 남아있는 유저들에게 알림
                 leaveRoomAlarmToAnotherClient(roomKey);
             }
 
             // 로비로 돌아가기
             lobbyService.joinLobby(client);
+
             return updateResponseDto;
+
         } catch (SocketException e) {
-            log.error("Failed to leave room: {}", e.getErrorCode().getMessage());
+            log.error("방을 나가는데 실패했습니다.: {}", e.getErrorCode().getMessage());
             throw e;
         } catch (Exception e) {
-            log.error("Unexpected error while leaving room: {}", e.getMessage());
+            log.error("방을 나가는 동안 예상하지 못한 오류가 발생했습니다.: {}", e.getMessage());
             throw new SocketException(LEAVE_ROOM_FAILED);
         }
     }
@@ -265,9 +283,11 @@ public class RoomService {
     }
 
     public void leaveRoomAlarmToAnotherClient(String key) throws SocketException {
+        log.debug("방 안에 남아있는 유저들에게 업데이트 된 정보알림을 시도합니다. - eventType: room:leave:send, roomKey: {}", key);
         Object roomObj = jsonRedisTemplate.opsForValue().get(key);
         Room room = objectMapper.convertValue(roomObj, Room.class);
         if (room == null) {
+            log.error("방 안에 있는 사람들에게 알리기 위한 key로 방을 찾을 수 없습니다.");
             throw new SocketException(ROOM_NOT_FOUND);
         }
 
@@ -291,16 +311,17 @@ public class RoomService {
                 .build();
 
         namespace.getRoomOperations(key).sendEvent(LEAVE_ROOM_SEND.getValue(), responseDto);
-        log.info("Room information sent to room {} users", key);
+        log.info("{}번 방 정보를 유저들에게 알림.", key);
     }
 
     // 유저가 특정 방에 있는지 확인
     public boolean isUserInRoom(SocketIOClient client, Long roomId) {
+        log.debug("유저가 {}번 방에 있는지 확인하려는 시도 중", roomId);
         String key = ROOM_KEY_PREFIX + roomId;
         String roomKey = ROOM_LIST + key;
         Set<String> rooms = new HashSet<>(client.getAllRooms());
 
-        log.debug("Attempting to get room data for key: {}", roomKey);
+        log.debug("방 데이터를 가져오려고 시도 중 - roomKey: {}", roomKey);
         Object roomData = jsonRedisTemplate.opsForValue().get(roomKey);
 
         boolean userExists = rooms.contains(key);
