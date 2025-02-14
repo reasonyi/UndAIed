@@ -110,7 +110,7 @@ public class RoomService {
             log.debug("레디스 대기방 목록에 방 정보를 저장합니다. - waitingKey: {}", waitingKey);
 
             client.leaveRoom(LOBBY_ROOM);
-            log.debug("클라이언트를 로비에서 퇴장시켰습니다. - userId: {}", (String) client.get("userId"));
+            log.debug("클라이언트를 로비에서 퇴장시켰습니다. - userId: {}", (Integer) client.get("userId"));
             client.joinRoom(key);
 
             List<RoomUserResponseDto> userResponseDtos = room.getCurrentPlayers().stream()
@@ -275,9 +275,9 @@ public class RoomService {
         return leaveRoom(roomId, client);
     }
 
-    public void leaveRoomAlarmToAnotherClient(String key) throws SocketException {
-        log.debug("방 안에 남아있는 유저들에게 업데이트 된 정보알림을 시도합니다. - eventType: room:leave:send, roomKey: {}", key);
-        Object roomObj = jsonRedisTemplate.opsForValue().get(key);
+    public void leaveRoomAlarmToAnotherClient(String roomKey) throws SocketException {
+        log.debug("방 안에 남아있는 유저들에게 업데이트 된 정보알림을 시도합니다. - eventType: room:leave:send, roomKey: {}", roomKey);
+        Object roomObj = jsonRedisTemplate.opsForValue().get(roomKey);
         Room room = objectMapper.convertValue(roomObj, Room.class);
         if (room == null) {
             log.error("방 안에 있는 사람들에게 알리기 위한 key로 방을 찾을 수 없습니다.");
@@ -303,6 +303,7 @@ public class RoomService {
                 .currentPlayers(userResponseDtos)
                 .build();
 
+        String key = roomKey.substring(ROOM_LIST.length());
         namespace.getRoomOperations(key).sendEvent(LEAVE_ROOM_SEND.getValue(), responseDto);
         log.info("room:leave:send 이벤트를 발생시켜 {}번 방 정보를 해당 방 안에 남은 유저들에게 알림.", key);
     }

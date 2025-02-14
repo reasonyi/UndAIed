@@ -48,9 +48,9 @@ public class LobbyService {
         boolean inLobby = rooms.size() == 1 && rooms.contains(LOBBY_ROOM);
 
         if(inLobby) {
-            log.debug("유저가 로비에 있음 - userId: {}", (String) client.get("userId"));
+            log.debug("유저가 로비에 있음 - userId: {}", (Integer) client.get("userId"));
         } else {
-            log.debug("유저가 로비에 없음 - userId: {}", (String) client.get("userId"));
+            log.debug("유저가 로비에 없음 - userId: {}", (Integer) client.get("userId"));
         }
         return inLobby;
     }
