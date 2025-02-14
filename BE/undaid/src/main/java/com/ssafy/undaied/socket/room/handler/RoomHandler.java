@@ -125,6 +125,13 @@ public class RoomHandler {
         namespace.addEventListener(ENTER_ROOM_EMIT.getValue(), RoomEnterRequestDto.class,
                 (client, data, ackRequest) -> {
                     try {
+                        if (data == null) {
+                            log.error("방 입장을 위한 데이터가 비어있습니다.");
+                            throw new SocketException(CREATE_ROOM_FAILED);
+                        }
+
+                        log.info("room:enter:emit 이벤트 도착. - userId: {}, roomId: {}", client.get("userId"), data.getRoomId());
+                        
                         RoomEnterResponseDto roomEnterResponseDto = roomService.enterRoom(client, data.getRoomId(), data.getRoomPassword());
                         log.debug("User enter room Successfully - userId: {}, roomId: {}", client.get("userId"), data.getRoomId());
 
@@ -132,6 +139,7 @@ public class RoomHandler {
                         LobbyUpdateResponseDto lobbyUpdateResponseDto = lobbyService.sendEventRoomEnter(roomEnterResponseDto, client);
                         if(lobbyUpdateResponseDto != null) {
                             namespace.getRoomOperations(LOBBY_ROOM).sendEvent(UPDATE_ROOM_AT_LOBBY.getValue(), lobbyUpdateResponseDto);
+                            log.debug("lobby:room:update sendEvent 실행. - eventType: {}, roomId: {}", lobbyUpdateResponseDto.getType(), lobbyUpdateResponseDto.getData().getRoomId());
                         }
 
                         // 방에 입장한 클라이언트에게 데이터 전송
@@ -142,11 +150,13 @@ public class RoomHandler {
                             response.put("enterId", roomEnterResponseDto.getEnterId());
                             response.put("data", roomEnterResponseDto);
                             ackRequest.sendAckData(response);
+                            log.debug("room:enter:emit 에 대한 ack응답 성공적으로 전송 - userId: {}, userNickname: {}", client.get("userId"), client.get("nickname"));
                         }
 
                         // 방에 있는 모든 사용자에게 업데이트된 정보 전송
                         String key = ROOM_KEY_PREFIX + data.getRoomId();
                         namespace.getRoomOperations(key).sendEvent(ENTER_ROOM_SEND.getValue(), roomEnterResponseDto.getRoom());
+                        log.info("room:enter:send 이벤트를 발생시켜 {}번 방 정보를 해당 방 안에 남은 유저들에게 알림.", key);
 
                     } catch (Exception e) {
                         log.error("Room enter failed: {}", e.getMessage());
@@ -156,6 +166,7 @@ public class RoomHandler {
                             response.put("errorMessage", e.getMessage());
                             response.put("data", null);
                             ackRequest.sendAckData(response);
+                            log.debug("room:enter:emit 에 대한 ack응답 전송 실패 - userId: {}, userNickname: {}", client.get("userId"), client.get("nickname"));
                         }
                     }
 
