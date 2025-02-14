@@ -1,6 +1,7 @@
 package com.ssafy.undaied.socket.room.handler;
 
 import com.corundumstudio.socketio.SocketIONamespace;
+import com.ssafy.undaied.socket.common.exception.SocketException;
 import com.ssafy.undaied.socket.lobby.dto.response.LobbyUpdateResponseDto;
 import com.ssafy.undaied.socket.lobby.service.LobbyService;
 import com.ssafy.undaied.socket.room.dto.request.RoomCreateRequestDto;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component;
 import static com.ssafy.undaied.socket.common.constant.EventType.*;
 import static com.ssafy.undaied.socket.common.constant.SocketRoom.LOBBY_ROOM;
 import static com.ssafy.undaied.socket.common.constant.SocketRoom.ROOM_KEY_PREFIX;
+import static com.ssafy.undaied.socket.common.exception.SocketErrorCode.CREATE_ROOM_FAILED;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,7 +28,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class RoomHandler {
 
-//    private final SocketIOServer server;
     private final SocketIONamespace namespace;  // 추가
     private final RoomService roomService;
     private final LobbyService lobbyService;
@@ -36,10 +37,16 @@ public class RoomHandler {
         namespace.addEventListener(CREATE_ROOM_AT_LOBBY.getValue(), RoomCreateRequestDto.class,
                 (client, data, ackRequest) -> {
                     try {
+                        if (data == null) {
+                            log.error("방 생성을 위한 데이터가 비어있습니다.");
+                            throw new SocketException(CREATE_ROOM_FAILED);
+                        }
+
+                        log.info("lobby:room:create 이벤트 도착. - 방을 생성한 userId: {}, roomTitle: {}", client.get("userId"), data.getRoomTitle());
 
                         // 방 생성.
                         RoomCreateResponseDto responseRoomData = roomService.createRoom(data, client);
-                        log.info("Room created - ID: {}, Title: {}", responseRoomData.getRoomId(), responseRoomData.getRoomTitle());
+                        log.info("성공적으로 방이 생성되었습니다. - roomId: {}, roomTitle: {}", responseRoomData.getRoomId(), responseRoomData.getRoomTitle());
 
                         // 로비에 데이터 보내주기
                         LobbyUpdateResponseDto lobbyUpdateResponseDto = lobbyService.sendEventRoomCreate(responseRoomData, client);
@@ -49,6 +56,7 @@ public class RoomHandler {
 
                         // 방을 생성한 클라이언트에게 데이터 전송
                         if (ackRequest.isAckRequested()) {
+                            log.debug("lobby:room:create에 대한 ack응답 성공적으로 전송 - userNickname: {}", (String) client.get("nickname"));
                             Map<String, Object> response = new HashMap<>();
                             response.put("success", true);
                             response.put("errorMessage", null);
@@ -58,6 +66,7 @@ public class RoomHandler {
 
                     } catch (Exception e) {
                         if (ackRequest.isAckRequested()) {
+                            log.error("lobby:room:create에 대한 ack응답 전송 실패 - userNickname: {}", (String) client.get("nickname"));
                             Map<String, Object> response = new HashMap<>();
                             response.put("success", false);
                             response.put("errorMessage", e.getMessage());
