@@ -95,9 +95,8 @@ public class GameChatService {
     public void processFreeChat(SocketIOClient client, Integer userId, GameChatRequestDto gameChatRequestDto) {
 
         //임시
-//        String gameIdStr = client.getHandshakeData().getSingleUrlParam("gameId");
-//        Integer gameId = Integer.parseInt(gameIdStr);
-        Integer gameId = 1;
+       String gameIdStr = client.getHandshakeData().getSingleUrlParam("gameId");
+       Integer gameId = Integer.parseInt(gameIdStr);
 
         log.info("들어옴2");
         //복구해야
