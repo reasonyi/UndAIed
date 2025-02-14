@@ -34,30 +34,41 @@ public class LobbyService {
     /**
      * 클라이언트를 로비에서 퇴장시킵니다.
      */
-    public void leaveLobby(SocketIOClient client) {
-        client.leaveRoom(LOBBY_ROOM);
-        log.info("User {} (sessionId: {}) left lobby", client.get("userId"), client.getSessionId());
-    }
+//    public void leaveLobby(SocketIOClient client) {
+//        client.leaveRoom(LOBBY_ROOM);
+//        log.info("User {} (sessionId: {}) left lobby", client.get("userId"), client.getSessionId());
+//    }
 
     public boolean isUserInLobby(SocketIOClient client) {
         Set<String> rooms = new HashSet<>(client.getAllRooms());
-        log.debug("Checking lobby status for client {} - All rooms: {}", client.getSessionId(), rooms);
+        log.debug("유저 {} 가 로비에 있는지 확인 중 - 모든 방 목록: {}", client.get("userId"), rooms);
 
-        rooms.remove("");
-        log.debug("Rooms after removing empty: {}", rooms);
+        rooms.remove("");   // 빈 방 제거
 
         boolean inLobby = rooms.size() == 1 && rooms.contains(LOBBY_ROOM);
-        log.debug("Is user in lobby? {}", inLobby);
 
+        if(inLobby) {
+            log.debug("유저가 로비에 있음 - userId: {}", (Integer) client.get("userId"));
+        } else {
+            log.debug("유저가 로비에 없음 - userId: {}", (Integer) client.get("userId"));
+        }
         return inLobby;
     }
 
     public LobbyUpdateResponseDto sendEventRoomCreate(RoomCreateResponseDto responseDto, SocketIOClient client) {
 
         // 비밀방인 경우 로비에 보내지 않는다.
-        if(responseDto.getIsPrivate()) return null;
+        if(responseDto.getIsPrivate()) {
+            log.debug("비밀방이기 때문에 로비에 데이터를 전송하지 않습니다. - roomId: {}", responseDto.getRoomId());
+            return null;
+        }
 
-        System.out.println("방 아이디: "+responseDto.getRoomId()+" 방 제목: "+responseDto.getRoomTitle()+" 비밀방 여부: "+ false +" 인원 수: "+ responseDto.getCurrentPlayers().size()+"플레이 중: "+responseDto.getPlaying());
+        log.debug("로비에 방 업데이트 정보를 보내기 위한 데이터 준비 - 방 아이디: {} 방 제목: {} 비밀방 여부: {} 인원 수: {} 플레이 중: {}",
+                responseDto.getRoomId(),
+                responseDto.getRoomTitle(),
+                false,
+                responseDto.getCurrentPlayers().size(),
+                responseDto.getPlaying());
 
         UpdateData updateData = UpdateData.builder()
                 .roomId(responseDto.getRoomId())
