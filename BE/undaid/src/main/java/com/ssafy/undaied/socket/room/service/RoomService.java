@@ -393,7 +393,7 @@ public class RoomService {
 
             // 입장하는 사용자를 이동시키기
             client.leaveRoom(LOBBY_ROOM);
-            client.joinRoom(key);  // rooms:room:1 형태의 키로 방 입장
+            client.joinRoom(key);  // room:1 형태의 키로 방 입장
         }
 
         // RoomUser를 RoomUserResponseDto로 변환
