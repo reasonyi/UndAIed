@@ -30,26 +30,29 @@ import static com.ssafy.undaied.global.common.exception.ErrorCode.*;
 @RequiredArgsConstructor
 public class SocketIoHandler {
 
-    private final SocketIOServer server;
     private final SocketIONamespace namespace;
     private final SocketAuthenticationService authenticationService;
     private final SocketDisconnectService disconnectService;
     private final RoomService roomService;
     private final LobbyService lobbyService;
-    private final StageService stageService;
     private final UserRepository userRepository;
 
     @PostConstruct
     private void init() {
 
         namespace.addConnectListener(listenConnected());
-        namespace.addDisconnectListener(listenDisconnected());namespace.addDisconnectListener(listenDisconnected());
+        namespace.addDisconnectListener(listenDisconnected());
 
         // disconnecting 이벤트 리스너 추가
         namespace.addEventListener("disconnecting", Object.class, (client, data, ackRequest) -> {
             try {
+                log.debug("클라이언트가 소켓 연결 해제 시도 중 - eventType: disconnecting");
+                Integer userId = client.get("userId");
+
                 disconnectService.handleDisconnect(client);
+                log.info("성공적으로 소켓 연결 해제 - userId: {}, eventType: disconnecting", userId);
             } catch (Exception e) {
+                log.error("클라이언트 연결 해제 실패");
                 throw new BaseException(SOCKET_EVENT_ERROR);
             }
         });
@@ -132,12 +135,13 @@ public class SocketIoHandler {
      */
     private DisconnectListener listenDisconnected() {
         return client -> {
-            log.debug("클라이언트가 소켓 연결 해제 시도 중 ");
+            log.debug("클라이언트가 소켓 연결 해제 시도 중 - eventType: disconnect");
             Integer userId = client.get("userId");
             try {
                 disconnectService.handleDisconnect(client);
-                log.info("성공적으로 소켓 연결 해제 - userId: {}", userId);
+                log.info("성공적으로 소켓 연결 해제 - userId: {}, eventType: disconnect", userId);
             } catch (Exception e) {
+                log.error("클라이언트 연결 해제 실패");
                 throw new BaseException(SOCKET_EVENT_ERROR);
             }
         };
