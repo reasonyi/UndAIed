@@ -79,9 +79,8 @@ function GameRoom() {
   const [playerEnterId, setPlayerEnterId] = useState<number>();
   const [playerInfo, setPlayerInfo] = useState<IPlayer | undefined>();
 
-  //방 참여자 전원 더미
+  //방 전체 정보보
   const [roomInfo, setRoomInfo] = useState<IRoomInfo>();
-
   const [messages, setMessages] = useState<IMessage[]>([]);
 
   const addMessage = (newMessage: IMessage) => {
@@ -151,15 +150,17 @@ function GameRoom() {
       }
     });
 
-    // socket.on("game:init:send", (data: any) => {
-    //   console.log("게임으로 이동 이벤트 수신:", data);
-    //   navigate(`game/play/${data.gameId}`);
-    // });
+    socket.on("game:init:send", (data: { gameId: number }) => {
+      console.log("게임으로 이동 이벤트 수신:", data);
+      debugger;
+      navigate(`game/play/${data.gameId}`);
+    });
+
     return () => {
       socket.off("room:enter:send");
       socket.off("room:leave:send");
       socket.off("room:chat:send");
-      // socket.off("game:init:send");
+      socket.off("game:init:send");
     };
   }, [socket, messages, playerEnterId, roomInfo]);
 
@@ -311,7 +312,7 @@ function GameRoom() {
           roomId={roomInfo?.roomId}
           roomTitle={roomInfo?.roomTitle}
           nickname={playerInfo ? playerInfo.nickname : "연결이 끊어졌습니다."}
-          icon={PlayerIcon1}
+          icon={iconArr[playerInfo ? playerInfo.enterId : 1]}
           socket={socket}
           onLeaveRoom={handleLeaveRoom}
           onGameStart={handleGameStart}

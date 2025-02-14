@@ -16,7 +16,7 @@ interface ILeftGameSideBarProps {
   nickname: string;
   icon: string;
   socket: Socket | null;
-  onLeaveRoom: () => void;
+  // onLeaveRoom: () => void;
 }
 
 //아이콘
@@ -32,8 +32,8 @@ function LeftGameSideBar({
   nickname,
   icon,
   socket,
-  onLeaveRoom,
-}: ILeftGameSideBarProps) {
+}: // onLeaveRoom,
+ILeftGameSideBarProps) {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <>
@@ -70,7 +70,7 @@ function LeftGameSideBar({
         `}
       >
         <div className="w-full text-base flex justify-center items-center text-[white] bg-[rgb(7,7,10)] px-1.5 py-1 border-2 border-solid border-[rgba(255,255,255,0.35)] rounded-md">
-          No. 001 방 제목
+          No. 001 게임임
         </div>
         <div className="flex flex-col items-center justify-center profile w-52 h-52 border-2 border-solid border-[rgba(255,255,255,0.35)] bg-[#07070a4d]">
           <img className="filter brightness-75 w-28 h-28 mb-3" src={icon} />
@@ -105,7 +105,9 @@ function LeftGameSideBar({
                 className="text-white p-1 w-[1.25rem] h-[1.25rem]"
               />
             </button>
-            <button onClick={onLeaveRoom}>
+            <button
+            // onClick={onLeaveRoom}
+            >
               <FontAwesomeIcon
                 icon={doorOpen}
                 className="text-white p-1 w-[1.25rem] h-[1.25rem]"

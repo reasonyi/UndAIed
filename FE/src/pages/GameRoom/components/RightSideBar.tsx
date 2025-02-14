@@ -102,7 +102,7 @@ function RightSideBar({ players, iconArr }: RightSideBarProps) {
             </div>
           </>
         ) : (
-          <>Loading...</>
+          <div className="text-lg text-white">Loading...</div>
         )}
 
         <div className="w-full text-base flex flex-col justify-between items-center row-start-3 row-end-5 col-span-3 text-white px-2 py-1">
