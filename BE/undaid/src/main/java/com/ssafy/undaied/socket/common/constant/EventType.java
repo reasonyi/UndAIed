@@ -23,7 +23,9 @@ public enum EventType {
     CHAT_SUBJECT_SEND("chat:subject:send"),
 
     START_GAME("game:start:emit"),
-    GAME_INFO("game:info"),
+    GAME_INFO_EMIT("game:info:emit"),
+
+    GAME_INFO_SEND("game:info:send"),
     SEND_SUBJECT("send:subject"),
 
     GAME_CHAT_SEND("game:chat:send"),
