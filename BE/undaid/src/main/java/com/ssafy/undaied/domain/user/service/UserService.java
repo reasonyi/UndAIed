@@ -153,7 +153,13 @@ public class UserService{
         Users user = userRepository.findById(userId)
                 .orElseThrow(() -> new BaseException(USER_NOT_FOUND));
 
-        user.updateProfile(requestDto.getProfileImage(), requestDto.getAvatar(), requestDto.isSex(), requestDto.getAge(), requestDto.getNickname());
+        System.out.println("현재 유저 데이터: " +
+                "프로필 이미지: "+user.getProfileImage()+", 아바타 이미지: "+ user.getAvatar()+", 성별: "+user.getSex()+", 닉네임 {}" +user.getNickname());
+
+        System.out.println("바꿀 유저 데이터: " +
+                "프로필 이미지: "+requestDto.getProfileImage()+", 아바타 이미지: "+ requestDto.getAvatar()+", 성별: "+requestDto.getSex()+", 닉네임 {}" +requestDto.getNickname());
+
+        user.updateProfile(requestDto.getProfileImage(), requestDto.getAvatar(), requestDto.getSex(), requestDto.getAge(), requestDto.getNickname());
 
         return getUserProfile(userId);
     }
