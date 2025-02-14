@@ -19,6 +19,7 @@ import static com.ssafy.undaied.socket.common.constant.EventType.*;
 import static com.ssafy.undaied.socket.common.constant.SocketRoom.LOBBY_ROOM;
 import static com.ssafy.undaied.socket.common.constant.SocketRoom.ROOM_KEY_PREFIX;
 import static com.ssafy.undaied.socket.common.exception.SocketErrorCode.CREATE_ROOM_FAILED;
+import static com.ssafy.undaied.socket.common.exception.SocketErrorCode.LEAVE_ROOM_FAILED;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -52,26 +53,27 @@ public class RoomHandler {
                         LobbyUpdateResponseDto lobbyUpdateResponseDto = lobbyService.sendEventRoomCreate(responseRoomData, client);
                         if(lobbyUpdateResponseDto != null) {
                             namespace.getRoomOperations(LOBBY_ROOM).sendEvent(UPDATE_ROOM_AT_LOBBY.getValue(), lobbyUpdateResponseDto);
+                            log.debug("lobby:room:update sendEvent 실행. - eventType: {}, roomId: {}", lobbyUpdateResponseDto.getType(), lobbyUpdateResponseDto.getData().getRoomId());
                         }
 
                         // 방을 생성한 클라이언트에게 데이터 전송
                         if (ackRequest.isAckRequested()) {
-                            log.debug("lobby:room:create에 대한 ack응답 성공적으로 전송 - userNickname: {}", (String) client.get("nickname"));
                             Map<String, Object> response = new HashMap<>();
                             response.put("success", true);
                             response.put("errorMessage", null);
                             response.put("data", responseRoomData.getRoomId());
                             ackRequest.sendAckData(response);
+                            log.debug("lobby:room:create에 대한 ack응답 성공적으로 전송 - userId: {}, userNickname: {}", client.get("userId"), client.get("nickname"));
                         }
 
                     } catch (Exception e) {
                         if (ackRequest.isAckRequested()) {
-                            log.error("lobby:room:create에 대한 ack응답 전송 실패 - userNickname: {}", (String) client.get("nickname"));
                             Map<String, Object> response = new HashMap<>();
                             response.put("success", false);
                             response.put("errorMessage", e.getMessage());
                             response.put("data", null);
                             ackRequest.sendAckData(response);
+                            log.error("lobby:room:create에 대한 ack응답 전송 실패 - userId: {}, userNickname: {}", client.get("userId"), client.get("nickname"));
                         }
                     }
                 }
@@ -80,12 +82,21 @@ public class RoomHandler {
         namespace.addEventListener(LEAVE_ROOM_EMIT.getValue(), RoomLeaveRequestDto.class,
                 (client, data, ackRequest) -> {
                     try {
+                        if (data == null) {
+                            log.error("방 퇴장을 위한 데이터가 비어있습니다.");
+                            throw new SocketException(LEAVE_ROOM_FAILED);
+                        }
+
+                        log.info("room:leave:emit 이벤트 도착. - userId: {}, roomId: {}", client.get("userId"), data.getRoomId());
+
 
                         LobbyUpdateResponseDto lobbyUpdateResponseDto = roomService.leaveRoom(data.getRoomId(), client);
+                        log.info("클라이언트가 성공적으로 방을 나갔습니다. - userId: {}, room: {}", client.get("userId"), data.getRoomId());
 
                         // 로비에 데이터 보내주기
                         if(lobbyUpdateResponseDto != null) {
                             namespace.getRoomOperations(LOBBY_ROOM).sendEvent(UPDATE_ROOM_AT_LOBBY.getValue(), lobbyUpdateResponseDto);
+                            log.debug("lobby:room:update sendEvent 실행. - eventType: {}, roomId: {}", lobbyUpdateResponseDto.getType(), lobbyUpdateResponseDto.getData().getRoomId());
                         }
 
                         // 방을 생성한 클라이언트에게 데이터 전송
@@ -95,6 +106,7 @@ public class RoomHandler {
                             response.put("errorMessage", null);
                             response.put("data", null);
                             ackRequest.sendAckData(response);
+                            log.debug("room:leave:emit에 대한 ack응답 성공적으로 전송 - userId: {}, userNickname: {}", client.get("userId"), client.get("nickname"));
                         }
 
                     } catch (Exception e) {
@@ -104,6 +116,7 @@ public class RoomHandler {
                             response.put("errorMessage", e.getMessage());
                             response.put("data", null);
                             ackRequest.sendAckData(response);
+                            log.error("room:leave:emit에 대한 ack응답 전송 실패 - userId: {}, userNickname: {}", client.get("userId"), client.get("nickname"));
                         }
                     }
                 }
