@@ -115,11 +115,17 @@ export const useGameRooms = () => {
     // 방 업데이트 이벤트 함수
     const handleRoomUpdated = (updatedRoom: GameRoom) => {
       console.log("updatedRoom 출력", updatedRoom);
-      setRooms((prev: GameRoom[]) =>
-        prev.map((room) =>
-          room.roomId === updatedRoom.roomId ? updatedRoom : room
-        )
-      );
+      if (updatedRoom.playing === true) {
+        setRooms((prev: GameRoom[]) =>
+          prev.filter((room) => room.roomId !== updatedRoom.roomId)
+        );
+      } else {
+        setRooms((prev: GameRoom[]) =>
+          prev.map((room) =>
+            room.roomId === updatedRoom.roomId ? updatedRoom : room
+          )
+        );
+      }
     };
     // 방 삭제 이벤트 처리
     const handleRoomDeleted = (roomId: number) => {
