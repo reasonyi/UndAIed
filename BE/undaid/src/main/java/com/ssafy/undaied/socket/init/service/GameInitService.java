@@ -9,6 +9,7 @@ import com.ssafy.undaied.socket.common.constant.EventType;
 import com.ssafy.undaied.socket.common.exception.SocketErrorCode;
 import com.ssafy.undaied.socket.common.exception.SocketException;
 import com.ssafy.undaied.socket.common.util.GameTimer;
+import com.ssafy.undaied.socket.init.dto.response.BroadcastResponseDto;
 import com.ssafy.undaied.socket.init.dto.response.GameInfoResponseDto;
 import com.ssafy.undaied.socket.init.dto.response.PlayerInfoDto;
 import com.ssafy.undaied.socket.lobby.dto.response.LobbyUpdateResponseDto;
@@ -371,12 +372,18 @@ public class GameInitService {
 
     public void broadcastGameInit(Integer gameId) {
 
+        // BroadcastResponseDto 객체 생성
+    BroadcastResponseDto responseDto = BroadcastResponseDto.builder()
+            .gameId(gameId)
+            .build();
+
         // 연결된 클라이언트 확인
         Collection<SocketIOClient> clients = namespace.getRoomOperations(GAME_KEY_PREFIX + gameId).getClients();
-        log.debug("Clients in game room {}: {}", GAME_KEY_PREFIX + gameId, clients.size());
-
+        log.info("Clients in game room {}: {}", GAME_KEY_PREFIX + gameId, clients.size());
+        
         namespace.getRoomOperations(GAME_KEY_PREFIX + gameId)
-                .sendEvent(EventType.GAME_INIT_SEND.getValue(), gameId);
+                .sendEvent(EventType.GAME_INIT_SEND.getValue(), responseDto);
+                log.info("Broadcast sent with responseDto: {}", responseDto);
     }
 
     public void updatePlayerStatus(int gameId, int number, boolean isDied, boolean isInfected, boolean isInGame) {
