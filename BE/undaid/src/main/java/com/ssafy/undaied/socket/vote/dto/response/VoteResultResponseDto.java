@@ -19,7 +19,7 @@ public class VoteResultResponseDto {
         this.message = message;
     }
 
-    public static VoteResultResponseDto notifyVoteResult(int eliminatedNumber, int receivedCount, boolean isAI, boolean isInfected) {
+    public static VoteResultResponseDto notifyVoteResult(String eliminatedNumber, int receivedCount, boolean isAI, boolean isInfected) {
         String type;
         if (!isAI) {
             if (!isInfected) {
