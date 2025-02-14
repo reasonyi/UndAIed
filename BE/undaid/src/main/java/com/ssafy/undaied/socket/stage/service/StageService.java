@@ -132,8 +132,8 @@ public class StageService {
                         if (currentStage == StageType.VOTE) {
                             // 투표 결과 알림 (2초)
                             System.out.println("투표 결과 알림");
-                            VoteResultResponseDto responseDto = voteService.computeVoteResult(gameId);
-                            namespace.getRoomOperations("game:"+gameId).sendEvent(EventType.GAME_CHAT_SEND.getValue(), responseDto);
+//                            VoteResultResponseDto responseDto = voteService.computeVoteResult(gameId);
+//                            namespace.getRoomOperations("game:"+gameId).sendEvent(EventType.GAME_CHAT_SEND.getValue(), responseDto);
 
                             gameTimer.setTimer(gameId, GameTimerConstants.VOTE_RESULT, 2, () -> {
                                 try {
