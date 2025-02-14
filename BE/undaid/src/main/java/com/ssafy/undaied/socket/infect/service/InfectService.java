@@ -47,13 +47,13 @@ public class InfectService {
 
             String roundKey = "game:" + gameId + ":round";
             String currentRound = redisTemplate.opsForValue().get(roundKey).toString();
-            String eventKey = "game:" + gameId + ":round" + currentRound + ":events";
+            String eventKey = "game:" + gameId + ":round:" + currentRound + ":events";
             String userNameKey = "game:" + gameId + ":number_nicknames";
 
             String infectedPlayerName = redisTemplate.opsForHash().get(userNameKey, infectedPlayerNumber).toString();
 
 
-            redisTemplate.opsForList().rightPush(eventKey, String.format("{infection} [null] <null> (%s) ~%s~ %s |",
+            redisTemplate.opsForValue().append(eventKey, String.format("{infection} [null] <null> (%s) ~%s~ %s | ",
                     infectedPlayerName, infectedPlayerNumber, LocalDateTime.now())
             );
 
