@@ -26,20 +26,9 @@ public class LobbyService {
      * 클라이언트를 로비에 입장시킵니다.
      */
     public void joinLobby(SocketIOClient client) {
-        log.debug("Attempting to join lobby - Client ID: {}", client.getSessionId());
-        log.debug("Current rooms before joining lobby: {}", client.getAllRooms());
-
-        // 기존 방에서 모두 나가기
-        Set<String> rooms = new HashSet<>(client.getAllRooms());
-        rooms.remove("");
-        for (String room : rooms) {
-            client.leaveRoom(room);
-            log.debug("Left room: {}", room);
-        }
-
         // 로비에 입장
         client.joinRoom(LOBBY_ROOM);
-        log.debug("Joined lobby - Current rooms: {}", client.getAllRooms());
+        log.info("클라이언트 로비 입장 - userId:{}, 현재 방 목록: {}", client.get("userId"), client.getAllRooms());
     }
 
     /**

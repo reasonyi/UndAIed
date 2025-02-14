@@ -17,6 +17,7 @@ import com.ssafy.undaied.global.auth.service.OAuth2Service;
 import com.ssafy.undaied.global.auth.token.JwtTokenProvider;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -37,11 +38,13 @@ public class UserService{
 
     // 회원가입
     public Users createUser(JsonNode node, String email) {
+        String hashedProviderId = BCrypt.hashpw(node.get("sub").asText(), BCrypt.gensalt());    // BCrypt
+
         Users user = Users.builder()
                 .email(email)
                 .nickname(email.split("@")[0])
                 .provider(oAuth2Service.checkProvider(node.get("iss").asText()))
-                .providerId(node.get("sub").asText())
+                .providerId(hashedProviderId)
                 .build();
 
         userRepository.save(user);
@@ -87,6 +90,7 @@ public class UserService{
                 .nickname(user.getNickname())
                 .totalWin(user.getTotalWin())
                 .totalLose(user.getTotalLose())
+                .profileImage(user.getProfileImage())
                 .build();
 
         tokenValidationDto.setUserLoginResponseDto(userLoginResponseDto);
@@ -149,7 +153,13 @@ public class UserService{
         Users user = userRepository.findById(userId)
                 .orElseThrow(() -> new BaseException(USER_NOT_FOUND));
 
-        user.updateProfile(requestDto.getProfileImage(), requestDto.getAvatar(), requestDto.isSex(), requestDto.getAge(), requestDto.getNickname());
+        System.out.println("현재 유저 데이터: " +
+                "프로필 이미지: "+user.getProfileImage()+", 아바타 이미지: "+ user.getAvatar()+", 성별: "+user.getSex()+", 닉네임 {}" +user.getNickname());
+
+        System.out.println("바꿀 유저 데이터: " +
+                "프로필 이미지: "+requestDto.getProfileImage()+", 아바타 이미지: "+ requestDto.getAvatar()+", 성별: "+requestDto.getSex()+", 닉네임 {}" +requestDto.getNickname());
+
+        user.updateProfile(requestDto.getProfileImage(), requestDto.getAvatar(), requestDto.getSex(), requestDto.getAge(), requestDto.getNickname());
 
         return getUserProfile(userId);
     }

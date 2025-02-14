@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
-import playerIcon from "../../../assets/player-icon/player-icon-1.svg";
 import DonutChart from "../components/DonutChart";
 import { useUserProfile } from "../../../hooks/useUserData";
+import { getPlayerIcon } from "../../Util/PlayerIcon";
 
 function GameSidebar() {
   const blockStyle =
@@ -13,7 +13,6 @@ function GameSidebar() {
 
   const { data: response, isLoading, error } = useUserProfile();
   const userData = response?.data;
-
   // userData가 존재할 때만 승률 계산
   const winningRate = userData
     ? userData.totalWin + userData.totalLose > 0
@@ -40,7 +39,7 @@ function GameSidebar() {
         <>
           <div className="flex align-middle">
             <div className="w-32 h-32 mt-8 mb-3 flex items-center justify-center border border-[#f74a5c]/60">
-              <img src={`${playerIcon}`} alt="" />
+              <img src={`${getPlayerIcon(userData.profileImage)}`} alt="" />
             </div>
             <div className="w-32 mt-5 flex flex-col gap-2 items-center justify-center text-[#fcfafa]">
               <div>{userData.nickname}</div>

@@ -5,8 +5,8 @@ services:
     expose:
       - "5173"
     volumes:
-      - ./FE:/app
-      - /app/node_modules
+      - ./FE:/FE
+      - /FE/node_modules
     networks:
       - app_network
     restart: always
@@ -35,11 +35,9 @@ services:
       SPRING_REDIS_PORT: 6379
       SPRING_REDIS_PASSWORD: ${REDIS_PASSWORD}
       TZ: Asia/Seoul
-      # 소켓 해결하고 추가된 환경변수
       JAVA_SECURITY_PROPERTIES: |
         jdk.internal.reflect.permitAll=true
         jdk.reflect.allowNativeAccess=true
-    # 소켓 해결하고 추가된 환경변수 + 이건 왜 해주는거지???
     ulimits:
       nofile:
         soft: 65536
@@ -60,9 +58,9 @@ services:
     expose:
       - "8000"
     volumes:
-      - ./AI:/app
+      - ./AI:/AI
     environment:
-      - PYTHONPATH=/app
+      - PYTHONPATH=/AI
       - TZ=Asia/Seoul
     networks:
       - app_network
@@ -73,8 +71,8 @@ services:
     build: 
       context: ./mysql
     container_name: mysql
-    ports:
-      - "3306:3306"
+    expose:
+      - "3306"
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
@@ -98,8 +96,8 @@ services:
   redis:
     build: ./redis
     container_name: redis
-    ports:
-      - "6379:6379"
+    expose:
+      - "6379"
     volumes:
       - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
       - ./redis/var/run/redis:/var/run/redis

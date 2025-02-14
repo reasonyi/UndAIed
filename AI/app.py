@@ -1,19 +1,29 @@
 from fastapi import FastAPI
+from models.Gemini import init_genimi
+from datetime import datetime
+from pydantic import BaseModel
+from utils.dialogue_parser import dialogue_parser
+
 
 app = FastAPI()
+gemini_bot = init_genimi()
 
-@app.get("/api/ai/")  # "/" -> "/api/ai/"로 변경
-def read_root():
-    return {"Hello": "World"}
+class message_request(BaseModel):
+    message:str
 
-@app.get("/api/ai/items/{item_id}")  # "/items/" -> "/api/ai/items/"로 변경
-def read_item(item_id: int, q: str | None = None):
-    return {"item_id": item_id, "q": q}
 
-# health check 추가
-@app.get("/health")
-def health_check():
-    return {"status": "ok"}
-
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+@app.post("/api/ai/{room_number}/")
+def create_message(room_number: int, message: message_request):
+    
+    user_dialogue = ...
+    
+    gemini_message = gemini_bot.generate_content(message.message)
+    precise_timestamp = datetime.now().isoformat()
+    event_log = "AI 대답 생성 완료"
+    return {
+        "timeStamp": f"{precise_timestamp} - {event_log}",
+        "AI_code" : 1,
+        "status": 200,
+        "room_number": room_number,
+        "message": gemini_message.text,
+    }

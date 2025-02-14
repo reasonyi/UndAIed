@@ -5,9 +5,9 @@ import lombok.Setter;
 
 @Getter @Setter
 public class UpdateProfileRequestDto {
-    private boolean sex;
-    private int profileImage;
-    private int avatar;
-    private int age;
+    private Boolean sex;
+    private Integer profileImage;
+    private Integer avatar;
+    private Integer age;
     private String nickname;
 }

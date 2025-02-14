@@ -1,3 +1,12 @@
+@keyframes slideInFromCenter {
+  0% {
+    opacity: 0.1;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
 @keyframes slideInFromRight {
   0% {
     transform: translateX(100%);
@@ -40,6 +49,10 @@
     transform: translateY(0);
     opacity: 1;
   }
+}
+
+.slide-in-center {
+  animation: slideInFromCenter 1s ease-out;
 }
 
 .slide-in-right {

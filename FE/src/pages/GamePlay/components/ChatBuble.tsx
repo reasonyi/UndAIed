@@ -6,13 +6,7 @@ import PlayerIcon5 from "../../../assets/player-icon/player-icon-5.svg";
 import PlayerIcon6 from "../../../assets/player-icon/player-icon-1.svg";
 import PlayerIcon7 from "../../../assets/player-icon/player-icon-2.svg";
 import PlayerIcon8 from "../../../assets/player-icon/player-icon-3.svg";
-
-interface IMessage {
-  id: number;
-  player: number;
-  text: string;
-  isMine: boolean; // true면 내가 보낸 메시지, false면 상대방 메시지
-}
+import { IMessage } from "../../../types/gameroom";
 
 interface ChatBubbleProps {
   message: IMessage;
