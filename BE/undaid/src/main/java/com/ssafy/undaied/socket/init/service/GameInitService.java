@@ -175,14 +175,6 @@ public class GameInitService {
 
         handleSocketConnections(gameId, roomId);
 
-        log.info("Game successfully initialized - gameId: {}, roomKey: {}, players: {}",
-                gameId,
-                ROOM_LIST+ ROOM_KEY_PREFIX + roomId,
-                room.getCurrentPlayers().stream()
-                        .map(user -> String.format("%s(%d)", user.getNickname(), user.getUserId()))
-                        .collect(Collectors.joining(", "))
-        );
-
         return gameId;
     }
 
@@ -378,23 +370,13 @@ public class GameInitService {
     }
 
     public void broadcastGameInit(Integer gameId) {
-        log.info("Starting broadcastGameInit for gameId: {}", gameId);
 
         // 연결된 클라이언트 확인
         Collection<SocketIOClient> clients = namespace.getRoomOperations(GAME_KEY_PREFIX + gameId).getClients();
-        log.info("Clients in game room {}: {}", GAME_KEY_PREFIX + gameId, clients.size());
+        log.debug("Clients in game room {}: {}", GAME_KEY_PREFIX + gameId, clients.size());
 
         namespace.getRoomOperations(GAME_KEY_PREFIX + gameId)
                 .sendEvent(EventType.GAME_INIT_SEND.getValue(), gameId);
-    }
-
-    private Map<Integer, String> createNumberNicknames() {
-        return IntStream.rangeClosed(1, TOTAL_NUMBERS)
-                .boxed()
-                .collect(Collectors.toMap(
-                        i -> i,
-                        i -> "익명" + i
-                ));
     }
 
     public void updatePlayerStatus(int gameId, int number, boolean isDied, boolean isInfected, boolean isInGame) {
@@ -438,7 +420,7 @@ public class GameInitService {
     }
 
     public LobbyUpdateResponseDto createLobbyUpdateResponse(int roomId) throws SocketException {
-        String roomKey = WAITING_LIST + ROOM_KEY_PREFIX + roomId;
+        String roomKey = ROOM_LIST + ROOM_KEY_PREFIX + roomId;
         Object roomObj = jsonRedisTemplate.opsForValue().get(roomKey);
         Room room = objectMapper.convertValue(roomObj, Room.class);
 
@@ -446,7 +428,11 @@ public class GameInitService {
             throw new SocketException(SocketErrorCode.ROOM_NOT_FOUND);
         }
 
-        //아래 부분 프론트엔드랑 얘기해봐야 할 것 같음.
+            // waiting 리스트에서 해당 방 제거
+        String waitingKey = WAITING_LIST + ROOM_KEY_PREFIX + roomId;  // "waiting:room:roomId" 형식
+        Boolean isDeleted = jsonRedisTemplate.delete(waitingKey);
+        log.debug("레디스 대기방 목록에서 방을 제거합니다. - waitingKey: {}, 제거 성공 여부: {}", waitingKey, isDeleted);
+
 
         return LobbyUpdateResponseDto.builder()
                 .type("update")
