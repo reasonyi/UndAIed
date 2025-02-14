@@ -1,8 +1,10 @@
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router-dom";
 import { IUser } from "../../../types/User";
 import PlayerIcon1 from "../../../assets/player-icon/player-icon-1.svg";
 import { userState } from "../../../store/userState";
 import { useSetRecoilState } from "recoil";
+import IntroOverlay from "../../Util/IntroOverlay";
+import { useState } from "react";
 
 interface ILoginContainer {
   userInfo: IUser;
@@ -11,6 +13,7 @@ interface ILoginContainer {
 function LoginContainer({ userInfo }: ILoginContainer) {
   const navigate = useNavigate();
   const setUser = useSetRecoilState(userState);
+  const [showIntro, setShowIntro] = useState(false);
 
   // 로그아웃 버튼 클릭 시 sessionStorage에서 userInfo 제거
   const handleLogout = () => {
@@ -31,9 +34,10 @@ function LoginContainer({ userInfo }: ILoginContainer) {
 
   return (
     <div className="flex flex-col w-full items-center">
+      {showIntro && <IntroOverlay />}
       <button
-        onClick={() => navigate("/game")}
-        className="w-[22.5rem] h-[5.5rem] flex justify-center items-center mb-8 bg-black text-white font-mono border-2 border-[#872341] rounded-sm text-3xl font-semibold"
+        onClick={() => setShowIntro(true)}
+        className="w-[22.5rem] h-[5.5rem] flex justify-center items-center mb-8 bg-black text-white font-mono border-2 border-[#872341] rounded-sm text-3xl font-semibold hover:bg-[#872341] transition-colors"
       >
         GAME START
       </button>
@@ -46,9 +50,8 @@ function LoginContainer({ userInfo }: ILoginContainer) {
             <h1 className="font-semibold max-w-[10rem] truncate">
               {userInfo.nickname}님
             </h1>
-
             <button
-              className="text-xs ml-3 border-[1px] p-1"
+              className="text-xs ml-3 border-[1px] p-1 hover:bg-[#872341] transition-colors"
               onClick={handleLogout}
             >
               로그아웃
