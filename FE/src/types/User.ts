@@ -36,10 +36,18 @@ export interface GameUserInfoProps {
   userInfo: UserData;
 }
 
-export interface GameListProps {
-  gameList: Game[];
+export interface ProfileUpdate {
+  sex: null;
+  profileImage: number | null;
+  avatar: number | null;
+  age: null;
+  nickname: string | null;
 }
 
-export interface AvatarProps {
-  avatar: number;
+export interface ProfileFormData {
+  nickname?: string;
+  profileImage?: string;
+  sex?: string | null;
+  age?: number | null;
+  avatar?: string | null;
 }

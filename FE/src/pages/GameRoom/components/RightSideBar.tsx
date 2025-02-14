@@ -4,18 +4,11 @@ import EmptyProfile from "./EmptyProfile";
 import { faPeopleGroup } from "@fortawesome/free-solid-svg-icons";
 import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-
-interface Player {
-  id: number;
-  playerNum: number;
-  name: string;
-  token: string;
-  imgNum: number;
-}
+import { IPlayer } from "../../../types/gameroom";
 
 interface RightSideBarProps {
   /** 현재 게임 방의 유저 목록 */
-  players: Player[];
+  players?: IPlayer[];
   /** 플레이어 아이콘 배열 */
   iconArr: string[];
 }
@@ -27,31 +20,6 @@ const peopleGroup: IconDefinition = faPeopleGroup;
  * ReadyProfile / EmptyProfile을 렌더링
  */
 function RightSideBar({ players, iconArr }: RightSideBarProps) {
-  const player1 = useMemo(
-    () => players.find((user) => user.playerNum === 1),
-    [players]
-  );
-  const player2 = useMemo(
-    () => players.find((user) => user.playerNum === 2),
-    [players]
-  );
-  const player3 = useMemo(
-    () => players.find((user) => user.playerNum === 3),
-    [players]
-  );
-  const player4 = useMemo(
-    () => players.find((user) => user.playerNum === 4),
-    [players]
-  );
-  const player5 = useMemo(
-    () => players.find((user) => user.playerNum === 5),
-    [players]
-  );
-  const player6 = useMemo(
-    () => players.find((user) => user.playerNum === 6),
-    [players]
-  );
-
   const [isRightOpen, setIsRightOpen] = useState(true);
   return (
     <>
@@ -64,76 +32,82 @@ function RightSideBar({ players, iconArr }: RightSideBarProps) {
                 ${isRightOpen ? "translate-y-full" : "close-right-sidebar"}`}
       >
         {/* 플레이어 프로필 영역 */}
-        <div className="row-start-1 px-2 py-1">
-          {player1 ? (
-            <ReadyProfile
-              nickname={player1.name}
-              playerNum={player1.playerNum}
-              icon={iconArr[player1.imgNum]}
-            />
-          ) : (
-            <EmptyProfile />
-          )}
-        </div>
-        <div className="row-start-1 px-2 py-1">
-          {player2 ? (
-            <ReadyProfile
-              nickname={player2.name}
-              playerNum={player2.playerNum}
-              icon={iconArr[player2.imgNum]}
-            />
-          ) : (
-            <EmptyProfile />
-          )}
-        </div>
-        <div className="row-start-1 px-2 py-1">
-          {player3 ? (
-            <ReadyProfile
-              nickname={player3.name}
-              playerNum={player3.playerNum}
-              icon={iconArr[player3.imgNum]}
-            />
-          ) : (
-            <EmptyProfile />
-          )}
-        </div>
-        <div className="row-start-2 px-2 py-1">
-          {player4 ? (
-            <ReadyProfile
-              nickname={player4.name}
-              playerNum={player4.playerNum}
-              icon={iconArr[player4.imgNum]}
-            />
-          ) : (
-            <EmptyProfile />
-          )}
-        </div>
-        <div className="row-start-2 px-2 py-1">
-          {player5 ? (
-            <ReadyProfile
-              nickname={player5.name}
-              playerNum={player5.playerNum}
-              icon={iconArr[player5.imgNum]}
-            />
-          ) : (
-            <EmptyProfile />
-          )}
-        </div>
-        <div className="row-start-2 px-2 py-1">
-          {player6 ? (
-            <ReadyProfile
-              nickname={player6.name}
-              playerNum={player6.playerNum}
-              icon={iconArr[player6.imgNum]}
-            />
-          ) : (
-            <EmptyProfile />
-          )}
-        </div>
+        {players ? (
+          <>
+            <div className="row-start-1 px-2 py-1">
+              {players[0] ? (
+                <ReadyProfile
+                  nickname={players[0].nickname}
+                  playerNum={players[0].enterId}
+                  icon={iconArr[players[0].profileImage]}
+                />
+              ) : (
+                <EmptyProfile />
+              )}
+            </div>
+            <div className="row-start-1 px-2 py-1">
+              {players[1] ? (
+                <ReadyProfile
+                  nickname={players[1].nickname}
+                  playerNum={players[1].enterId}
+                  icon={iconArr[players[1].profileImage]}
+                />
+              ) : (
+                <EmptyProfile />
+              )}
+            </div>
+            <div className="row-start-1 px-2 py-1">
+              {players[2] ? (
+                <ReadyProfile
+                  nickname={players[2].nickname}
+                  playerNum={players[2].enterId}
+                  icon={iconArr[players[2].profileImage]}
+                />
+              ) : (
+                <EmptyProfile />
+              )}
+            </div>
+            <div className="row-start-2 px-2 py-1">
+              {players[3] ? (
+                <ReadyProfile
+                  nickname={players[3].nickname}
+                  playerNum={players[3].enterId}
+                  icon={iconArr[players[3].profileImage]}
+                />
+              ) : (
+                <EmptyProfile />
+              )}
+            </div>
+            <div className="row-start-2 px-2 py-1">
+              {players[4] ? (
+                <ReadyProfile
+                  nickname={players[4].nickname}
+                  playerNum={players[4].enterId}
+                  icon={iconArr[players[4].profileImage]}
+                />
+              ) : (
+                <EmptyProfile />
+              )}
+            </div>
+            <div className="row-start-2 px-2 py-1">
+              {players[5] ? (
+                <ReadyProfile
+                  nickname={players[5].nickname}
+                  playerNum={players[5].enterId}
+                  icon={iconArr[players[5].profileImage]}
+                />
+              ) : (
+                <EmptyProfile />
+              )}
+            </div>
+          </>
+        ) : (
+          <>Loading...</>
+        )}
 
         <div className="w-full text-base flex flex-col justify-between items-center row-start-3 row-end-5 col-span-3 text-white px-2 py-1">
           <div className="w-full text-base flex justify-end items-center text-white px-2 py-1">
-            0/6
+            {players?.length}/6
           </div>
           <div className="w-full h-[80%] text-base flex flex-col justify-center items-center bg-[rgb(7,7,10)] border-2 border-solid border-[#B4B4B4] text-white px-2 py-1">
             <div>시스템 로그</div>

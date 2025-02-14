@@ -8,10 +8,12 @@ import {
 
 interface IGameProfileProps {
   nickname: string;
+  playerNum: number;
   icon: string;
+  isDied: boolean;
 }
 
-function GameProfile({ nickname, icon }: IGameProfileProps) {
+function GameProfile({ nickname, icon, playerNum, isDied }: IGameProfileProps) {
   const robot: IconDefinition = faRobot;
   const noteSticky: IconDefinition = faNoteSticky;
   const checkToSlot: IconDefinition = faCheckToSlot;

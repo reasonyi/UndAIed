@@ -104,6 +104,7 @@ public class RoomHandler {
                 (client, data, ackRequest) -> {
                     try {
                         RoomEnterResponseDto roomEnterResponseDto = roomService.enterRoom(client, data.getRoomId(), data.getRoomPassword());
+                        log.debug("User enter room Successfully - userId: {}, roomId: {}", client.get("userId"), data.getRoomId());
 
                         // 로비에 데이터 보내주기
                         LobbyUpdateResponseDto lobbyUpdateResponseDto = lobbyService.sendEventRoomEnter(roomEnterResponseDto, client);
@@ -116,7 +117,8 @@ public class RoomHandler {
                             Map<String, Object> response = new HashMap<>();
                             response.put("success", true);
                             response.put("errorMessage", null);
-                            response.put("data", roomEnterResponseDto.getEnterId());
+                            response.put("enterId", roomEnterResponseDto.getEnterId());
+                            response.put("data", roomEnterResponseDto);
                             ackRequest.sendAckData(response);
                         }
 

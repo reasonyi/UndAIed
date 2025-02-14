@@ -1,25 +1,17 @@
 package com.ssafy.undaied.socket.common.handler;
 
-import com.corundumstudio.socketio.AckRequest;
 import com.corundumstudio.socketio.HandshakeData;
 import com.corundumstudio.socketio.SocketIONamespace;
 import com.ssafy.undaied.global.common.exception.BaseException;
-import com.ssafy.undaied.socket.common.constant.EventType;
-import com.ssafy.undaied.socket.common.exception.SocketException;
-import com.ssafy.undaied.socket.common.response.AckResponse;
-import com.ssafy.undaied.socket.stage.handler.StageHandler;
-import com.ssafy.undaied.socket.chat.handler.GameChatHandler;
+import com.ssafy.undaied.socket.room.service.RoomService;
 import com.ssafy.undaied.domain.user.entity.Users;
 import com.ssafy.undaied.domain.user.entity.repository.UserRepository;
 import com.ssafy.undaied.socket.common.service.SocketAuthenticationService;
 import com.ssafy.undaied.socket.common.service.SocketDisconnectService;
 import com.ssafy.undaied.socket.lobby.service.LobbyService;
-import com.ssafy.undaied.socket.vote.dto.request.VoteSubmitRequestDto;
-import com.ssafy.undaied.socket.vote.dto.response.VoteSubmitResponseDto;
-import com.ssafy.undaied.socket.vote.service.VoteService;
+import com.ssafy.undaied.socket.stage.service.StageService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import com.corundumstudio.socketio.SocketIOServer;
@@ -42,24 +34,27 @@ public class SocketIoHandler {
     private final SocketIONamespace namespace;
     private final SocketAuthenticationService authenticationService;
     private final SocketDisconnectService disconnectService;
+    private final RoomService roomService;
     private final LobbyService lobbyService;
-    private final StageHandler stageHandler;
+    private final StageService stageService;
     private final UserRepository userRepository;
-    private final GameChatHandler gameChatHandler;
-    private final VoteService voteService;
 
     @PostConstruct
     private void init() {
 
         namespace.addConnectListener(listenConnected());
-        namespace.addDisconnectListener(listenDisconnected());
+        namespace.addDisconnectListener(listenDisconnected());namespace.addDisconnectListener(listenDisconnected());
 
-        addGameStartListeners();
+        // disconnecting 이벤트 리스너 추가
+        namespace.addEventListener("disconnecting", Object.class, (client, data, ackRequest) -> {
+            try {
+                disconnectService.handleDisconnect(client);
+            } catch (Exception e) {
+                throw new BaseException(SOCKET_EVENT_ERROR);
+            }
+        });
     }
 
-    /**
-     * 클라이언트 연결 리스너
-     */
     /**
      * 클라이언트 연결 리스너
      */
@@ -67,38 +62,37 @@ public class SocketIoHandler {
         return (client) -> {
 
             String namespace = client.getNamespace().getName();
-            log.info("Client attempting to connect to namespace: {}", namespace);
+            log.debug("클라이언트가 {} 네임스페이스로 소켓 연결 시도 중", namespace);
 
             // 더 자세한 디버깅을 위한 로그
             SocketIONamespace clientNamespace = client.getNamespace();
             String namespaceName = clientNamespace != null ? clientNamespace.getName() : "null";
-
-            log.info("Client namespace object: {}", clientNamespace);
-            log.info("Client attempting to connect to namespace: '{}'", namespaceName);
+//            log.info("Client namespace object: {}", clientNamespace);
+//            log.info("Client attempting to connect to namespace: '{}'", namespaceName);
 
 
             try {
                 // null 체크를 포함한 네임스페이스 검증
                 if (clientNamespace == null || !"/socket.io".equals(namespaceName)) {
-                    log.info("Connection failed: wrong or empty namespace: '{}' :: Client SessionId: {}",
-                            namespaceName, client.getSessionId());
+                    log.error("네임스페이스가 비어있거나 /socket.io가 아니라서 연결에 실패했습니다. - 현재 네임스페이스 {}, 클라이언트 세션아이디: {}", namespaceName, client.getSessionId());
                     throw new BaseException(SOCKET_CONNECTION_FAILED);
                 }
 
                 // 디버깅을 위한 handshake 데이터 출력
                 HandshakeData handshakeData = client.getHandshakeData();
-                log.debug("Connection attempt - Query params: {}", handshakeData.getUrlParams());
-                log.debug("Connection attempt - Request URI: {}", handshakeData.getUrl());
-                log.debug("Connection attempt - Address: {}", handshakeData.getAddress());
-                log.debug("Connection attempt - HTTP Headers: {}", handshakeData.getHttpHeaders());
+//                log.debug("Connection attempt - Query params: {}", handshakeData.getUrlParams());
+//                log.debug("Connection attempt - Request URI: {}", handshakeData.getUrl());
+//                log.debug("Connection attempt - Address: {}", handshakeData.getAddress());
+//                log.debug("Connection attempt - HTTP Headers: {}", handshakeData.getHttpHeaders());
 
                 // 클라이언트 인증
                 int userId;
                 try {
+                    log.debug("클라이언트 인증 시도 중");
                     userId = authenticationService.authenticateClient(client);
-                    log.debug("Authentication successful for connection. UserId: {}", userId);
+                    log.debug("세션 연결을 위한 인증에 성공했습니다. - userId: {}", userId);
                 } catch (Exception e) {
-                    log.error("Authentication failed: ", e);
+                    log.error("세션 연결에 실패했습니다.: ", e);
                     throw new BaseException(SOCKET_CONNECTION_FAILED);
                 }
 
@@ -107,9 +101,9 @@ public class SocketIoHandler {
                 try {
                     user = userRepository.findById(userId)
                             .orElseThrow(() -> new BaseException(USER_NOT_FOUND));
-                    log.debug("User found: {}", user.getNickname());
+                    log.debug("소켓 클라이언트 데이터 설정을 위한 유저 데이터를 성공적으로 찾았습니댜. - userNickname: {}", user.getNickname());
                 } catch (Exception e) {
-                    log.error("User lookup failed: ", e);
+                    log.error("소켓 클라이언트 데이터 설정을 위한 유저 데이터를 찾는데 실패했습니다.: ", e);
                     throw new BaseException(USER_NOT_FOUND);
                 }
 
@@ -118,11 +112,15 @@ public class SocketIoHandler {
                 client.set("nickname", user.getNickname());
                 client.set("profileImage", user.getProfileImage());
 
-                // 로비 입장
+                roomService.clientLeaveAllRooms(client);
+                log.info("클라이언트가 모든 방에서 성공적으로 나가졌습니다. - userId: {}", userId);
+
                 lobbyService.joinLobby(client);
 
+                log.info("소켓 연결 성공 - userId: {}", userId);
+
             } catch (Exception e) {
-                log.error("Connection error: ", e);
+                log.error("소켓 연결 실패: ", e);
                 client.disconnect();
                 throw new BaseException(SOCKET_CONNECTION_FAILED);
             }
@@ -134,27 +132,14 @@ public class SocketIoHandler {
      */
     private DisconnectListener listenDisconnected() {
         return client -> {
+            log.debug("클라이언트가 소켓 연결 해제 시도 중 ");
+            Integer userId = client.get("userId");
             try {
                 disconnectService.handleDisconnect(client);
+                log.info("성공적으로 소켓 연결 해제 - userId: {}", userId);
             } catch (Exception e) {
                 throw new BaseException(SOCKET_EVENT_ERROR);
             }
         };
     }
-
-    public void addGameStartListeners() {
-        server.addNamespace("/socket.io").addEventListener(EventType.START_GAME.getValue(), Object.class,
-                (client, data, ack) -> {
-                    Integer userId = client.get("userId");
-                    if (userId == null) {
-                        client.sendEvent("error", "UserId is required");
-                        return;
-                    }
-                    Integer gameId = 1; // 테스트를 위해 임시로 1로 지정
-//                            client.get("gameId");
-                    client.joinRoom(String.valueOf(gameId));
-                    stageHandler.handleGameStart(gameId);
-                });
-    }
-
 }
