@@ -27,32 +27,29 @@ public class SocketAuthenticationService {
             String token = handshakeData.getSingleUrlParam("auth");
 
             if (token == null) {
-                log.error("No auth parameter found in query");
+                log.error("auth 파라미터를 찾을 수 없습니다.");
                 throw new BaseException(NOT_AUTHENTICATED);
             }
 
-            log.debug("Found auth param: {}", token);
+//            log.debug("Found auth param: {}", token);
 
             // 3. "Bearer " 접두사가 포함되어 있다면, JwtTokenProvider에서 제거
             //    (JwtTokenProvider.resolveToken()이 알아서 처리한다고 가정)
             String jwt = jwtTokenProvider.resolveToken(token);
 
             if (jwt == null) {
-                log.error("Failed to resolve JWT token");
+                log.error("jwt 토큰 추출에 실패했습니다.");
                 throw new BaseException(TOKEN_VALIDATION_FAILED);
             }
 
             // 4. 토큰 유효성 검증
             if (!jwtTokenProvider.validateToken(jwt)) {
-                log.error("JWT validation failed");
+                log.error("jwt 인증에 실패했습니다.");
                 throw new BaseException(TOKEN_VALIDATION_FAILED);
             }
 
             // 5. 토큰에서 userId 추출
-            int userId = jwtTokenProvider.getUserIdFromToken(jwt);
-            log.debug("Successfully authenticated user ID: {}", userId);
-
-            return userId;
+            return jwtTokenProvider.getUserIdFromToken(jwt);
 
         } catch (BaseException e) {
             log.error("Authentication failed with error code: {}", e.getErrorCode());

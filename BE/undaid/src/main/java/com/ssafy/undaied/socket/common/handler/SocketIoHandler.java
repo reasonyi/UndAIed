@@ -62,38 +62,37 @@ public class SocketIoHandler {
         return (client) -> {
 
             String namespace = client.getNamespace().getName();
-            log.info("Client attempting to connect to namespace: {}", namespace);
+            log.debug("클라이언트가 {} 네임스페이스로 소켓 연결 시도 중", namespace);
 
             // 더 자세한 디버깅을 위한 로그
             SocketIONamespace clientNamespace = client.getNamespace();
             String namespaceName = clientNamespace != null ? clientNamespace.getName() : "null";
-
-            log.info("Client namespace object: {}", clientNamespace);
-            log.info("Client attempting to connect to namespace: '{}'", namespaceName);
+//            log.info("Client namespace object: {}", clientNamespace);
+//            log.info("Client attempting to connect to namespace: '{}'", namespaceName);
 
 
             try {
                 // null 체크를 포함한 네임스페이스 검증
                 if (clientNamespace == null || !"/socket.io".equals(namespaceName)) {
-                    log.info("Connection failed: wrong or empty namespace: '{}' :: Client SessionId: {}",
-                            namespaceName, client.getSessionId());
+                    log.error("네임스페이스가 비어있거나 /socket.io가 아니라서 연결에 실패했습니다. - 현재 네임스페이스 {}, 클라이언트 세션아이디: {}", namespaceName, client.getSessionId());
                     throw new BaseException(SOCKET_CONNECTION_FAILED);
                 }
 
                 // 디버깅을 위한 handshake 데이터 출력
                 HandshakeData handshakeData = client.getHandshakeData();
-                log.debug("Connection attempt - Query params: {}", handshakeData.getUrlParams());
-                log.debug("Connection attempt - Request URI: {}", handshakeData.getUrl());
-                log.debug("Connection attempt - Address: {}", handshakeData.getAddress());
-                log.debug("Connection attempt - HTTP Headers: {}", handshakeData.getHttpHeaders());
+//                log.debug("Connection attempt - Query params: {}", handshakeData.getUrlParams());
+//                log.debug("Connection attempt - Request URI: {}", handshakeData.getUrl());
+//                log.debug("Connection attempt - Address: {}", handshakeData.getAddress());
+//                log.debug("Connection attempt - HTTP Headers: {}", handshakeData.getHttpHeaders());
 
                 // 클라이언트 인증
                 int userId;
                 try {
+                    log.debug("클라이언트 인증 시도 중");
                     userId = authenticationService.authenticateClient(client);
-                    log.debug("Authentication successful for connection. UserId: {}", userId);
+                    log.debug("세션 연결을 위한 인증에 성공했습니다. - userId: {}", userId);
                 } catch (Exception e) {
-                    log.error("Authentication failed: ", e);
+                    log.error("세션 연결에 실패했습니다.: ", e);
                     throw new BaseException(SOCKET_CONNECTION_FAILED);
                 }
 
@@ -102,9 +101,9 @@ public class SocketIoHandler {
                 try {
                     user = userRepository.findById(userId)
                             .orElseThrow(() -> new BaseException(USER_NOT_FOUND));
-                    log.debug("User found: {}", user.getNickname());
+                    log.debug("소켓 클라이언트 데이터 설정을 위한 유저 데이터를 성공적으로 찾았습니댜. - userNickname: {}", user.getNickname());
                 } catch (Exception e) {
-                    log.error("User lookup failed: ", e);
+                    log.error("소켓 클라이언트 데이터 설정을 위한 유저 데이터를 찾는데 실패했습니다.: ", e);
                     throw new BaseException(USER_NOT_FOUND);
                 }
 
@@ -114,10 +113,14 @@ public class SocketIoHandler {
                 client.set("profileImage", user.getProfileImage());
 
                 roomService.clientLeaveAllRooms(client);
+                log.info("클라이언트가 모든 방에서 성공적으로 나가졌습니다. - userId: {}", userId);
+
                 lobbyService.joinLobby(client);
 
+                log.info("소켓 연결 성공 - userId: {}", userId);
+
             } catch (Exception e) {
-                log.error("Connection error: ", e);
+                log.error("소켓 연결 실패: ", e);
                 client.disconnect();
                 throw new BaseException(SOCKET_CONNECTION_FAILED);
             }
@@ -129,8 +132,11 @@ public class SocketIoHandler {
      */
     private DisconnectListener listenDisconnected() {
         return client -> {
+            log.debug("클라이언트가 소켓 연결 해제 시도 중 ");
+            Integer userId = client.get("userId");
             try {
                 disconnectService.handleDisconnect(client);
+                log.info("성공적으로 소켓 연결 해제 - userId: {}", userId);
             } catch (Exception e) {
                 throw new BaseException(SOCKET_EVENT_ERROR);
             }
