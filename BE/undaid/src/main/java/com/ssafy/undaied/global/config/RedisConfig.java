@@ -11,7 +11,6 @@ import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
@@ -37,7 +36,6 @@ public class RedisConfig {
 
         // redisConfig 설정
         redisConfig.setPassword("${spring.data.redis.password}"); // Redis 비밀번호 설정
-
 
         // Lettuce 클라이언트 설정
         LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
