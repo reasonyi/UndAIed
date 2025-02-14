@@ -47,18 +47,15 @@ public class GameInitHandler {
             try {
                 log.info("Game init request received.");
 
-//                // 클라이언트가 속한 방 찾기
-//                Set<String> rooms = client.getAllRooms();
-//                String roomKey = rooms.stream()
-//                        .filter(room -> room.startsWith(ROOM_KEY_PREFIX))
-//                        .findFirst()
-//                        .orElseThrow(() -> new SocketException(SocketErrorCode.ROOM_NOT_FOUND));
-//
-//                // roomKey에서 roomId 추출 (예: "room:456" -> 456)
-//                int roomId = Integer.parseInt(roomKey.substring(ROOM_KEY_PREFIX.length()));
+                // 클라이언트가 속한 방 찾기
+                Set<String> rooms = client.getAllRooms();
+                String roomKey = rooms.stream()
+                        .filter(room -> room.startsWith(ROOM_KEY_PREFIX))
+                        .findFirst()
+                        .orElseThrow(() -> new SocketException(SocketErrorCode.ROOM_NOT_FOUND));
 
-                //임시
-                int roomId=456;
+                // roomKey에서 roomId 추출 (예: "room:456" -> 456)
+                int roomId = Integer.parseInt(roomKey.substring(ROOM_KEY_PREFIX.length()));
 
                 log.info("Game initialization requested - roomId: {}", roomId);
 
@@ -68,9 +65,6 @@ public class GameInitHandler {
 
                 try {
                     int gameId = gameInitService.startGame(client, roomId);
-
-//                    Thread.sleep(100);
-
 
                     log.info("Checking ackRequest: {}", ackRequest);
                     stageService.handleGameStart(gameId);
