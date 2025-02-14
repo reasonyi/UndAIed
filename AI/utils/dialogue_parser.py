@@ -1,70 +1,60 @@
-def dialogue_parser(dialogue: str) -> str:
-    return ""
+import re
+import json
 
 
-def parse_rounds(input_string):
-    rounds = []
-    for round_str in input_string.split('),'):
-        round_data = round_str.strip('()')
-        conversations, events = round_data.split("'", 1)
-        
-        conversations = conversations.strip("'")
-        events = events.strip("'")
-        
-        parsed_conversations = parse_conversations(conversations)
-        parsed_events = parse_events(events)
-        
-        rounds.append({
-            'conversations': parsed_conversations,
-            'events': parsed_events
-        })
-    return rounds
+def dialogue_parser(dialogue: str) -> dict:
+    round_list = dialogue.strip()[1:-1].split("), (")
+    round_dict = {}
 
-def parse_conversations(conversations):
-    parsed = []
-    for conv in conversations.split('|'):
-        parts = conv.strip().split(' ', 3)
-        user_id = parts[0].strip('{}')
-        nickname = parts[1].strip('[]')
-        anon_number = parts[2].strip('<>')
-        content, timestamp = parts[3].rsplit(' ', 1)
-        content = content.strip('()')
-        parsed.append({
-            'user_id': user_id,
-            'nickname': nickname,
-            'anon_number': anon_number,
-            'content': content,
-            'timestamp': timestamp
-        })
-    return parsed
+    for round_str in round_list:
+        round_num = round_str[1]
+        round_dialogue = round_str.strip()[4:-1]
+        round_dict[round_num] = {}
 
-def parse_events(events):
-    parsed = []
-    for event in events.split('|'):
-        parts = event.strip().split(' ')
-        event_type = parts[0].strip('{}')
-        if event_type == '{infection}':
-            target = parts[2].strip('()')
-            target_anon = parts[3].strip('~~')
-            timestamp = parts[4]
-            parsed.append({
-                'type': 'infection',
-                'target': target,
-                'target_anon': target_anon,
-                'timestamp': timestamp
-            })
-        else:
-            voter = parts[1].strip('[]')
-            voter_anon = parts[2].strip('<>')
-            target = parts[3].strip('()')
-            target_anon = parts[4].strip('~~')
-            timestamp = parts[5]
-            parsed.append({
-                'type': 'vote',
-                'voter': voter,
-                'voter_anon': voter_anon,
-                'target': target,
-                'target_anon': target_anon,
-                'timestamp': timestamp
-            })
-    return parsed
+        # [topic] 섹션 파싱
+        topic_pattern = r"\[topic\]\s*\((.*?)\)"
+        topic_match = re.search(topic_pattern, round_dialogue)
+        if topic_match:
+            round_dict[round_num]["topic"] = topic_match.group(1)
+
+        # [topic_debate] 섹션 파싱
+        topic_debate_pattern = r"\[topic_debate\](.*?)\[free_debate\]"
+        topic_debate_match = re.search(topic_debate_pattern, round_dialogue)
+        if topic_debate_match:
+            debates = topic_debate_match.group(1).strip().split("|")
+            parsed_debates = []
+            for debate in debates:
+                debate = debate.strip()
+                if debate:
+                    user_pattern = r"\{(\d+)\}\s*<[^>]+>\s*\(([^)]+)\)"
+                    user_match = re.search(user_pattern, debate)
+                    if user_match:
+                        parsed_debates.append(
+                            {
+                                "user_id": user_match.group(1),
+                                "content": user_match.group(2),
+                            }
+                        )
+            round_dict[round_num]["topic_debate"] = parsed_debates
+
+        # [free_debate] 섹션 파싱
+        free_debate_pattern = r"\[free_debate\](.*?)\[event\]"
+        free_debate_match = re.search(free_debate_pattern, round_dialogue)
+        if free_debate_match:
+            debates = free_debate_match.group(1).strip().split("|")
+            parsed_debates = []
+            for debate in debates:
+                debate = debate.strip()
+                if debate:
+                    user_pattern = r"\{(\d+)\}\s*<[^>]+>\s*\(([^)]+)\)"
+                    user_match = re.search(user_pattern, debate)
+                    if user_match:
+                        parsed_debates.append(
+                            {
+                                "user_id": user_match.group(1),
+                                "content": user_match.group(2),
+                            }
+                        )
+            round_dict[round_num]["free_debate"] = parsed_debates
+
+    return json.dumps(round_dict, ensure_ascii=False, indent=2)
