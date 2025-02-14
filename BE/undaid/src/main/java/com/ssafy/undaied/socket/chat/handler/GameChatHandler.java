@@ -4,7 +4,6 @@ import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.SocketIONamespace;
 import com.corundumstudio.socketio.SocketIOServer;
 import com.corundumstudio.socketio.annotation.OnEvent;
-import com.ssafy.undaied.socket.stage.handler.StageHandler;
 import com.ssafy.undaied.socket.chat.dto.request.GameChatRequestDto;
 import com.ssafy.undaied.socket.chat.service.GameChatService;
 import jakarta.annotation.PostConstruct;
