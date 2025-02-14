@@ -62,7 +62,12 @@ public class GameChatService {
     public void sendSubject(int gameId) {
         String gameKey = "game:" + gameId;
 
-        String usedSubjectsKey = gameKey + ":used_subjects";
+        // 현재 라운드 가져오기
+        String roundKey = gameKey + ":round";
+        String currentRound = redisTemplate.opsForValue().get(roundKey);
+
+        // 라운드별 사용된 주제 키
+        String usedSubjectsKey = String.format("%s:round:%s:used_subjects", gameKey, currentRound);
         Set<String> usedSubjects = redisTemplate.opsForSet().members(usedSubjectsKey);
 
         List<Integer> availableSubjects = new ArrayList<>();
@@ -127,7 +132,7 @@ public class GameChatService {
 
         // 자유토론 채팅 저장
         String chatKey = String.format("%s%d:round:%s:freechats", GAME_KEY_PREFIX, gameId, currentRound);
-        String message = String.format("{%d} [%s] <%d>(%s) %s\n",
+        String message = String.format("{%d} [%s] <%d>(%s) %s | ",
                 userId, nickname, number, gameChatRequestDto.getContent(),
                 timestamp.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
 
@@ -178,7 +183,7 @@ public class GameChatService {
 
         // 주제토론 채팅 저장
         String chatKey = String.format("%s%d:round:%s:subjectchats", GAME_KEY_PREFIX, gameId, currentRound);
-        String message = String.format("{%d} [%s] <%d>(%s) %s\n",
+        String message = String.format("{%d} [%s] <%d>(%s) %s | ",
                 userId, nickname, number, gameChatRequestDto.getContent(),
                 timestamp.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
 
