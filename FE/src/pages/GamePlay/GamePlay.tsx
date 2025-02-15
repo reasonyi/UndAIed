@@ -239,7 +239,7 @@ function GamePlay() {
         <LeftGameSideBar
           nickname={
             playerInfo
-              ? "익명" + String(playerInfo.number + 1)
+              ? "익명" + String(playerInfo.number)
               : "연결이 끊어졌습니다."
           }
           icon={iconArr[playerInfo ? playerInfo.number : 1]}
@@ -259,7 +259,7 @@ function GamePlay() {
                       <ChatBubble
                         key={index}
                         message={msg}
-                        playerName={`익명${msg.player + 1}`}
+                        playerName={`익명${msg.player}`}
                       />
                     );
                   }
