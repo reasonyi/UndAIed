@@ -34,7 +34,7 @@ public class GameChatService {
     private final SocketIONamespace namespace;
 
     //임시 변수, 나중에 수정해야
-    int gameId = 1;
+//    int gameId = 1;
 
     private static final Map<Integer, String> SUBJECTS = new HashMap<>() {{
         put(1, "인공지능이 인간을 이길 수 있을까?");
@@ -89,27 +89,25 @@ public class GameChatService {
                 .build();
 
         namespace.getRoomOperations("game:"+gameId).sendEvent("send:subject", sendSubjectresponseDto);
-
     }
 
     public void processFreeChat(SocketIOClient client, Integer userId, GameChatRequestDto gameChatRequestDto) {
 
         //임시
-        String gameIdStr = client.getHandshakeData().getSingleUrlParam("gameId");
-        Integer gameId = Integer.parseInt(gameIdStr);
+//        String gameIdStr = client.getHandshakeData().getSingleUrlParam("gameId");
+//        Integer gameId = Integer.parseInt(gameIdStr);
 
-        log.info("들어옴2");
-        //복구해야
-//        Integer gameId = client.get("gameId");
+//        log.info("들어옴2");
 
+//        // 게임방 조인 처리
+//        String gameRoom = GAME_KEY_PREFIX + gameId;
+//        if (!client.getAllRooms().contains(gameRoom)) {
+//            client.joinRoom(gameRoom);
+//            log.info("Client joined game room - userId: {}, gameRoom: {}", userId, gameRoom);
+//        }
+
+        Integer gameId = client.get("gameId");
         String nickname = client.get("nickname");
-
-        // 게임방 조인 처리
-        String gameRoom = GAME_KEY_PREFIX + gameId;
-        if (!client.getAllRooms().contains(gameRoom)) {
-            client.joinRoom(gameRoom);
-            log.info("Client joined game room - userId: {}, gameRoom: {}", userId, gameRoom);
-        }
 
         if (gameId == null) {
             log.warn("Game ID not found for userId: {}", userId);
@@ -146,7 +144,7 @@ public class GameChatService {
                 .build();
 
 
-        namespace.getRoomOperations(gameRoom).sendEvent("game:chat:send", response);
+        namespace.getRoomOperations(GAME_KEY_PREFIX + gameId).sendEvent("game:chat:send", response);
         log.info("Free chat sent - gameId: {}, userId: {}, number: {}, message: {}",
                 gameId, userId, number, gameChatRequestDto.getContent());
     }
@@ -155,17 +153,17 @@ public class GameChatService {
         Integer gameId = client.get("gameId");
         String nickname = client.get("nickname");
 
-        // 게임방 조인 처리
-        String gameRoom = GAME_KEY_PREFIX + gameId;
-        if (!client.getAllRooms().contains(gameRoom)) {
-            client.joinRoom(gameRoom);
-            log.info("Client joined game room - userId: {}, gameRoom: {}", userId, gameRoom);
-        }
-
         if (gameId == null) {
             log.warn("Game ID not found for userId: {}", userId);
             return;
         }
+
+//        // 게임방 조인 처리
+//        String gameRoom = GAME_KEY_PREFIX + gameId;
+//        if (!client.getAllRooms().contains(gameRoom)) {
+//            client.joinRoom(gameRoom);
+//            log.info("Client joined game room - userId: {}, gameRoom: {}", userId, gameRoom);
+//        }
 
         LocalDateTime timestamp = LocalDateTime.now();
 
