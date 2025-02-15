@@ -152,7 +152,6 @@ function GameRoom() {
 
     socket.on("game:init:send", (data: { gameId: number }) => {
       console.log("게임으로 이동 이벤트 수신:", data);
-      debugger;
       navigate(`/game/play/${data.gameId}`);
     });
 
@@ -198,6 +197,7 @@ function GameRoom() {
             errorMessage || "입장 도중 에러러가 발생했습니다."
           );
           console.log(errorMessage);
+          toast.error(errorMessage);
           return;
         }
       }
@@ -267,7 +267,7 @@ function GameRoom() {
       //데이터 형식 맞는지 잘 확인하기. 현재 백에서 data는 gameId임!!
       ({ success, errorMessage, data }: IGameStartDone) => {
         if (success) {
-          debugger;
+          console.log("game:init:emit 잘 동작함");
         } else {
           //게임 시작 실패 안내내
           toast.error(errorMessage);
