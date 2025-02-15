@@ -2,6 +2,7 @@ package com.ssafy.undaied.socket.common.handler;
 
 import com.corundumstudio.socketio.HandshakeData;
 import com.corundumstudio.socketio.SocketIONamespace;
+import com.corundumstudio.socketio.listener.DataListener;
 import com.ssafy.undaied.global.common.exception.BaseException;
 import com.ssafy.undaied.socket.room.service.RoomService;
 import com.ssafy.undaied.domain.user.entity.Users;
@@ -42,20 +43,8 @@ public class SocketIoHandler {
 
         namespace.addConnectListener(listenConnected());
         namespace.addDisconnectListener(listenDisconnected());
+        namespace.addEventListener("pre-disconnect", Object.class, handlePreDisconnect());
 
-        // disconnecting 이벤트 리스너 추가
-        namespace.addEventListener("disconnecting", Object.class, (client, data, ackRequest) -> {
-            try {
-                log.debug("클라이언트가 소켓 연결 해제 시도 중 - eventType: disconnecting");
-                Integer userId = client.get("userId");
-
-                disconnectService.handleDisconnect(client);
-                log.info("성공적으로 소켓 연결 해제 - userId: {}, eventType: disconnecting", userId);
-            } catch (Exception e) {
-                log.error("클라이언트 연결 해제 실패");
-                throw new BaseException(SOCKET_EVENT_ERROR);
-            }
-        });
     }
 
     /**
@@ -135,13 +124,33 @@ public class SocketIoHandler {
      */
     private DisconnectListener listenDisconnected() {
         return client -> {
-            log.debug("클라이언트가 소켓 연결 해제 시도 중 - eventType: disconnect");
-            Integer userId = client.get("userId");
             try {
-                disconnectService.handleDisconnect(client);
-                log.info("성공적으로 소켓 연결 해제 - userId: {}, eventType: disconnect", userId);
+                log.debug("클라이언트가 소켓 연결 해제 시도 중 - eventType: disconnect");
+                Integer userId = client.get("userId");
+
+                // 바로 room 처리를 수행
+                roomService.clientLeaveAllRooms(client);
+
+                log.info("성공적으로 소켓 연결 해제 - userId: {}, sessionId: {}",
+                        userId, client.getSessionId());
             } catch (Exception e) {
                 log.error("클라이언트 연결 해제 실패");
+                throw new BaseException(SOCKET_EVENT_ERROR);
+            }
+        };
+    }
+
+    private DataListener<Object> handlePreDisconnect() {
+        return (client, data, ackRequest) -> {
+            try {
+                log.debug("클라이언트 pre-disconnect 이벤트 처리 시작");
+                Integer userId = client.get("userId");
+
+                // 방 나가기 처리 및 알림 전송
+                roomService.clientLeaveAllRooms(client);
+
+            } catch (Exception e) {
+                log.error("pre-disconnect 처리 실패", e);
                 throw new BaseException(SOCKET_EVENT_ERROR);
             }
         };

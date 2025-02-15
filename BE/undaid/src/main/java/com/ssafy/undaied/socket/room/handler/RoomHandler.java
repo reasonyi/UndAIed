@@ -48,6 +48,7 @@ public class RoomHandler {
                         // 방 생성.
                         RoomCreateResponseDto responseRoomData = roomService.createRoom(data, client);
                         log.info("성공적으로 방이 생성되었습니다. - roomId: {}, roomTitle: {}", responseRoomData.getRoomId(), responseRoomData.getRoomTitle());
+                        log.debug("클라이언트가 현재 입장되어있는 방: {}", client.getAllRooms());
 
                         // 로비에 데이터 보내주기
                         LobbyUpdateResponseDto lobbyUpdateResponseDto = lobbyService.sendEventRoomCreate(responseRoomData, client);
