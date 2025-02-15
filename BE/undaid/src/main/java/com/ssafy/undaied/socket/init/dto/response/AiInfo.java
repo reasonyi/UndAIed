@@ -8,6 +8,6 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 public class AiInfo {
-    private String aiId;      // "1", "2", "3" 형태
+    private int aiId;      // "1", "2", "3" 형태
     private int number;       // 할당된 번호
 }
