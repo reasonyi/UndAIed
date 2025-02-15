@@ -141,7 +141,8 @@ public class StageService {
             log.info("InfectedPlayerNumber: {}", infectedPlayerNumber);
             namespace.getRoomOperations("game:" + gameId).sendEvent(
                     EventType.GAME_CHAT_SEND.getValue(),
-                    Map.of("number", 0, "content", "밤 사이에 인간 플레이어가 AI에게 감염되었습니다.")
+                    Map.of("number", 0,
+                            "content", "밤 사이에 인간 플레이어가 AI에게 감염되었습니다.")
             );
         } catch (Exception e) {
             log.error("Infection stage error: {}", e.getMessage());
