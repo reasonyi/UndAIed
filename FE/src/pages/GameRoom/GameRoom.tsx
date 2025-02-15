@@ -350,7 +350,7 @@ function GameRoom() {
               {/* 메시지 리스트 영역 */}
               <div className="flex-1 px-5 pt-4">
                 {messages.map((msg: IMessage, index) => {
-                  if (msg.player === 10) {
+                  if (msg.player === 0) {
                     return <SystemBubble key={index} message={msg} />;
                   } else {
                     return (

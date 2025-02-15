@@ -85,7 +85,7 @@ ILeftGameSideBarProps) {
             <h2 className="mr-3 text-xl font-semibold mb-[0.375rem]">
               {stage ?? "종료"}
             </h2>
-            <SecondCounter initialSeconds={60} />
+            <SecondCounter initialSeconds={timer ? timer : 10} />
           </div>
         </div>
         <div className="flex flex-col items-center justify-center profile w-52 h-52 border-2 border-solid border-[rgba(255,255,255,0.35)] bg-[#07070a4d]">
