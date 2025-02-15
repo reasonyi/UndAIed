@@ -31,33 +31,25 @@ public class GameChatHandler {
         namespace.addEventListener("game:chat:emit", GameChatRequestDto.class,
                 (client, data, ackRequest) -> {
                     try {
-                        log.info("게임 채팅 요청 확인");
+                        log.info("게임 채팅 요청 확인");;
 
-                        //임시
-//                        String gameIdStr = client.getHandshakeData().getSingleUrlParam("gameId");
-//                        Integer gameId = Integer.parseInt(gameIdStr);
-
-
-                        //복구해야
                         Integer gameId = client.get("gameId");
-
+                        log.warn("gameId를 찾았습니다: {}", gameId);
                         Integer userId = client.get("userId");
+                        log.warn("userId를 찾았습니다: {}", userId);
                         String stageKey = GAME_KEY_PREFIX + gameId + ":stage";
 
-//                        //임시 변수
-//                        String currentStage="free_debate";
                         String currentStage = redisTemplate.opsForValue().get(stageKey);
 
-                        log.info("currentStage: {}", currentStage);
+                        log.info("현재 stage: {}", currentStage);
 
-
-                        if ("free_debate".equals(currentStage)) {
-
-                            gameChatService.processFreeChat(client, userId, data);
+                        if ("subject_debate".equals(currentStage)) {
+                            gameChatService.storeSubjectChat(gameId, client, userId, data);
                         } else {
-                            gameChatService.storeSubjectChat(client, userId, data);
+                            gameChatService.processFreeChat(gameId, client, userId, data);
                         }
-                        // 저장 성공 응답 전송
+
+                        // 성공 응답 전송
                         if (ackRequest.isAckRequested()) {
                             Map<String, Object> response = new HashMap<>();
                             response.put("success", true);
