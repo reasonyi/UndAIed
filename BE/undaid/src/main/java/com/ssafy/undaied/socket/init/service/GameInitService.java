@@ -392,12 +392,12 @@ public class GameInitService {
         // round 값 처리
         String roundKey = "game:" + gameId + ":round";
         String roundValue = redisTemplate.opsForValue().get(roundKey);
-        int currentRound =Integer.parseInt(roundValue);
+        int round =Integer.parseInt(roundValue);
 
         // stage 값 처리
         String stageKey = "game:" + gameId + ":stage";
         String stageValue = redisTemplate.opsForValue().get(stageKey);
-        String currentStage = stageValue;
+        String stage = (stageValue == null) ? "start" : stageValue;
 
         Integer remainingTime = gameTimer.getRemainingTime(gameId);
         log.info("Checking timer: gameId={}, remainingTime={}", gameId, remainingTime);
@@ -416,8 +416,8 @@ public class GameInitService {
 
         return GameInfoResponseDto.builder()
                 .gameId(gameId)
-                .currentRound(currentRound)
-                .currentStage(currentStage)
+                .round(round)
+                .stage(stage)
                 .timer(remainingTime)
                 .players(players)
                 .build();
@@ -450,8 +450,8 @@ public class GameInitService {
                 .build();
     }
 
-    private void notifyAiServer(int gameId, List<AiInfo> aiInfoList) {
-        AiNotificationDto notification = new AiNotificationDto(aiInfoList);
+    private void notifyAiServer(int gameId, List<AiInfo> selectedAIs) {
+        AiNotificationDto notification = new AiNotificationDto(selectedAIs);
 
         webClient.post()
                 .uri("/api/ai/{gameId}/", gameId)
@@ -461,7 +461,7 @@ public class GameInitService {
                 .bodyToMono(String.class)
                 .subscribe(
                         response -> log.info("AI 서버로 게임시작 데이터 전송 성공. gameId: {} with AI info: {}",
-                                gameId, aiInfoList),
+                                gameId, selectedAIs),
                         error -> log.error("AI 서버로 게임시작 데이터 전송 실패 - gameId: {}", gameId, error)
           );
      }
