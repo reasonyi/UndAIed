@@ -24,6 +24,8 @@ interface IChatSend {
 }
 
 interface IGameInfoSend {
+  gameId: number;
+  round: number;
   stage: string;
   timer: number;
   players: IAnonimus[];
@@ -55,6 +57,7 @@ function GamePlay() {
 
   //유저 아이콘
   const iconArr = [
+    "",
     PlayerIcon1,
     PlayerIcon2,
     PlayerIcon3,
@@ -237,6 +240,10 @@ function GamePlay() {
           }
           icon={iconArr[playerInfo ? playerInfo.number : 1]}
           socket={socket}
+          title={`Game No. ${gameInfo?.gameId}`}
+          timer={gameInfo?.timer}
+          stage={gameInfo?.stage}
+          round={gameInfo?.round}
           // onLeaveRoom={handleLeaveRoom}
         />
         <div className="lg:pl-[19.5rem]">
