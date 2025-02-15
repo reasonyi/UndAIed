@@ -51,6 +51,9 @@ public class GameResultHandler {
                         // 🔹 게임 종료 후 게임방에서 나가고 원래 room으로 이동
                         boolean movedToRoom = gameResultService.movePlayersToRoom(client, gameId);
 
+                        // 게임 결과 DB에 저장
+                        gameResultService.saveGameResult(gameId);
+
                         // 🔹 클라이언트에게 응답 반환
                         if (ackRequest.isAckRequested()) {
                             Map<String, Object> response = new HashMap<>();
