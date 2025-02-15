@@ -389,16 +389,18 @@ public class GameInitService {
         String statusKey = GAME_KEY_PREFIX + gameId + ":player_status";
         Map<Object, Object> allStatus = redisTemplate.opsForHash().entries(statusKey);
 
+        // round 값 처리
+        String roundKey = "game:" + gameId + ":round";
+        String roundValue = redisTemplate.opsForValue().get(roundKey);
+        int currentRound =Integer.parseInt(roundValue);
 
-        //임시 저장. 수정 필요
+        // stage 값 처리
         String stageKey = "game:" + gameId + ":stage";
-//        String currentStage = redisTemplate.opsForValue().get(stageKey).toString();
-        String currentStage="Start";
+        String stageValue = redisTemplate.opsForValue().get(stageKey);
+        String currentStage = stageValue;
 
         Integer remainingTime = gameTimer.getRemainingTime(gameId);
         log.info("Checking timer: gameId={}, remainingTime={}", gameId, remainingTime);
-
-
 
         List<PlayerInfoDto> players = allStatus.entrySet().stream()
                 .map(entry -> {
@@ -414,6 +416,7 @@ public class GameInitService {
 
         return GameInfoResponseDto.builder()
                 .gameId(gameId)
+                .currentRound(currentRound)
                 .currentStage(currentStage)
                 .timer(remainingTime)
                 .players(players)

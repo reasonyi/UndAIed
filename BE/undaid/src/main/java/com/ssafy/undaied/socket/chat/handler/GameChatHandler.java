@@ -31,15 +31,15 @@ public class GameChatHandler {
         namespace.addEventListener("game:chat:emit", GameChatRequestDto.class,
                 (client, data, ackRequest) -> {
                     try {
-                        log.info("들어옴");
+                        log.info("게임 채팅 요청 확인");
 
                         //임시
-                        String gameIdStr = client.getHandshakeData().getSingleUrlParam("gameId");
-                        Integer gameId = Integer.parseInt(gameIdStr);
+//                        String gameIdStr = client.getHandshakeData().getSingleUrlParam("gameId");
+//                        Integer gameId = Integer.parseInt(gameIdStr);
 
-                        log.info("여기가 문제?");
+
                         //복구해야
-//                        Integer gameId = client.get("gameId");
+                        Integer gameId = client.get("gameId");
 
                         Integer userId = client.get("userId");
                         String stageKey = GAME_KEY_PREFIX + gameId + ":stage";
@@ -47,7 +47,6 @@ public class GameChatHandler {
                         //임시 변수
                         String currentStage="free_debate";
 //                        String currentStage = redisTemplate.opsForValue().get(stageKey);
-
 
                         log.info("currentStage: {}", currentStage);
 

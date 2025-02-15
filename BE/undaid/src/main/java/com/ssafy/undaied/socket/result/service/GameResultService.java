@@ -76,7 +76,7 @@ public class GameResultService {
                     if (!status.contains("isInGame=true")) {
                         return false;
                     }
-                    return status.contains("isDied=true") || status.contains("isInfected=true");
+                    return status.contains("isDied=true");
                 });
     }
 
@@ -125,7 +125,6 @@ public class GameResultService {
                     .number(Integer.parseInt(number.toString()))
                     .nickname(nickname)
                     .isDied(statusStr.contains("isDied=true"))
-                    .isInfected(statusStr.contains("isInfected=true"))
                     .isInGame(statusStr.contains("isInGame=true"))
                     .build());
         });
