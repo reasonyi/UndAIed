@@ -107,15 +107,13 @@ function GamePlay() {
     socket.on("game:info:send", (data: IGameInfoSend) => {
       console.log("game:info:send 발생! data 수신:", data);
 
+      debugger;
+
       if (data.players) {
-        const gameUsers: IAnonimus[] = data.players.sort(
-          (a: IAnonimus, b: IAnonimus) => a.number - b.number
-        );
-        const data_ = data;
-        data_.players = gameUsers;
-        setGameInfo(data_);
-        debugger;
+        setGameInfo(data);
       }
+
+      debugger;
     });
 
     return () => {
@@ -136,7 +134,6 @@ function GamePlay() {
         const player = gameInfo.players.find(
           (player) => player.number === data.number
         );
-        debugger;
 
         if (player) {
           const newMessage: IMessage = {
@@ -146,7 +143,6 @@ function GamePlay() {
             isMine: Boolean(player.number === playerEnterId),
           };
           setMessages([...messages, newMessage]);
-          debugger;
         }
       }
     });
@@ -159,8 +155,8 @@ function GamePlay() {
   //emit 이벤트 모음
   const handleGameInfo = useCallback(() => {
     // 방 입장 요청
-    if (!socket || !playerEnterId) {
-      console.log("enter: socket 또는 playerEnterId이 존재하지 않습니다");
+    if (!socket) {
+      console.log("enter: socket이 존재하지 않습니다");
       return;
     }
     console.log("emit 발생!");
@@ -170,7 +166,7 @@ function GamePlay() {
       {},
       (data: { success: boolean; errorMessage: string; number: number }) => {
         //여기서 받는 건 없음
-        debugger;
+
         if (data.success) {
           setPlayerEnterId(data.number);
           return;
@@ -185,22 +181,20 @@ function GamePlay() {
 
   //실행하기
   useEffect(() => {
-    if (socket && gameInfo) {
+    if (socket) {
       handleGameInfo();
     }
-  }, [socket, gameInfo, handleGameInfo]);
+  }, [socket, handleGameInfo]);
 
   //나 찾기기
   useEffect(() => {
     setPlayerInfo(
       gameInfo?.players.find((player) => player.number === playerEnterId)
     );
-    debugger;
   }, [gameInfo, playerEnterId]);
 
   const handleGameChat = useCallback(
     (input: string) => {
-      debugger;
       if (!socket || !playerEnterId) {
         console.log("enter: socket 또는 playerEnterId이 존재하지 않습니다");
         return;
@@ -212,7 +206,6 @@ function GamePlay() {
         },
         ({ success, errorMessage, data }: IGameChatEmitDone) => {
           if (success) {
-            debugger;
           } else {
             console.error("채팅 전송 오류:", errorMessage);
             toast.error(errorMessage);

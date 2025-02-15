@@ -36,96 +36,96 @@ function RightGameSideBar({ players, iconArr }: IRightGameSideBarProps) {
         {players ? (
           <>
             <div className="row-start-1 px-2 py-1">
-              {players[0].isInGame ? (
+              {players[0].inGame ? (
                 <GameProfile
                   nickname={`익명${players[0].number}`}
                   playerNum={players[0].number}
                   icon={iconArr[players[0].number]}
-                  isDied={players[0].isDied}
+                  isDied={players[0].died}
                 />
               ) : (
                 <EmptyProfile />
               )}
             </div>
             <div className="row-start-1 px-2 py-1">
-              {players[1].isInGame ? (
+              {players[1].inGame ? (
                 <GameProfile
                   nickname={`익명${players[1].number}`}
                   playerNum={players[1].number}
                   icon={iconArr[players[1].number]}
-                  isDied={players[1].isDied}
+                  isDied={players[1].died}
                 />
               ) : (
                 <EmptyProfile />
               )}
             </div>
             <div className="row-start-1 px-2 py-1">
-              {players[2].isInGame ? (
+              {players[2].inGame ? (
                 <GameProfile
                   nickname={`익명${players[2].number}`}
                   playerNum={players[2].number}
                   icon={iconArr[players[2].number]}
-                  isDied={players[2].isDied}
+                  isDied={players[2].died}
                 />
               ) : (
                 <EmptyProfile />
               )}
             </div>
             <div className="row-start-2 px-2 py-1">
-              {players[3].isInGame ? (
+              {players[3].inGame ? (
                 <GameProfile
                   nickname={`익명${players[3].number}`}
                   playerNum={players[3].number}
                   icon={iconArr[players[3].number]}
-                  isDied={players[3].isDied}
+                  isDied={players[3].died}
                 />
               ) : (
                 <EmptyProfile />
               )}
             </div>
             <div className="row-start-2 px-2 py-1">
-              {players[4].isInGame ? (
+              {players[4].inGame ? (
                 <GameProfile
                   nickname={`익명${players[4].number}`}
                   playerNum={players[4].number}
                   icon={iconArr[players[4].number]}
-                  isDied={players[4].isDied}
+                  isDied={players[4].died}
                 />
               ) : (
                 <EmptyProfile />
               )}
             </div>
             <div className="row-start-2 px-2 py-1">
-              {players[5].isInGame ? (
+              {players[5].inGame ? (
                 <GameProfile
                   nickname={`익명${players[5].number}`}
                   playerNum={players[5].number}
                   icon={iconArr[players[5].number]}
-                  isDied={players[5].isDied}
+                  isDied={players[5].died}
                 />
               ) : (
                 <EmptyProfile />
               )}
             </div>
             <div className="row-start-3 px-2 py-1">
-              {players[6].isInGame ? (
+              {players[6].inGame ? (
                 <GameProfile
                   nickname={`익명${players[6].number}`}
                   playerNum={players[6].number}
                   icon={iconArr[players[6].number]}
-                  isDied={players[6].isDied}
+                  isDied={players[6].died}
                 />
               ) : (
                 <EmptyProfile />
               )}
             </div>
             <div className="row-start-3 px-2 py-1">
-              {players[7].isInGame ? (
+              {players[7].inGame ? (
                 <GameProfile
                   nickname={`익명${players[7].number}`}
                   playerNum={players[7].number}
                   icon={iconArr[players[7].number]}
-                  isDied={players[7].isDied}
+                  isDied={players[7].died}
                 />
               ) : (
                 <EmptyProfile />
