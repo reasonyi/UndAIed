@@ -367,7 +367,7 @@ public class GameInitService {
     public void broadcastGameInit(Integer gameId) {
 
         // BroadcastResponseDto 객체 생성
-    BroadcastResponseDto responseDto = BroadcastResponseDto.builder()
+        BroadcastResponseDto responseDto = BroadcastResponseDto.builder()
             .gameId(gameId)
             .build();
 

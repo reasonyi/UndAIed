@@ -33,9 +33,6 @@ public class GameChatService {
     private final Random random = new Random();
     private final SocketIONamespace namespace;
 
-    //임시 변수, 나중에 수정해야
-//    int gameId = 1;
-
     private static final Map<Integer, String> SUBJECTS = new HashMap<>() {{
         put(1, "인공지능이 인간을 이길 수 있을까?");
         put(2, "인공지능은 인류를 멸망시킬까?");
@@ -94,6 +91,8 @@ public class GameChatService {
 
     public void processFreeChat(Integer gameId, SocketIOClient client, Integer userId, GameChatRequestDto gameChatRequestDto) {
 
+        log.info("Chat content received: {}", gameChatRequestDto.getContent());
+
         String nickname = client.get("nickname");
 
         if (nickname == null) {
@@ -117,7 +116,7 @@ public class GameChatService {
 
         // 자유토론 채팅 저장
         String chatKey = String.format("%s%d:round:%s:freechats", GAME_KEY_PREFIX, gameId, currentRound);
-        String message = String.format("{%d} [%s] <%d>(%s) %s | ",
+        String message = String.format("{%d} [%s] <%d>(%s) %s|",  // 끝에 공백 제거, | 앞에 공백 제거
                 userId, nickname, number, gameChatRequestDto.getContent(),
                 timestamp.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
 
@@ -161,13 +160,12 @@ public class GameChatService {
 
         // 주제토론 채팅 저장
         String chatKey = String.format("%s%d:round:%s:subjectchats", GAME_KEY_PREFIX, gameId, currentRound);
-        String message = String.format("{%d} [%s] <%d>(%s) %s | ",
+        String message = String.format("{%d} [%s] <%d>(%s) %s|",
                 userId, nickname, number, gameChatRequestDto.getContent(),
                 timestamp.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
 
         redisTemplate.opsForValue().append(chatKey, message);
         redisTemplate.expire(chatKey, EXPIRE_TIME, TimeUnit.SECONDS);
-
     }
 
     public List<GameChatResponseDto> getSubjectDebateChats(Integer gameId, String round) {
@@ -180,18 +178,18 @@ public class GameChatService {
 
         List<GameChatResponseDto> result = new ArrayList<>();
         // 개행으로 분리하여 각 메시지 처리
-        String[] messages = chatLog.split("\n");
+        String[] messages = chatLog.split("|");
 
         for (String message : messages) {
             if (message.isEmpty()) continue;
 
             // 정규식을 사용하여 메시지 파싱
-            Pattern pattern = Pattern.compile("\\{(\\d+)\\} \\[.*?\\] <(\\d+)>\\((.*?)\\) .*");
+            Pattern pattern = Pattern.compile("\\{(\\d+)\\} \\[(.*?)\\] <(\\d+)>\\((.*?)\\) (.*)");
             Matcher matcher = pattern.matcher(message);
 
             if (matcher.find()) {
-                int number = Integer.parseInt(matcher.group(2));
-                String content = matcher.group(3);
+                int number = Integer.parseInt(matcher.group(3));
+                String content = matcher.group(4);
 
                 result.add(GameChatResponseDto.builder()
                         .number(number)
