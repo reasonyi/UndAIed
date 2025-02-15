@@ -17,9 +17,15 @@ import { userState } from "../../store/userState";
 import LoginContainer from "./components/LoginContainer";
 import LogoutContainer from "./components/LogoutContainer";
 
-interface OuletContextType {
-  isLoggedIn: boolean;
-}
+import Setting from "../../util/Setting";
+import { preloadAudio } from "../../util/AudioCache";
+import lobbyBgm from "../../assets/bgm/lobby.mp3";
+import gameRoomBgm from "../../assets/bgm/game-room.mp3";
+import clickSound from "../../assets/bgm/click.mp3";
+import myPageBgm from "../../assets/bgm/my-page.mp3";
+import introBgm from "../../assets/bgm/intro.mp3";
+import slideSound from "../../assets/bgm/slide.mp3";
+
 interface IBoard {
   id: number;
   tag: string;
@@ -50,6 +56,18 @@ function Home() {
     { id: 6, tag: "공지", title: "일곱번째 공지", date: "2025-02-03" },
   ]);
 
+  useEffect(() => {
+    const audioFiles = [
+      lobbyBgm,
+      gameRoomBgm,
+      clickSound,
+      slideSound,
+      myPageBgm,
+      introBgm,
+    ];
+
+    audioFiles.forEach((src) => preloadAudio(src));
+  }, []);
   // 스크롤 감지 핸들러
   useEffect(() => {
     const onScroll = () => {
@@ -85,6 +103,7 @@ function Home() {
 
   return (
     <div className="">
+      <Setting></Setting>
       <Header scrollRatio={scrollRatio} />
       <HeaderTemp />
       <div className="on-scroll flex w-screen min-h-[calc(100vh-3.5rem)]">
