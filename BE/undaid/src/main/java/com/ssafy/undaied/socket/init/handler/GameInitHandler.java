@@ -126,6 +126,9 @@ public class GameInitHandler {
                 // 🔹 응답 전송 (ACK 응답에 number 포함)
                 sendResponse(ackRequest, true, numberResponse);
 
+                gameInitService.sendGameInfo(gameId);
+
+
             } catch (SocketException e) {
                 log.error("Failed to retrieve game info: {}", e.getMessage());
                 sendResponse(ackRequest, false, e.getMessage());
