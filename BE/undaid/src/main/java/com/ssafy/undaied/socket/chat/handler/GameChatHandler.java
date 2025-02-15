@@ -44,15 +44,15 @@ public class GameChatHandler {
                         Integer userId = client.get("userId");
                         String stageKey = GAME_KEY_PREFIX + gameId + ":stage";
 
-                        //임시 변수
-                        String currentStage="free_debate";
-//                        String currentStage = redisTemplate.opsForValue().get(stageKey);
+//                        //임시 변수
+//                        String currentStage="free_debate";
+                        String currentStage = redisTemplate.opsForValue().get(stageKey);
 
                         log.info("currentStage: {}", currentStage);
 
 
                         if ("free_debate".equals(currentStage)) {
-                            log.info("6. 자유토론 처리 시작");
+
                             gameChatService.processFreeChat(client, userId, data);
                         } else {
                             gameChatService.storeSubjectChat(client, userId, data);
