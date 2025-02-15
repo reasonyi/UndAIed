@@ -153,7 +153,7 @@ function GameRoom() {
     socket.on("game:init:send", (data: { gameId: number }) => {
       console.log("게임으로 이동 이벤트 수신:", data);
       debugger;
-      navigate(`game/play/${data.gameId}`);
+      navigate(`/game/play/${data.gameId}`);
     });
 
     return () => {
