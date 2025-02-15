@@ -31,7 +31,13 @@ public class GameChatHandler {
         namespace.addEventListener("game:chat:emit", GameChatRequestDto.class,
                 (client, data, ackRequest) -> {
                     try {
-                        log.info("게임 채팅 요청 확인");;
+                        log.info("게임 채팅 요청 확인");
+
+                        // data 객체 자체 확인
+                        log.info("Received data object: {}", data);
+
+                        // content 필드 값 확인
+                        log.info("Content from data: {}", data.getContent());
 
                         Integer gameId = client.get("gameId");
                         log.warn("gameId를 찾았습니다: {}", gameId);
@@ -57,6 +63,7 @@ public class GameChatHandler {
                             response.put("data", null);
                             ackRequest.sendAckData(response);
                         }
+
                     } catch (Exception e) {
                         log.error("Game chat failed: {}", e.getMessage());
 
