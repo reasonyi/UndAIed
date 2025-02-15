@@ -66,31 +66,31 @@ function GamePlay() {
   ];
 
   const [messages, setMessages] = useState<IMessage[]>([
-    {
-      player: 0,
-      nickname: "사회자",
-      text: "게임이 시작되었습니다.",
-      isMine: false,
-    },
-    { player: 1, text: "안녕하세요", isMine: false, nickname: "익명1" },
-    { player: 2, text: "ㅎㅇ", isMine: false, nickname: "익명2" },
-    { player: 3, text: "안녕하세요오", isMine: true, nickname: "익명3" },
-    { player: 4, text: "반갑습니다", isMine: false, nickname: "익명4" },
-    {
-      player: 5,
-      text: "안녕, 반가워! 우리 이번 게임 잘해보자^^안녕, 반가워! 우리 이번 게임 잘해보자^^안녕, 반가워! 우리 이번 게임 잘해보자^^",
-      isMine: false,
-      nickname: "익명5",
-    },
-    { player: 6, text: "하이", isMine: false, nickname: "익명6" },
-    {
-      player: 7,
-      text: "벌써 누군지 알겠는데",
-      isMine: false,
-      nickname: "익명7",
-    },
-    { player: 8, text: "그러니까", isMine: false, nickname: "익명8" },
-    { player: 3, text: "어쨋든 난 아님", isMine: true, nickname: "익명3" },
+    // {
+    //   player: 0,
+    //   nickname: "사회자",
+    //   text: "게임이 시작되었습니다.",
+    //   isMine: false,
+    // },
+    // { player: 1, text: "안녕하세요", isMine: false, nickname: "익명1" },
+    // { player: 2, text: "ㅎㅇ", isMine: false, nickname: "익명2" },
+    // { player: 3, text: "안녕하세요오", isMine: true, nickname: "익명3" },
+    // { player: 4, text: "반갑습니다", isMine: false, nickname: "익명4" },
+    // {
+    //   player: 5,
+    //   text: "안녕, 반가워! 우리 이번 게임 잘해보자^^안녕, 반가워! 우리 이번 게임 잘해보자^^안녕, 반가워! 우리 이번 게임 잘해보자^^",
+    //   isMine: false,
+    //   nickname: "익명5",
+    // },
+    // { player: 6, text: "하이", isMine: false, nickname: "익명6" },
+    // {
+    //   player: 7,
+    //   text: "벌써 누군지 알겠는데",
+    //   isMine: false,
+    //   nickname: "익명7",
+    // },
+    // { player: 8, text: "그러니까", isMine: false, nickname: "익명8" },
+    // { player: 3, text: "어쨋든 난 아님", isMine: true, nickname: "익명3" },
   ]);
 
   //socket 훅 사용
@@ -157,7 +157,7 @@ function GamePlay() {
   }, [socket, messages, playerEnterId, gameInfo]);
 
   //emit 이벤트 모음
-  const handleEnterRoom = useCallback(() => {
+  const handleGameInfo = useCallback(() => {
     // 방 입장 요청
     if (!socket || !playerEnterId) {
       console.log("enter: socket 또는 playerEnterId이 존재하지 않습니다");
@@ -170,6 +170,7 @@ function GamePlay() {
       {},
       (data: { success: boolean; errorMessage: string; number: number }) => {
         //여기서 받는 건 없음
+        debugger;
         if (data.success) {
           setPlayerEnterId(data.number);
           return;
@@ -181,6 +182,21 @@ function GamePlay() {
       }
     );
   }, [socket, playerEnterId]);
+
+  //실행하기
+  useEffect(() => {
+    if (socket && gameInfo) {
+      handleGameInfo();
+    }
+  }, [socket, gameInfo, handleGameInfo]);
+
+  //나 찾기기
+  useEffect(() => {
+    setPlayerInfo(
+      gameInfo?.players.find((player) => player.number === playerEnterId)
+    );
+    debugger;
+  }, [gameInfo, playerEnterId]);
 
   const handleGameChat = useCallback(
     (input: string) => {
@@ -223,7 +239,7 @@ function GamePlay() {
         <LeftGameSideBar
           nickname={
             playerInfo
-              ? "익명" + String(playerInfo.number)
+              ? "익명" + String(playerInfo.number + 1)
               : "연결이 끊어졌습니다."
           }
           icon={iconArr[playerInfo ? playerInfo.number : 1]}
@@ -236,14 +252,14 @@ function GamePlay() {
               {/* 메시지 리스트 영역 */}
               <div className="flex-1 px-5 pt-4">
                 {messages.map((msg: IMessage, index) => {
-                  if (msg.player === 0) {
+                  if (msg.player === 10) {
                     return <SystemBubble key={index} message={msg} />;
                   } else {
                     return (
                       <ChatBubble
                         key={index}
                         message={msg}
-                        playerName={"익명"}
+                        playerName={`익명${msg.player + 1}`}
                       />
                     );
                   }
