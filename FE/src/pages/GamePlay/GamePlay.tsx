@@ -171,10 +171,11 @@ function GamePlay() {
         //여기서 받는 건 없음
 
         if (data.success) {
+          debugger;
           setPlayerEnterId(data.number);
           return;
         } else {
-          console.log(data.errorMessage);
+          console.log("game:info:emit error:", data.errorMessage);
           toast.error(data.errorMessage);
           return;
         }
@@ -191,6 +192,7 @@ function GamePlay() {
 
   //나 찾기기
   useEffect(() => {
+    debugger;
     setPlayerInfo(
       gameInfo?.players.find((player) => player.number === playerEnterId)
     );
@@ -235,8 +237,8 @@ function GamePlay() {
         <LeftGameSideBar
           nickname={
             playerInfo
-              ? "익명" + String(playerInfo.number)
-              : "연결이 끊어졌습니다."
+              ? `익명${String(playerInfo.number)}`
+              : "연결이 끊겼습니다."
           }
           icon={iconArr[playerInfo ? playerInfo.number : 1]}
           socket={socket}
