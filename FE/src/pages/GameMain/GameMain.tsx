@@ -32,9 +32,6 @@ function GameMain() {
             </div>
 
             <div className="flex flex-col flex-1 px-8">
-              {/* 오른쪽에서 왼쪽으로 */}
-              <div className="slide-in-top"></div>
-
               {/* 아래에서 위로 */}
               <div className="slide-in-top flex flex-col gap-4">
                 <CreateRoomButton />
