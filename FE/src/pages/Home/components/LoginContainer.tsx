@@ -3,8 +3,9 @@ import { IUser } from "../../../types/User";
 import PlayerIcon1 from "../../../assets/player-icon/player-icon-1.svg";
 import { userState } from "../../../store/userState";
 import { useSetRecoilState } from "recoil";
-import IntroOverlay from "../../Util/IntroOverlay";
+import IntroOverlay from "../../../util/IntroOverlay";
 import { useState } from "react";
+import { GlitchButton } from "../../../util/GlitchButton";
 
 interface ILoginContainer {
   userInfo: IUser;
