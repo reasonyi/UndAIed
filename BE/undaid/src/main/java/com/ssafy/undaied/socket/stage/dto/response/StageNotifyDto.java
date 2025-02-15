@@ -9,7 +9,7 @@ import lombok.Getter;
 @Builder
 public class StageNotifyDto {
     private final Integer number = 0;
-    private String message;
+    private String content;
 
     public static StageNotifyDto notifyStartStage(StageType stage) {
         String message = stage == StageType.DAY || stage == StageType.NIGHT ?
@@ -17,14 +17,14 @@ public class StageNotifyDto {
                 stage.getValue() + stage.getParticle() + " 시작합니다.";
 
         return StageNotifyDto.builder()
-                .message(message)
+                .content(message)
                 .build();
     }
 
     public static StageNotifyDto notifyEndStage(StageType stage) {
         String message = stage.getValue() + stage.getParticle() + " 종료합니다.";
         return StageNotifyDto.builder()
-                .message(message)
+                .content(message)
                 .build();
     }
 

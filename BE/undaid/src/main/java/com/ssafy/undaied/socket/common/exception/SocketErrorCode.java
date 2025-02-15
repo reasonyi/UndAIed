@@ -44,17 +44,20 @@ public enum SocketErrorCode {
     PLAYER_NOT_FOUND(4021, "플레이어를 찾을 수 없습니다."),
 
     // Game 관련 공통 예외 (4100-4199)
+    GAME_NOT_STARTED(4101, "게임을 시작할 수 없습니다."),
     PLAYER_NOT_IN_GAME(4102, "게임에 참여하지 않은 사용자입니다."),
-    DEAD_PLAYER(4103, "사망한 플레이어는 게임에 참여할 수 없습니다"),
-    INFECTED_PLAYER(4104, "감염된 플레이어는 게임에 참여할 수 없습니다"),
+    GAME_ALREADY_START(4103, "이미 시작된 게임입니다."),
 
     // 투표 관련 예외 (4200-4299)
     VOTE_INVALID_TARGET(4201, "유효하지 않은 투표 대상입니다."),
     VOTE_INVALID_PLAYER(4202, "유효하지 않은 투표입니다."),
     VOTE_ALREADY_SUBMITTED(4203, "이미 투표를 제출했습니다."),
     VOTE_STAGE_INVALID(4204, "현재는 투표가 불가합니다."),
-    VOTE_SUBMIT_FAILED(4205, "투표 제출이 실패하였습니다." )
+    VOTE_SUBMIT_FAILED(4205, "투표 제출이 실패하였습니다." ),
 
+    // 감염 관련 예외
+    INFECT_PLAYER_NOT_FOUND(4301, "감염이 가능한 플레이어가 없습니다."),
+    INFECT_FAILED(4302, "감염 처리 중 오류가 발생했습니다.");
     ;
 
     private final int status;
