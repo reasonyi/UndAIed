@@ -10,6 +10,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class GameInfoResponseDto {
+    private Integer currentRound;
     private String currentStage;
     private Integer gameId;
     private Integer timer;  // Added timer field

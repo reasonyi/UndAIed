@@ -75,7 +75,7 @@ public class StageService {
                 saveCurrentRound(gameId);
                 // 라운드 알림
                 RoundNotifyDto roundNotifyDto = RoundNotifyDto.notifyRoundStart(getCurrentRound(gameId));
-                namespace.getRoomOperations("game:" + gameId).sendEvent(EventType.GAME_CHAT_EMIT.getValue(), roundNotifyDto);
+                namespace.getRoomOperations("game:" + gameId).sendEvent(EventType.GAME_CHAT_SEND.getValue(), roundNotifyDto);
             }
 
             // 2라운드 종료 체크
@@ -100,12 +100,12 @@ public class StageService {
 
     private void handleNotifyStartStage(Integer gameId, StageType currentStage) {
         StageNotifyDto stageNotifyDto = StageNotifyDto.notifyStartStage(currentStage);
-        namespace.getRoomOperations("game:" + gameId).sendEvent(EventType.GAME_CHAT_EMIT.getValue(), stageNotifyDto);
+        namespace.getRoomOperations("game:" + gameId).sendEvent(EventType.GAME_CHAT_SEND.getValue(), stageNotifyDto);
     }
 
     private void handleNotifyEndStage(Integer gameId, StageType currentStage) {
         StageNotifyDto stageNotifyDto = StageNotifyDto.notifyEndStage(currentStage);
-        namespace.getRoomOperations("game:" + gameId).sendEvent(EventType.GAME_CHAT_EMIT.getValue(), stageNotifyDto);
+        namespace.getRoomOperations("game:" + gameId).sendEvent(EventType.GAME_CHAT_SEND.getValue(), stageNotifyDto);
     }
 
     private void handleStageUpdate(Integer gameId, StageType currentStage) {
