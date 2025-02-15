@@ -400,7 +400,7 @@ public class GameInitService {
         String stage = (stageValue == null) ? "start" : stageValue;
 
         Integer remainingTime = gameTimer.getRemainingTime(gameId);
-        log.info("Checking timer: gameId={}, remainingTime={}", gameId, remainingTime);
+        log.info("타이머 동작 확인: gameId={}, remainingTime={}", gameId, remainingTime);
 
         List<PlayerInfoDto> players = allStatus.entrySet().stream()
                 .map(entry -> {
@@ -436,7 +436,6 @@ public class GameInitService {
         String waitingKey = WAITING_LIST + ROOM_KEY_PREFIX + roomId;  // "waiting:room:roomId" 형식
         Boolean isDeleted = jsonRedisTemplate.delete(waitingKey);
         log.debug("레디스 대기방 목록에서 방을 제거합니다. - waitingKey: {}, 제거 성공 여부: {}", waitingKey, isDeleted);
-
 
         return LobbyUpdateResponseDto.builder()
                 .type("update")

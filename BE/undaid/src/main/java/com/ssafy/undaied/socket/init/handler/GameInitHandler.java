@@ -133,14 +133,19 @@ public class GameInitHandler {
         });
     }
 
-
-
     private void sendResponse(AckRequest ackRequest, boolean success, Object data) {
         if (ackRequest.isAckRequested()) {
             Map<String, Object> response = new HashMap<>();
             response.put("success", success);
             response.put("errorMessage", success ? null : data);
             response.put("data", success ? data : null);  // ✅ 성공 시 `data`에 NumberResponseDto 포함
+
+            // success가 true이고 data가 NumberResponseDto인 경우에만 number 추출
+            if (success && data instanceof NumberResponseDto) {
+                response.put("number", ((NumberResponseDto) data).getNumber());
+            } else {
+                response.put("number", null);
+            }
 
             ackRequest.sendAckData(response);
             log.info("📢 Sending ACK Response: {}", response);
