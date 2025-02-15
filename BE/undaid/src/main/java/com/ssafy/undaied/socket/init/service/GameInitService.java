@@ -221,10 +221,9 @@ public class GameInitService {
 
     private void validatePlayers(List<Integer> players) throws SocketException {
 
-        // 임시 설정
-        // if (players.size() != REQUIRED_PLAYERS) {
-        //     throw new SocketException(SocketErrorCode.INVALID_PLAYER_COUNT);
-        // }
+        if (players.size() != REQUIRED_PLAYERS) {
+            throw new SocketException(SocketErrorCode.INVALID_PLAYER_COUNT);
+        }
     }
 
     private int initGame() {
@@ -340,7 +339,7 @@ public class GameInitService {
         }
 
        // AI 서버에 알림
-    //    notifyAiServer(gameId, aiInfoList);
+       notifyAiServer(gameId, aiInfoList);
 
         // Redis 키 만료시간 설정
         Arrays.asList(mappingKey, playersKey, statusKey, userNicknameKey, numberNicknameKey)
@@ -457,12 +456,11 @@ public class GameInitService {
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .bodyValue(notification)
                 .retrieve()
-                .bodyToMono(String.class)  // ✅ 응답 body를 String으로 받음
+                .bodyToMono(String.class)
                 .subscribe(
                         response -> log.info("AI 서버로 게임시작 데이터 전송 성공. gameId: {} with AI info: {}",
                                 gameId, aiInfoList),
-                        error -> log.error("AI 서버로 게임시작 데이터 전송 실패패 - gameId: {}", gameId, error)
-                );
-    }
-
+                        error -> log.error("AI 서버로 게임시작 데이터 전송 실패 - gameId: {}", gameId, error)
+          );
+     }
 }

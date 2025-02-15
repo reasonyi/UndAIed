@@ -38,7 +38,7 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-app = FastAPI(redirect_slashes=False)
+app = FastAPI()
 
 # Java DTO와 일치하는 구조
 class AiInfo(BaseModel):
@@ -56,26 +56,3 @@ async def create_message(game_id: int, notification: AiNotificationDto):
     return {
         "hello": "world"
     }
-
-
-# 기존 동환 코드 (현만이 임시 수정)
-
-# from fastapi import FastAPI
-# from pydantic import BaseModel
-# from typing import List
-
-# app = FastAPI()
-
-# class AISelect(BaseModel):
-#     aiId: int | str  # aiId가 문자열("3")이나 정수(1) 모두 가능하도록
-#     number: int
-
-# class MessageRequest(BaseModel):
-#     selectedAIs: List[AISelect]  # AISelect 객체의 리스트
-#     message: str
-
-# @app.post("/api/ai/{game_id}/")
-# def create_message(game_id: int, request: MessageRequest):
-#     return {
-#         "hello": "world"
-#     }
