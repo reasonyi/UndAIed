@@ -85,32 +85,19 @@ public class GameChatService {
 
         // 응답 전송
         SendSubjectResponseDto sendSubjectresponseDto = SendSubjectResponseDto.builder()
+                .number(0)
                 .item(SUBJECTS.get(subjectId))
                 .build();
 
         namespace.getRoomOperations("game:"+gameId).sendEvent("send:subject", sendSubjectresponseDto);
     }
 
-    public void processFreeChat(SocketIOClient client, Integer userId, GameChatRequestDto gameChatRequestDto) {
+    public void processFreeChat(Integer gameId, SocketIOClient client, Integer userId, GameChatRequestDto gameChatRequestDto) {
 
-        //임시
-//        String gameIdStr = client.getHandshakeData().getSingleUrlParam("gameId");
-//        Integer gameId = Integer.parseInt(gameIdStr);
-
-//        log.info("들어옴2");
-
-//        // 게임방 조인 처리
-//        String gameRoom = GAME_KEY_PREFIX + gameId;
-//        if (!client.getAllRooms().contains(gameRoom)) {
-//            client.joinRoom(gameRoom);
-//            log.info("Client joined game room - userId: {}, gameRoom: {}", userId, gameRoom);
-//        }
-
-        Integer gameId = client.get("gameId");
         String nickname = client.get("nickname");
 
-        if (gameId == null) {
-            log.warn("Game ID not found for userId: {}", userId);
+        if (nickname == null) {
+            log.warn("닉네임을 찾았습니다.(레디스 저장용)", nickname);
             return;
         }
 
@@ -149,21 +136,14 @@ public class GameChatService {
                 gameId, userId, number, gameChatRequestDto.getContent());
     }
 
-    public void storeSubjectChat(SocketIOClient client, Integer userId, GameChatRequestDto gameChatRequestDto) {
-        Integer gameId = client.get("gameId");
+    public void storeSubjectChat(Integer gameId, SocketIOClient client, Integer userId, GameChatRequestDto gameChatRequestDto) {
+
         String nickname = client.get("nickname");
 
-        if (gameId == null) {
-            log.warn("Game ID not found for userId: {}", userId);
+        if (nickname == null) {
+            log.warn("닉네임을 찾았습니다.(레디스 저장용)", nickname);
             return;
         }
-
-//        // 게임방 조인 처리
-//        String gameRoom = GAME_KEY_PREFIX + gameId;
-//        if (!client.getAllRooms().contains(gameRoom)) {
-//            client.joinRoom(gameRoom);
-//            log.info("Client joined game room - userId: {}, gameRoom: {}", userId, gameRoom);
-//        }
 
         LocalDateTime timestamp = LocalDateTime.now();
 

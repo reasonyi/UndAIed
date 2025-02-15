@@ -1,12 +1,13 @@
 package com.ssafy.undaied.socket.chat.dto.response;
 
 import lombok.Builder;
+import lombok.Data;
 import lombok.Getter;
 
-@Getter
+@Data
 @Builder
 public class SendSubjectResponseDto {
-
+    private Integer number;
     private String item;
 
 }
