@@ -9,9 +9,7 @@ import com.ssafy.undaied.socket.common.constant.EventType;
 import com.ssafy.undaied.socket.common.exception.SocketErrorCode;
 import com.ssafy.undaied.socket.common.exception.SocketException;
 import com.ssafy.undaied.socket.common.util.GameTimer;
-import com.ssafy.undaied.socket.init.dto.response.BroadcastResponseDto;
-import com.ssafy.undaied.socket.init.dto.response.GameInfoResponseDto;
-import com.ssafy.undaied.socket.init.dto.response.PlayerInfoDto;
+import com.ssafy.undaied.socket.init.dto.response.*;
 import com.ssafy.undaied.socket.lobby.dto.response.LobbyUpdateResponseDto;
 import com.ssafy.undaied.socket.lobby.dto.response.UpdateData;
 import com.ssafy.undaied.socket.room.dto.Room;
@@ -21,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -40,6 +39,7 @@ public class GameInitService {
     private final ObjectMapper objectMapper;
     private final SocketIONamespace namespace;
     private final GameTimer gameTimer;
+    private final WebClient webClient;
 
     private static final long EXPIRE_TIME = 7200;
     private static final int REQUIRED_PLAYERS = 6;
@@ -47,9 +47,9 @@ public class GameInitService {
 
     // AI 후보 리스트
     private static final Map<String, String> AI_POOL = new HashMap<>() {{
-        put("ai1", "deepseek");
-        put("ai2", "gemini");
-        put("ai3", "chatgpt");
+        put("1", "deepseek");
+        put("2", "gemini");
+        put("3", "chatgpt");
     }};
 
 //     테스트 데이터. 나중에 지우려고 함.
@@ -181,9 +181,9 @@ public class GameInitService {
 
     // AI 3개 중 2개를 랜덤 선택하는 메서드
     private List<String> selectTwoAIs() {
-        List<String> shuffledAIs = new ArrayList<>(AI_POOL.keySet()); // AI key(ai1, ai2, ai3) 리스트 가져오기
-        Collections.shuffle(shuffledAIs); // 랜덤 섞기
-        return shuffledAIs.subList(0, 2); // 앞에서 2개 선택
+        List<String> aiIds = new ArrayList<>(AI_POOL.keySet()); // AI key(ai1, ai2, ai3) 리스트 가져오기
+        Collections.shuffle(aiIds); // 랜덤 섞기
+        return aiIds.subList(0, 2); // 앞에서 2개 선택
     }
 
     private Integer validateAuthentication(SocketIOClient client) throws SocketException {
@@ -291,18 +291,19 @@ public class GameInitService {
                 .collect(Collectors.toList());
         Collections.shuffle(availableNumbers);
 
-        // Room 정보에서 닉네임 정보 가져오기
-        Map<Integer, String> userNicknames = room.getCurrentPlayers().stream()
-                .collect(Collectors.toMap(
-                        RoomUser::getUserId,
-                        RoomUser::getNickname
-                ));
-
+        // Redis 키 준비
         String mappingKey = GAME_KEY_PREFIX + gameId + ":number_mapping";
         String playersKey = GAME_KEY_PREFIX + gameId + ":players";
         String statusKey = GAME_KEY_PREFIX + gameId + ":player_status";
         String userNicknameKey = GAME_KEY_PREFIX + gameId + ":user_nicknames";
         String numberNicknameKey = GAME_KEY_PREFIX + gameId + ":number_nicknames";
+
+        // 실제 플레이어 닉네임 매핑
+        Map<Integer, String> userNicknames = room.getCurrentPlayers().stream()
+                .collect(Collectors.toMap(
+                        RoomUser::getUserId,
+                        RoomUser::getNickname
+                ));
 
         // 실제 플레이어 할당
         for (int i = 0; i < REQUIRED_PLAYERS; i++) {
@@ -315,40 +316,29 @@ public class GameInitService {
             savePlayerStatus(statusKey, assignedNumber.toString(), false, false, true);
             String nickname = userNicknames.get(userId);
             redisTemplate.opsForHash().put(userNicknameKey, userId.toString(), nickname);
+            redisTemplate.opsForHash().put(numberNicknameKey, assignedNumber.toString(), nickname);
         }
 
-        // AI 역할 매핑 후 랜덤 선택
-        List<String> aiRoles = new ArrayList<>(List.of("ai1", "ai2", "ai3"));
-        Collections.shuffle(aiRoles);
-        String selectedAI1 = aiRoles.get(0);
-        String selectedAI2 = aiRoles.get(1);
+        // AI 플레이어 할당 및 정보 저장
+        List<AiInfo> aiInfoList = new ArrayList<>();
+        for (String aiId : selectedAIs) {
+            int aiNumber = availableNumbers.remove(0);
+            String aiKey = "ai" + aiId;  // "ai1", "ai2", "ai3" 형식으로 변환
 
-        // AI를 실제 플레이어 번호에 매핑
-        String ai1Number = availableNumbers.remove(0).toString();
-        String ai2Number = availableNumbers.remove(0).toString();
+            // Redis에 AI 정보 저장
+            redisTemplate.opsForHash().put(mappingKey, aiKey, String.valueOf(aiNumber));
+            redisTemplate.opsForHash().put(userNicknameKey, aiKey, "AI-" + aiId);
+            savePlayerStatus(statusKey, String.valueOf(aiNumber), false, false, true);
 
-        // ✅ 기존 방식 수정: "ai1", "ai2"를 강제하지 않고, 선택된 AI ID를 그대로 저장
-        redisTemplate.opsForHash().put(mappingKey, selectedAI1, ai1Number);
-        redisTemplate.opsForHash().put(mappingKey, selectedAI2, ai2Number);
+            // AI 정보 리스트 구성 (Python 서버로 전송용)
+            aiInfoList.add(new AiInfo(aiId, aiNumber));
+        }
 
-        String aiKey = GAME_KEY_PREFIX + gameId + ":ai_numbers";
-        redisTemplate.opsForSet().add(aiKey, ai1Number, ai2Number);
+//        // AI 서버에 알림
+//        notifyAiServer(gameId, aiInfoList);
 
-        savePlayerStatus(statusKey, ai1Number, false, false, true);
-        savePlayerStatus(statusKey, ai2Number, false, false, true);
-
-        redisTemplate.opsForHash().put(userNicknameKey, "ai1", "AI-1");
-        redisTemplate.opsForHash().put(userNicknameKey, "ai2", "AI-2");
-
-        room.getCurrentPlayers().forEach(player -> {
-                    Integer assignedNumber = Integer.parseInt(
-                            (String) redisTemplate.opsForHash().get(mappingKey, player.getUserId().toString())
-                    );
-
-                    // "번호 → 닉네임" 매핑을 Redis에 저장
-                    redisTemplate.opsForHash().put(numberNicknameKey, assignedNumber.toString(), player.getNickname());
-                });
-        Arrays.asList(mappingKey, playersKey, aiKey, userNicknameKey, numberNicknameKey, statusKey)
+        // Redis 키 만료시간 설정
+        Arrays.asList(mappingKey, playersKey, statusKey, userNicknameKey, numberNicknameKey)
                 .forEach(key -> redisTemplate.expire(key, EXPIRE_TIME, TimeUnit.SECONDS));
     }
 
@@ -362,9 +352,10 @@ public class GameInitService {
     }
 
 
-    // 게임 정보를 특정 요청에 대한 응답으로 전송 (ackRequest가 있는 경우)
-    public void sendGameInfo(Integer gameId, GameInfoResponseDto gameInfo) {
+    // 게임 정보를 특정 요청에 대한 응답으로 전송
+    public void sendGameInfo(Integer gameId) {
 
+        GameInfoResponseDto gameInfo=createGameInfoResponse(gameId);
         // 2. 다른 모든 클라이언트에게도 최신 정보 브로드캐스트
         namespace.getRoomOperations(GAME_KEY_PREFIX + gameId)
                 .sendEvent("game:info:send", gameInfo);
@@ -451,6 +442,21 @@ public class GameInitService {
                         .playing(true)  // 게임 시작했으므로 true로 설정
                         .build())
                 .build();
+    }
+
+    private void notifyAiServer(int gameId, List<AiInfo> aiInfoList) {
+        AiNotificationDto notification = new AiNotificationDto(aiInfoList);
+
+        webClient.post()
+                .uri("/api/ai/{gameId}", gameId)
+                .bodyValue(notification)
+                .retrieve()
+                .toBodilessEntity()
+                .subscribe(
+                        response -> log.info("Successfully notified AI server for gameId: {} with AI info: {}",
+                                gameId, aiInfoList),
+                        error -> log.error("Failed to notify AI server - gameId: {}", gameId, error)
+                );
     }
 
 }
