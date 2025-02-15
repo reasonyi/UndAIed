@@ -153,7 +153,7 @@ function GameRoom() {
     socket.on("game:init:send", (data: { gameId: number }) => {
       console.log("게임으로 이동 이벤트 수신:", data);
       debugger;
-      navigate(`game/play/${data.gameId}`);
+      navigate(`/game/play/${data.gameId}`);
     });
 
     return () => {
@@ -284,6 +284,32 @@ function GameRoom() {
 
   // (1) chat-input-temp 너비를 저장할 state
   const [chatInputWidth, setChatInputWidth] = useState<number>(0);
+
+  //새로고침 관련
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (socket) {
+        event.preventDefault();
+        // 보안 및 사용자 정책에 의해 현재는 개발자가 출력 문구를 정할 수 없음.
+        // event.returnValue = "게임에서 나가시겠습니까?";
+      }
+    };
+
+    const handleUnload = () => {
+      if (socket) {
+        socket.emit("pre-disconnect");
+        console.log("새로고침 확인 후 실행됨");
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("unload", handleUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("unload", handleUnload);
+    };
+  }, [socket]); // socket을 의존성 배열에 추가
 
   useEffect(() => {
     // (3) ResizeObserver를 통한 너비 측정
