@@ -31,34 +31,31 @@ public class GameChatHandler {
         namespace.addEventListener("game:chat:emit", GameChatRequestDto.class,
                 (client, data, ackRequest) -> {
                     try {
-                        log.info("들어옴");
+                        log.info("게임 채팅 요청 확인");
 
-                        //임시
-                        String gameIdStr = client.getHandshakeData().getSingleUrlParam("gameId");
-                        Integer gameId = Integer.parseInt(gameIdStr);
+                        // data 객체 자체 확인
+                        log.info("Received data object: {}", data);
 
-                        log.info("여기가 문제?");
-                        //복구해야
-//                        Integer gameId = client.get("gameId");
+                        // content 필드 값 확인
+                        log.info("Content from data: {}", data.getContent());
 
+                        Integer gameId = client.get("gameId");
+                        log.warn("gameId를 찾았습니다: {}", gameId);
                         Integer userId = client.get("userId");
+                        log.warn("userId를 찾았습니다: {}", userId);
                         String stageKey = GAME_KEY_PREFIX + gameId + ":stage";
 
-                        //임시 변수
-                        String currentStage="free_debate";
-//                        String currentStage = redisTemplate.opsForValue().get(stageKey);
+                        String currentStage = redisTemplate.opsForValue().get(stageKey);
 
+                        log.info("현재 stage: {}", currentStage);
 
-                        log.info("currentStage: {}", currentStage);
-
-
-                        if ("free_debate".equals(currentStage)) {
-                            log.info("6. 자유토론 처리 시작");
-                            gameChatService.processFreeChat(client, userId, data);
+                        if ("subject_debate".equals(currentStage)) {
+                            gameChatService.storeSubjectChat(gameId, client, userId, data);
                         } else {
-                            gameChatService.storeSubjectChat(client, userId, data);
+                            gameChatService.processFreeChat(gameId, client, userId, data);
                         }
-                        // 저장 성공 응답 전송
+
+                        // 성공 응답 전송
                         if (ackRequest.isAckRequested()) {
                             Map<String, Object> response = new HashMap<>();
                             response.put("success", true);
@@ -66,6 +63,7 @@ public class GameChatHandler {
                             response.put("data", null);
                             ackRequest.sendAckData(response);
                         }
+
                     } catch (Exception e) {
                         log.error("Game chat failed: {}", e.getMessage());
 

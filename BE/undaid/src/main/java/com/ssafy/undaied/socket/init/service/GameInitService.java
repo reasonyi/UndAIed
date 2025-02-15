@@ -367,7 +367,7 @@ public class GameInitService {
     public void broadcastGameInit(Integer gameId) {
 
         // BroadcastResponseDto 객체 생성
-    BroadcastResponseDto responseDto = BroadcastResponseDto.builder()
+        BroadcastResponseDto responseDto = BroadcastResponseDto.builder()
             .gameId(gameId)
             .build();
 
@@ -389,16 +389,18 @@ public class GameInitService {
         String statusKey = GAME_KEY_PREFIX + gameId + ":player_status";
         Map<Object, Object> allStatus = redisTemplate.opsForHash().entries(statusKey);
 
+        // round 값 처리
+        String roundKey = "game:" + gameId + ":round";
+        String roundValue = redisTemplate.opsForValue().get(roundKey);
+        int round =Integer.parseInt(roundValue);
 
-        //임시 저장. 수정 필요
+        // stage 값 처리
         String stageKey = "game:" + gameId + ":stage";
-//        String currentStage = redisTemplate.opsForValue().get(stageKey).toString();
-        String currentStage="Start";
+        String stageValue = redisTemplate.opsForValue().get(stageKey);
+        String stage = (stageValue == null) ? "start" : stageValue;
 
         Integer remainingTime = gameTimer.getRemainingTime(gameId);
-        log.info("Checking timer: gameId={}, remainingTime={}", gameId, remainingTime);
-
-
+        log.info("타이머 동작 확인: gameId={}, remainingTime={}", gameId, remainingTime);
 
         List<PlayerInfoDto> players = allStatus.entrySet().stream()
                 .map(entry -> {
@@ -414,7 +416,8 @@ public class GameInitService {
 
         return GameInfoResponseDto.builder()
                 .gameId(gameId)
-                .currentStage(currentStage)
+                .round(round)
+                .stage(stage)
                 .timer(remainingTime)
                 .players(players)
                 .build();
@@ -434,7 +437,6 @@ public class GameInitService {
         Boolean isDeleted = jsonRedisTemplate.delete(waitingKey);
         log.debug("레디스 대기방 목록에서 방을 제거합니다. - waitingKey: {}, 제거 성공 여부: {}", waitingKey, isDeleted);
 
-
         return LobbyUpdateResponseDto.builder()
                 .type("update")
                 .data(UpdateData.builder()
@@ -447,8 +449,8 @@ public class GameInitService {
                 .build();
     }
 
-    private void notifyAiServer(int gameId, List<AiInfo> aiInfoList) {
-        AiNotificationDto notification = new AiNotificationDto(aiInfoList);
+    private void notifyAiServer(int gameId, List<AiInfo> selectedAIs) {
+        AiNotificationDto notification = new AiNotificationDto(selectedAIs);
 
         webClient.post()
                 .uri("/api/ai/{gameId}/", gameId)
@@ -458,7 +460,7 @@ public class GameInitService {
                 .bodyToMono(String.class)
                 .subscribe(
                         response -> log.info("AI 서버로 게임시작 데이터 전송 성공. gameId: {} with AI info: {}",
-                                gameId, aiInfoList),
+                                gameId, selectedAIs),
                         error -> log.error("AI 서버로 게임시작 데이터 전송 실패 - gameId: {}", gameId, error)
           );
      }
