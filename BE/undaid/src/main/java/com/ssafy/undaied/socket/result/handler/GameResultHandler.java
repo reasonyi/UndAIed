@@ -43,7 +43,7 @@ public class GameResultHandler {
                             gameId = Integer.parseInt(gameIdStr);
                         }
 
-                        log.info("Game result check requested - gameId: {}", gameId);
+                        log.info("게임종료 여부 확인 - gameId: {}", gameId);
 
                         // 🔹 게임 결과 확인
                         GameResultResponseDto result = gameResultService.checkGameResult(client, gameId);
