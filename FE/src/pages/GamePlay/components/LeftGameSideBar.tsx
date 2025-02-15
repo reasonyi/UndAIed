@@ -82,7 +82,9 @@ ILeftGameSideBarProps) {
           <div className="text-sm">{title}</div>
           <h1 className="text-base font-medium">{round}라운드</h1>
           <div className="flex items-center text-lg ">
-            <h2 className="mr-3 text-xl font-semibold">{stage ?? "종료"}</h2>
+            <h2 className="mr-3 text-xl font-semibold mb-[0.375rem]">
+              {stage ?? "종료"}
+            </h2>
             <SecondCounter initialSeconds={60} />
           </div>
         </div>
