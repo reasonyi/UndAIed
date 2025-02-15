@@ -1,6 +1,7 @@
 package com.ssafy.undaied.socket.chat.service;
 
 import com.corundumstudio.socketio.SocketIOClient;
+import com.corundumstudio.socketio.SocketIONamespace;
 import com.corundumstudio.socketio.SocketIOServer;
 import com.ssafy.undaied.socket.chat.dto.request.GameChatRequestDto;
 import com.ssafy.undaied.socket.chat.dto.response.GameChatResponseDto;
@@ -14,6 +15,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.ssafy.undaied.socket.common.constant.SocketRoom.GAME_KEY_PREFIX;
 
@@ -28,10 +31,10 @@ public class GameChatService {
     private final RedisTemplate<String, String> redisTemplate;
     private final RedisTemplate<String, Object> jsonRedisTemplate;
     private final Random random = new Random();
-    private final SocketIOServer server;
+    private final SocketIONamespace namespace;
 
     //임시 변수, 나중에 수정해야
-    int gameId=1;
+    int gameId = 1;
 
     private static final Map<Integer, String> SUBJECTS = new HashMap<>() {{
         put(1, "인공지능이 인간을 이길 수 있을까?");
@@ -59,7 +62,12 @@ public class GameChatService {
     public void sendSubject(int gameId) {
         String gameKey = "game:" + gameId;
 
-        String usedSubjectsKey = gameKey + ":used_subjects";
+        // 현재 라운드 가져오기
+        String roundKey = gameKey + ":round";
+        String currentRound = redisTemplate.opsForValue().get(roundKey);
+
+        // 라운드별 사용된 주제 키
+        String usedSubjectsKey = String.format("%s:round:%s:used_subjects", gameKey, currentRound);
         Set<String> usedSubjects = redisTemplate.opsForSet().members(usedSubjectsKey);
 
         List<Integer> availableSubjects = new ArrayList<>();
@@ -80,65 +88,142 @@ public class GameChatService {
                 .item(SUBJECTS.get(subjectId))
                 .build();
 
-        server.getRoomOperations( String.valueOf(gameId)).sendEvent("send:subject", sendSubjectresponseDto);
+        namespace.getRoomOperations("game:"+gameId).sendEvent("send:subject", sendSubjectresponseDto);
 
     }
 
-    public void processGameChat(SocketIOClient client, Integer userId, GameChatRequestDto gameChatRequestDto) {
-        // 임시 지정
-//        Integer gameId=client.get("gameId");
-//        Integer gameId=1;
+    public void processFreeChat(SocketIOClient client, Integer userId, GameChatRequestDto gameChatRequestDto) {
 
-        // URL 파라미터에서 gameId 가져오기 // 나중에 수정해야.
+        //임시
         String gameIdStr = client.getHandshakeData().getSingleUrlParam("gameId");
         Integer gameId = Integer.parseInt(gameIdStr);
 
-        // 클라이언트를 해당 게임 방에 조인시키기 // 나중에 수정해야.
+        log.info("들어옴2");
+        //복구해야
+//        Integer gameId = client.get("gameId");
+
+        String nickname = client.get("nickname");
+
+        // 게임방 조인 처리
         String gameRoom = GAME_KEY_PREFIX + gameId;
         if (!client.getAllRooms().contains(gameRoom)) {
             client.joinRoom(gameRoom);
             log.info("Client joined game room - userId: {}, gameRoom: {}", userId, gameRoom);
         }
 
-        log.info(String.valueOf(gameId));
         if (gameId == null) {
             log.warn("Game ID not found for userId: {}", userId);
-            return; // 게임 ID가 없으면 처리 중단
+            return;
         }
 
-        String nickname = client.get("nickname");
         LocalDateTime timestamp = LocalDateTime.now();
 
-        // 🔹 Redis에서 userId에 해당하는 익명 번호 가져오기
+        // Redis에서 익명 번호 조회
         String mappingKey = GAME_KEY_PREFIX + gameId + ":number_mapping";
         Object numberObj = redisTemplate.opsForHash().get(mappingKey, userId.toString());
         if (numberObj == null) {
             log.warn("No number found for userId: {}", userId);
-            return; // 해당 유저가 번호를 부여받지 않았다면 그냥 리턴
+            return;
         }
 
         int number = Integer.parseInt(numberObj.toString());
+        String roundKey = GAME_KEY_PREFIX + gameId + ":round";
+        String currentRound = redisTemplate.opsForValue().get(roundKey);
 
-        // 채팅 메시지 포맷
-        String chatKey = "game:" + gameId + ":chats";
-        String message = String.format("[%s] (%d) %s - %s",
-                nickname, number, gameChatRequestDto.getContent(),
+        // 자유토론 채팅 저장
+        String chatKey = String.format("%s%d:round:%s:freechats", GAME_KEY_PREFIX, gameId, currentRound);
+        String message = String.format("{%d} [%s] <%d>(%s) %s | ",
+                userId, nickname, number, gameChatRequestDto.getContent(),
                 timestamp.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
 
-        // Redis에 채팅 저장
-        redisTemplate.opsForList().rightPush(chatKey, message);
+        redisTemplate.opsForValue().append(chatKey, message);
         redisTemplate.expire(chatKey, EXPIRE_TIME, TimeUnit.SECONDS);
 
-        // 익명 번호(number)를 포함한 응답 전송
-        GameChatResponseDto gameChatResponseDto = GameChatResponseDto.builder()
+        // 실시간 채팅 전송
+        GameChatResponseDto response = GameChatResponseDto.builder()
                 .number(number)
                 .content(gameChatRequestDto.getContent())
                 .build();
 
-        server.getRoomOperations("game:" + gameId).sendEvent("chat:game", gameChatResponseDto);
 
-        log.info("Game chat sent - gameId: {}, userId: {}, number: {}, message: {}",
+        namespace.getRoomOperations(gameRoom).sendEvent("game:chat:send", response);
+        log.info("Free chat sent - gameId: {}, userId: {}, number: {}, message: {}",
                 gameId, userId, number, gameChatRequestDto.getContent());
     }
+
+    public void storeSubjectChat(SocketIOClient client, Integer userId, GameChatRequestDto gameChatRequestDto) {
+        Integer gameId = client.get("gameId");
+        String nickname = client.get("nickname");
+
+        // 게임방 조인 처리
+        String gameRoom = GAME_KEY_PREFIX + gameId;
+        if (!client.getAllRooms().contains(gameRoom)) {
+            client.joinRoom(gameRoom);
+            log.info("Client joined game room - userId: {}, gameRoom: {}", userId, gameRoom);
+        }
+
+        if (gameId == null) {
+            log.warn("Game ID not found for userId: {}", userId);
+            return;
+        }
+
+        LocalDateTime timestamp = LocalDateTime.now();
+
+        // Redis에서 익명 번호 조회
+        String mappingKey = GAME_KEY_PREFIX + gameId + ":number_mapping";
+        Object numberObj = redisTemplate.opsForHash().get(mappingKey, userId.toString());
+        if (numberObj == null) {
+            log.warn("No number found for userId: {}", userId);
+            return;
+        }
+
+        int number = Integer.parseInt(numberObj.toString());
+        String roundKey = GAME_KEY_PREFIX + gameId + ":round";
+        String currentRound = redisTemplate.opsForValue().get(roundKey);
+
+        // 주제토론 채팅 저장
+        String chatKey = String.format("%s%d:round:%s:subjectchats", GAME_KEY_PREFIX, gameId, currentRound);
+        String message = String.format("{%d} [%s] <%d>(%s) %s | ",
+                userId, nickname, number, gameChatRequestDto.getContent(),
+                timestamp.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+
+        redisTemplate.opsForValue().append(chatKey, message);
+        redisTemplate.expire(chatKey, EXPIRE_TIME, TimeUnit.SECONDS);
+
+    }
+
+    public List<GameChatResponseDto> getSubjectDebateChats(Integer gameId, String round) {
+        String chatKey = String.format("%s%d:round:%s:subjectchats", GAME_KEY_PREFIX, gameId, round);
+        String chatLog = redisTemplate.opsForValue().get(chatKey);
+
+        if (chatLog == null || chatLog.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        List<GameChatResponseDto> result = new ArrayList<>();
+        // 개행으로 분리하여 각 메시지 처리
+        String[] messages = chatLog.split("\n");
+
+        for (String message : messages) {
+            if (message.isEmpty()) continue;
+
+            // 정규식을 사용하여 메시지 파싱
+            Pattern pattern = Pattern.compile("\\{(\\d+)\\} \\[.*?\\] <(\\d+)>\\((.*?)\\) .*");
+            Matcher matcher = pattern.matcher(message);
+
+            if (matcher.find()) {
+                int number = Integer.parseInt(matcher.group(2));
+                String content = matcher.group(3);
+
+                result.add(GameChatResponseDto.builder()
+                        .number(number)
+                        .content(content)
+                        .build());
+            }
+        }
+
+        return result;
+    }
+
 }
 

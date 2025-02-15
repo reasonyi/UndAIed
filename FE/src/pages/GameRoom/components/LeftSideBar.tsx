@@ -11,23 +11,17 @@ import {
 import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Socket } from "socket.io-client";
-
-interface Player {
-  playerNum: number;
-  name: string;
-  profileImage: number;
-  isHost: boolean;
-}
+import { IPlayer } from "../../../types/gameroom";
 
 interface ILeftSideBarProps {
-  roomId: number;
-  roomTitle: string;
+  roomId?: number;
+  roomTitle?: string;
   nickname: string;
   icon: string;
   socket: Socket | null;
   onLeaveRoom: () => void;
   onGameStart: () => void;
-  player?: Player;
+  player?: IPlayer;
 }
 
 //아이콘

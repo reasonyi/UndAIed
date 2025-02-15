@@ -6,7 +6,6 @@ import { useGameRooms } from "../../../hooks/useGameRoomList";
 function GameRoomList() {
   const { rooms, loading, hasMore, fetchMoreRooms } = useGameRooms();
   const observerTarget = useRef<HTMLDivElement>(null);
-  console.log("게임룸 마운트", rooms);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
