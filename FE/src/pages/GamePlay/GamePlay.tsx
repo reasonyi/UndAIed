@@ -126,7 +126,7 @@ function GamePlay() {
     }
     console.log("소켓 생김!");
 
-    socket.on("game:chat:send", (data: IChatSend) => {
+    socket.on("game:chat:send", (data: any) => {
       console.log("chat:send 발생! data 수신:", data);
       debugger;
       if (data) {
@@ -212,7 +212,7 @@ function GamePlay() {
       socket.emit(
         "game:chat:emit",
         {
-          message: input,
+          content: input,
         },
         ({ success, errorMessage, data }: IGameChatEmitDone) => {
           debugger;
