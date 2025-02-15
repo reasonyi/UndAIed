@@ -57,9 +57,7 @@ public class GameInitHandler {
 
                 // roomKey에서 roomId 추출 (예: "room:456" -> 456)
                 int roomId = Integer.parseInt(roomKey.substring(ROOM_KEY_PREFIX.length()));
-
                 log.info("방 번호 확인 roomId: {}", roomId);
-
                 if (gameInitializationStatus.putIfAbsent(roomId, true) != null) {
                     throw new SocketException(SocketErrorCode.GAME_ALREADY_INITIALIZING);
                 }
@@ -67,7 +65,6 @@ public class GameInitHandler {
                 try {
                     int gameId = gameInitService.startGame(client, roomId);
 
-                    
                     // ✅ 로비 업데이트 이벤트 전송
                     LobbyUpdateResponseDto updateResponseDto = gameInitService.createLobbyUpdateResponse(roomId);
                     namespace.getRoomOperations(LOBBY_ROOM)
@@ -83,7 +80,6 @@ public class GameInitHandler {
 
                     log.info("게임 시작");
                     stageService.handleGameStart(gameId);
-
                 } finally {
                     gameInitializationStatus.remove(roomId);
                 }
@@ -125,9 +121,7 @@ public class GameInitHandler {
 
                 // 🔹 응답 전송 (ACK 응답에 number 포함)
                 sendResponse(ackRequest, true, numberResponse);
-
                 gameInitService.sendGameInfo(gameId);
-
 
             } catch (SocketException e) {
                 log.error("Failed to retrieve game info: {}", e.getMessage());

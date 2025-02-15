@@ -317,7 +317,7 @@ public class GameInitService {
             redisTemplate.opsForHash().put(mappingKey, userId.toString(), assignedNumber.toString());
             redisTemplate.opsForSet().add(playersKey, userId.toString());
 
-            savePlayerStatus(statusKey, assignedNumber.toString(), false, false, true);
+            savePlayerStatus(statusKey, assignedNumber.toString(), false, true);
             String nickname = userNicknames.get(userId);
             redisTemplate.opsForHash().put(userNicknameKey, userId.toString(), nickname);
             redisTemplate.opsForHash().put(numberNicknameKey, assignedNumber.toString(), nickname);
@@ -332,7 +332,7 @@ public class GameInitService {
             // Redis에 AI 정보 저장
             redisTemplate.opsForHash().put(mappingKey, String.valueOf(aiId), String.valueOf(aiNumber));
             redisTemplate.opsForHash().put(userNicknameKey, String.valueOf(aiId), "AI-" + aiId);
-            savePlayerStatus(statusKey, String.valueOf(aiNumber), false, false, true);
+            savePlayerStatus(statusKey, String.valueOf(aiNumber), false, true);
         
             // AI 정보 리스트 구성 (Python 서버로 전송용)
             aiInfoList.add(new AiInfo(aiId, aiNumber));
@@ -346,11 +346,10 @@ public class GameInitService {
                 .forEach(key -> redisTemplate.expire(key, EXPIRE_TIME, TimeUnit.SECONDS));
     }
 
-    private void savePlayerStatus(String statusKey, String number, boolean isDied, boolean isInfected, boolean isInGame) {
+    private void savePlayerStatus(String statusKey, String number, boolean isDied, boolean isInGame) {
         Map<String, String> status = new HashMap<>();
         status.put("number", number);
         status.put("isDied", String.valueOf(isDied));
-        status.put("isInfected", String.valueOf(isInfected));
         status.put("isInGame", String.valueOf(isInGame));
         redisTemplate.opsForHash().put(statusKey, number, status.toString());
     }
@@ -383,7 +382,7 @@ public class GameInitService {
 
     public void updatePlayerStatus(int gameId, int number, boolean isDied, boolean isInfected, boolean isInGame) {
         savePlayerStatus(GAME_KEY_PREFIX + gameId + ":player_status",
-                String.valueOf(number), isDied, isInfected, isInGame);
+                String.valueOf(number), isDied, isInGame);
     }
 
     public GameInfoResponseDto createGameInfoResponse(int gameId) {
@@ -407,7 +406,6 @@ public class GameInitService {
                     return PlayerInfoDto.builder()
                             .number(Integer.parseInt(entry.getKey().toString()))
                             .isDied(status.contains("isDied=true"))
-                            .isInfected(status.contains("isInfected=true"))
                             .isInGame(status.contains("isInGame=true"))
                             .build();
                 })
@@ -415,6 +413,7 @@ public class GameInitService {
                 .collect(Collectors.toList());
 
         return GameInfoResponseDto.builder()
+                .gameId(gameId)
                 .currentStage(currentStage)
                 .timer(remainingTime)
                 .players(players)
