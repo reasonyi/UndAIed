@@ -18,6 +18,8 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -218,6 +220,7 @@ public class GameInitService {
     }
 
     private void validatePlayers(List<Integer> players) throws SocketException {
+
         if (players.size() != REQUIRED_PLAYERS) {
             throw new SocketException(SocketErrorCode.INVALID_PLAYER_COUNT);
         }
@@ -266,9 +269,10 @@ public class GameInitService {
             namespace.getAllClients().forEach(client -> {
                 Integer clientUserId = client.get("userId");
                 if (clientUserId != null && roomUserIds.contains(clientUserId)) {
+
+                    client.getAllRooms().forEach(client::leaveRoom);
                     client.set("gameId", gameId);
                     client.joinRoom(GAME_KEY_PREFIX + gameId);
-                    client.leaveRoom(ROOM_KEY_PREFIX + roomId);
                     log.info("Player joined game room - userId: {}, gameId: {}, nickname: {}",
                             clientUserId,
                             gameId,
@@ -321,21 +325,21 @@ public class GameInitService {
 
         // AI 플레이어 할당 및 정보 저장
         List<AiInfo> aiInfoList = new ArrayList<>();
-        for (String aiId : selectedAIs) {
+        for (String aiIdStr : selectedAIs) {
+            int aiId = Integer.parseInt(aiIdStr);  // ✅ aiId를 int로 변환
             int aiNumber = availableNumbers.remove(0);
-            String aiKey = "ai" + aiId;  // "ai1", "ai2", "ai3" 형식으로 변환
-
+        
             // Redis에 AI 정보 저장
-            redisTemplate.opsForHash().put(mappingKey, aiKey, String.valueOf(aiNumber));
-            redisTemplate.opsForHash().put(userNicknameKey, aiKey, "AI-" + aiId);
+            redisTemplate.opsForHash().put(mappingKey, String.valueOf(aiId), String.valueOf(aiNumber));
+            redisTemplate.opsForHash().put(userNicknameKey, String.valueOf(aiId), "AI-" + aiId);
             savePlayerStatus(statusKey, String.valueOf(aiNumber), false, false, true);
-
+        
             // AI 정보 리스트 구성 (Python 서버로 전송용)
             aiInfoList.add(new AiInfo(aiId, aiNumber));
         }
 
-//        // AI 서버에 알림
-//        notifyAiServer(gameId, aiInfoList);
+       // AI 서버에 알림
+       notifyAiServer(gameId, aiInfoList);
 
         // Redis 키 만료시간 설정
         Arrays.asList(mappingKey, playersKey, statusKey, userNicknameKey, numberNicknameKey)
@@ -448,15 +452,15 @@ public class GameInitService {
         AiNotificationDto notification = new AiNotificationDto(aiInfoList);
 
         webClient.post()
-                .uri("/api/ai/{gameId}", gameId)
+                .uri("/api/ai/{gameId}/", gameId)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .bodyValue(notification)
                 .retrieve()
-                .toBodilessEntity()
+                .bodyToMono(String.class)
                 .subscribe(
-                        response -> log.info("Successfully notified AI server for gameId: {} with AI info: {}",
+                        response -> log.info("AI 서버로 게임시작 데이터 전송 성공. gameId: {} with AI info: {}",
                                 gameId, aiInfoList),
-                        error -> log.error("Failed to notify AI server - gameId: {}", gameId, error)
-                );
-    }
-
+                        error -> log.error("AI 서버로 게임시작 데이터 전송 실패 - gameId: {}", gameId, error)
+          );
+     }
 }
