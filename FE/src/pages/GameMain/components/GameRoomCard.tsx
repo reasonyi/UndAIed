@@ -19,7 +19,7 @@ function GameRoomCard({ room }: GameRoomCardProps) {
       >
         <span className="ml-2">{room.roomId}</span>
         <span className="truncate">{room.roomTitle}</span>
-        <span className="text-right mr-2">{room.currentPlayerNum} / 8</span>
+        <span className="text-right mr-2">{room.currentPlayerNum} / 6</span>
       </li>
     </ul>
   );
