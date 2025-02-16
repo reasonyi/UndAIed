@@ -8,6 +8,6 @@ import lombok.Getter;
 @Builder
 public class SendSubjectResponseDto {
     private Integer number;
-    private String item;
+    private String content;
 
 }

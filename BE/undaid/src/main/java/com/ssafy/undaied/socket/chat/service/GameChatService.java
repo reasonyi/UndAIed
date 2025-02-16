@@ -81,10 +81,10 @@ public class GameChatService {
         // 응답 전송
         SendSubjectResponseDto sendSubjectResponseDto = SendSubjectResponseDto.builder()
                 .number(0)
-                .item(SUBJECTS.get(subjectId))
+                .content(SUBJECTS.get(subjectId))
                 .build();
 
-        namespace.getRoomOperations("game:" + gameId).sendEvent("send:subject", sendSubjectResponseDto);
+        namespace.getRoomOperations("game:" + gameId).sendEvent("game:chat:send", sendSubjectResponseDto);
     }
 
     private boolean hasUserSpokenInSubjectDebate(Integer gameId, String round, int number) {
