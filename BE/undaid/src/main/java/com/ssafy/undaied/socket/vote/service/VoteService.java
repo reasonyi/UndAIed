@@ -160,7 +160,7 @@ public class VoteService {
         // AI 투표 처리
         // 가장 많은 표를 받은 사람 중 랜덤으로 타켓 선정
         int randomTarget = randomVoteTargetAI(voteCounts);
-        log.debug("RandoTarget: {}", randomTarget);
+        log.debug("--------RandomTarget: {}", randomTarget);
 
         int AICount = countValidAIs(gameId);
         voteCounts[randomTarget] += AICount;

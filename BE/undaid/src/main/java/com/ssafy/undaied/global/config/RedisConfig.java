@@ -33,7 +33,6 @@ public class RedisConfig {
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
         RedisStandaloneConfiguration redisConfig = new RedisStandaloneConfiguration(redisHost, redisPort);
-
         // redisConfig 설정
         redisConfig.setPassword("${spring.data.redis.password}"); // Redis 비밀번호 설정
 
