@@ -81,9 +81,8 @@ function GameRoom() {
   const [playerEnterId, setPlayerEnterId] = useState<number>();
   const [playerInfo, setPlayerInfo] = useState<IPlayer | undefined>();
 
-  //방 참여자 전원 더미
+  //방 전체 정보보
   const [roomInfo, setRoomInfo] = useState<IRoomInfo>();
-
   const [messages, setMessages] = useState<IMessage[]>([]);
 
   const addMessage = (newMessage: IMessage) => {
@@ -153,15 +152,16 @@ function GameRoom() {
       }
     });
 
-    // socket.on("game:init:send", (data: any) => {
-    //   console.log("게임으로 이동 이벤트 수신:", data);
-    //   navigate(`game/play/${data.gameId}`);
-    // });
+    socket.on("game:init:send", (data: { gameId: number }) => {
+      console.log("게임으로 이동 이벤트 수신:", data);
+      navigate(`/game/play/${data.gameId}`);
+    });
+
     return () => {
       socket.off("room:enter:send");
       socket.off("room:leave:send");
       socket.off("room:chat:send");
-      // socket.off("game:init:send");
+      socket.off("game:init:send");
     };
   }, [socket, messages, playerEnterId, roomInfo]);
 
@@ -199,6 +199,7 @@ function GameRoom() {
             errorMessage || "입장 도중 에러러가 발생했습니다."
           );
           console.log(errorMessage);
+          toast.error(errorMessage);
           return;
         }
       }
@@ -268,7 +269,7 @@ function GameRoom() {
       //데이터 형식 맞는지 잘 확인하기. 현재 백에서 data는 gameId임!!
       ({ success, errorMessage, data }: IGameStartDone) => {
         if (success) {
-          debugger;
+          console.log("game:init:emit 잘 동작함");
         } else {
           //게임 시작 실패 안내내
           toast.error(errorMessage);
@@ -285,6 +286,32 @@ function GameRoom() {
 
   // (1) chat-input-temp 너비를 저장할 state
   const [chatInputWidth, setChatInputWidth] = useState<number>(0);
+
+  //새로고침 관련
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (socket) {
+        event.preventDefault();
+        // 보안 및 사용자 정책에 의해 현재는 개발자가 출력 문구를 정할 수 없음.
+        // event.returnValue = "게임에서 나가시겠습니까?";
+      }
+    };
+
+    const handleUnload = () => {
+      if (socket) {
+        socket.emit("pre-disconnect");
+        console.log("새로고침 확인 후 실행됨");
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("unload", handleUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("unload", handleUnload);
+    };
+  }, [socket]); // socket을 의존성 배열에 추가
 
   useEffect(() => {
     // (3) ResizeObserver를 통한 너비 측정
