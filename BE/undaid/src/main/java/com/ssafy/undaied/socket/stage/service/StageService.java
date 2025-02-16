@@ -155,6 +155,7 @@ public class StageService {
 
     private void handleSubjectDebate(Integer gameId) {
         gameTimer.setTimer(gameId, GameTimerConstants.STAGE_START_NOTIFY, STAGE_DURATIONS.get("notify"), () -> {
+            gameChatService.sendSubject(gameId);
 
             gameTimer.setTimer(gameId, GameTimerConstants.STAGE_MAIN, STAGE_DURATIONS.get(StageType.SUBJECT_DEBATE.getRedisValue()), () -> {
                 handleNotifyEndStage(gameId, StageType.SUBJECT_DEBATE);
