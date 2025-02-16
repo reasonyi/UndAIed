@@ -308,19 +308,14 @@ function GameRoom() {
   }, [messages]);
   return (
     <>
-      <AudioPlayer
-        src={gameRoomBgm}
-        isPlaying={true}
-        volume={0.4}
-        shouldLoop={true}
-      />
+      <AudioPlayer src={gameRoomBgm} isPlaying={true} shouldLoop={true} />
       <div className="bg-[#07070a]">
         <div className="background-gradient max-w-[90rem] mx-auto px-4 sm:px-4 md:px-6">
           <LeftSideBar
             roomId={roomInfo?.roomId}
             roomTitle={roomInfo?.roomTitle}
             nickname={playerInfo ? playerInfo.nickname : "연결이 끊어졌습니다."}
-            icon={PlayerIcon1}
+            icon={iconArr[playerInfo ? playerInfo.enterId : 1]}
             socket={socket}
             onLeaveRoom={handleLeaveRoom}
             onGameStart={handleGameStart}
@@ -332,7 +327,7 @@ function GameRoom() {
                 {/* 메시지 리스트 영역 */}
                 <div className="flex-1 px-5 pt-4">
                   {messages.map((msg: IMessage, index) => {
-                    if (msg.player === 10) {
+                    if (msg.player === 0) {
                       return <SystemBubble key={index} message={msg} />;
                     } else {
                       return (
