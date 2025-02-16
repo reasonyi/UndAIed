@@ -126,7 +126,7 @@ function GamePlay() {
     }
     console.log("소켓 생김!");
 
-    socket.on("game:chat:send", (data: any) => {
+    socket.on("game:chat:send", (data: IChatSend) => {
       console.log("chat:send 발생! data 수신:", data);
       debugger;
       if (data) {
@@ -155,8 +155,33 @@ function GamePlay() {
       }
     });
 
+    //주제 토론에서 모아두었던 채팅 한번에 주기
+    socket.on("chat:subject:send", (data: IChatSend[]) => {
+      console.log("chat:subject:send 발생! data 수신:", data);
+      debugger;
+      if (data) {
+        if (gameInfo) {
+          data.map((msg) => {
+            const player = gameInfo.players.find(
+              (player) => player.number === msg.number
+            );
+            if (player) {
+              const newMessage: IMessage = {
+                player: player.number,
+                nickname: `익명${player.number}`,
+                text: msg.content,
+                isMine: Boolean(player.number === playerEnterId),
+              };
+              setMessages([...messages, newMessage]);
+            }
+          });
+        }
+      }
+    });
+
     return () => {
       socket.off("game:chat:send");
+      socket.off("chat:subject:send");
     };
   }, [socket, messages, playerEnterId, gameInfo]);
 
