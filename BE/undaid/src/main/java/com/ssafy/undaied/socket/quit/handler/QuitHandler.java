@@ -43,7 +43,7 @@ public class QuitHandler {
                         Integer userId = Integer.parseInt(userIdStr);
                         Integer gameId = Integer.parseInt(gameIdStr);
 
-                        log.info("Player leaving game - gameId: {}", gameId);
+                        log.info("플레이어가 게임을 나갔습니다. - gameId: {}", gameId);
 
                         // 🔹 퇴장 처리
                         boolean success = quitService.leaveGame(client, requestDto.isInGame());

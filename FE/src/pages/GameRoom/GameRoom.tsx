@@ -334,7 +334,7 @@ function GameRoom() {
     scrollToBottom();
   }, [messages]);
   return (
-    <>
+ <>
       <AudioPlayer src={gameRoomBgm} isPlaying={true} shouldLoop={true} />
       <div className="bg-[#07070a]">
         <div className="background-gradient max-w-[90rem] mx-auto px-4 sm:px-4 md:px-6">
