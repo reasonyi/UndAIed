@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { atom, useRecoilState, RecoilRoot } from "recoil";
-import { Maximize2, Minimize2, Volume2, VolumeX } from "lucide-react";
+// import { Maximize2, Minimize2, Volume2, VolumeX } from "lucide-react";
 
 // Recoil 상태 정의
 interface SettingsState {
