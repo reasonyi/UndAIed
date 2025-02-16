@@ -8,6 +8,7 @@ import com.ssafy.undaied.socket.common.exception.SocketException;
 import com.ssafy.undaied.socket.common.util.GameTimer;
 import com.ssafy.undaied.socket.common.util.GameTimerConstants;
 import com.ssafy.undaied.socket.infect.service.InfectService;
+import com.ssafy.undaied.socket.init.service.GameInitService;
 import com.ssafy.undaied.socket.result.service.GameResultService;
 import com.ssafy.undaied.socket.stage.constant.StageType;
 import com.ssafy.undaied.socket.stage.dto.response.RoundNotifyDto;
@@ -35,12 +36,13 @@ public class StageService {
     private final InfectService infectService;
     private final GameChatService gameChatService;
     private final GameResultService gameResultService;
+    private final GameInitService gameInitService;
 
     private static final Map<String, Integer> STAGE_DURATIONS = Map.of(
             "notify", 1,
             "result", 2,
-            StageType.SUBJECT_DEBATE.getRedisValue(), 5,  // 2분
-            StageType.FREE_DEBATE.getRedisValue(), 3000,     // 3분
+            StageType.SUBJECT_DEBATE.getRedisValue(), 15,  // 2분
+            StageType.FREE_DEBATE.getRedisValue(), 10,     // 3분
             StageType.VOTE.getRedisValue(), 10             // 30초
     );
 
@@ -90,6 +92,7 @@ public class StageService {
 
                 // 스테이지별 메인 로직 실행
                 handleStageUpdate(gameId, currentStage);
+
             });
         } catch (Exception e) {
             log.error("Error in startStage: {}", e.getMessage());
@@ -109,6 +112,7 @@ public class StageService {
     }
 
     private void handleStageUpdate(Integer gameId, StageType currentStage) {
+        gameInitService.sendGameInfo(gameId);
         switch (currentStage) {
             case START -> handleGameStart(gameId);
             case DAY -> handleDayStage(gameId);
@@ -141,8 +145,7 @@ public class StageService {
             log.info("InfectedPlayerNumber: {}", infectedPlayerNumber);
             namespace.getRoomOperations("game:" + gameId).sendEvent(
                     EventType.GAME_CHAT_SEND.getValue(),
-                    Map.of("number", 0,
-                            "content", "밤 사이에 인간 플레이어가 AI에게 감염되었습니다.")
+                    Map.of("number", 0, "content", "밤 사이에 인간 플레이어가 AI에게 감염되었습니다.")
             );
         } catch (Exception e) {
             log.error("Infection stage error: {}", e.getMessage());
