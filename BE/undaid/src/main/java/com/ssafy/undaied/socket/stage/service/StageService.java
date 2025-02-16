@@ -234,7 +234,7 @@ public class StageService {
     }
 
     private void handleGameEnd(Integer gameId) {
-        gameTimer.setTimer(gameId, GameTimerConstants.GAME_END, STAGE_DURATIONS.get("result"), () -> {
+        gameTimer.setTimer(gameId, GameTimerConstants.GAME_END, STAGE_DURATIONS.get("notify"), () -> {
             gameOver(gameId);
         });
         gameInitService.sendGameInfo(gameId);
