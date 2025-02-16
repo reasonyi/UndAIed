@@ -39,8 +39,8 @@ public class StageService {
     private final GameInitService gameInitService;
 
     private static final Map<String, Integer> STAGE_DURATIONS = Map.of(
-            "notify", 5,
-            "result", 8,
+            "notify", 1,
+            "result", 2,
             StageType.SUBJECT_DEBATE.getRedisValue(), 15,  // 2분
             StageType.FREE_DEBATE.getRedisValue(), 10,     // 3분
             StageType.VOTE.getRedisValue(), 10             // 30초
@@ -128,8 +128,8 @@ public class StageService {
         if (Integer.parseInt(getCurrentRound(gameId)) > 1) {
             handleInfection(gameId);
         }
-
-        gameTimer.setTimer(gameId, GameTimerConstants.STAGE_END_NOTIFY, STAGE_DURATIONS.get("notify"), () -> {
+        // 시작 시 5초
+        gameTimer.setTimer(gameId, GameTimerConstants.STAGE_END_NOTIFY, 5, () -> {
             try {
                 startStage(gameId, StageType.SUBJECT_DEBATE);
             } catch (Exception e) {
@@ -222,8 +222,8 @@ public class StageService {
             gameOver(gameId);
             return;
         }
-
-        gameTimer.setTimer(gameId, GameTimerConstants.STAGE_START_NOTIFY, STAGE_DURATIONS.get("notify"), () -> {
+        // 밤 진행 시간 5초
+        gameTimer.setTimer(gameId, GameTimerConstants.STAGE_START_NOTIFY, 5, () -> {
             try {
                 startStage(gameId, StageType.DAY);
             } catch (Exception e) {
