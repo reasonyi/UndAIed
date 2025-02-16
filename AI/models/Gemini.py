@@ -1,5 +1,6 @@
 import google.generativeai as genai
 from environs import Env
+# from .history import initialize_history
 from .history import history
 from .GeminiNoHistoryChatSession import NoHistoryChatSession
 
@@ -25,7 +26,8 @@ class GeminiBot:
         # 커스텀 ChatSession으로 초기화
         self.chat = NoHistoryChatSession(
             model=self.model,
-            history=history,  # 시스템 프롬프트만 담김, 이전 대화 기억하지 않음음
+            # history=initialize_history(),  # 시스템 프롬프트만 담김, 이전 대화 기억하지 않음
+            history=history,  # 시스템 프롬프트만 담김, 이전 대화 기억하지 않음
             enable_automatic_function_calling=False,
         )
 
