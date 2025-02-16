@@ -39,8 +39,8 @@ public class StageService {
     private final GameInitService gameInitService;
 
     private static final Map<String, Integer> STAGE_DURATIONS = Map.of(
-            "notify", 1,
-            "result", 2,
+            "notify", 5,
+            "result", 8,
             StageType.SUBJECT_DEBATE.getRedisValue(), 15,  // 2분
             StageType.FREE_DEBATE.getRedisValue(), 10,     // 3분
             StageType.VOTE.getRedisValue(), 10             // 30초
@@ -114,7 +114,6 @@ public class StageService {
 
     private void handleStageUpdate(Integer gameId, StageType currentStage) {
         switch (currentStage) {
-            case START -> handleGameStart(gameId);
             case DAY -> handleDayStage(gameId);
             case SUBJECT_DEBATE -> handleSubjectDebate(gameId);
             case FREE_DEBATE -> handleFreeDebate(gameId);
@@ -156,7 +155,6 @@ public class StageService {
 
     private void handleSubjectDebate(Integer gameId) {
         gameTimer.setTimer(gameId, GameTimerConstants.STAGE_START_NOTIFY, STAGE_DURATIONS.get("notify"), () -> {
-            gameChatService.sendSubject(gameId);
 
             gameTimer.setTimer(gameId, GameTimerConstants.STAGE_MAIN, STAGE_DURATIONS.get(StageType.SUBJECT_DEBATE.getRedisValue()), () -> {
                 handleNotifyEndStage(gameId, StageType.SUBJECT_DEBATE);
@@ -174,15 +172,14 @@ public class StageService {
                         handleGameError(gameId, e);
                     }
                 });
-                gameInitService.sendGameInfo(gameId);
             });
+            gameInitService.sendGameInfo(gameId);
         });
     }
 
     private void handleFreeDebate(Integer gameId) {
         gameTimer.setTimer(gameId, GameTimerConstants.STAGE_START_NOTIFY, STAGE_DURATIONS.get("notify"), () -> {
 
-            gameInitService.sendGameInfo(gameId);
             gameTimer.setTimer(gameId, GameTimerConstants.STAGE_MAIN, STAGE_DURATIONS.get(StageType.FREE_DEBATE.getRedisValue()), () -> {
                 handleNotifyEndStage(gameId, StageType.FREE_DEBATE);
 
@@ -201,7 +198,6 @@ public class StageService {
     private void handleVote(Integer gameId) {
         gameTimer.setTimer(gameId, GameTimerConstants.STAGE_START_NOTIFY, STAGE_DURATIONS.get("notify"), () -> {
 
-            gameInitService.sendGameInfo(gameId);
             gameTimer.setTimer(gameId, GameTimerConstants.STAGE_MAIN, STAGE_DURATIONS.get(StageType.VOTE.getRedisValue()), () -> {
                 handleNotifyEndStage(gameId, StageType.VOTE);
 
@@ -241,6 +237,7 @@ public class StageService {
         gameTimer.setTimer(gameId, GameTimerConstants.GAME_END, STAGE_DURATIONS.get("notify"), () -> {
             gameOver(gameId);
         });
+        gameInitService.sendGameInfo(gameId);
     }
 
     private void saveCurrentStage(Integer gameId, StageType currentStage) {

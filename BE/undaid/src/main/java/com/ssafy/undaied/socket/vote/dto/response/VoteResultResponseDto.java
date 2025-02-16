@@ -40,7 +40,7 @@ public class VoteResultResponseDto {
     public static VoteResultResponseDto notifyDraw(List<Integer> maxVotedCandidates, int receivedCount) {
         List<String> numbers = maxVotedCandidates.stream().map(number -> "익명 " + number.toString()).collect(Collectors.toList());
         String numbersString = String.join(", ", numbers);
-        String content = numbersString + " 플레이어가 각각" + receivedCount + " 표를 받아 처형 대상자가 없습니다.";
+        String content = numbersString + " 플레이어가 각각 " + receivedCount + "표를 받아 처형 대상자가 없습니다.";
 
         return VoteResultResponseDto.builder()
                 .content(content)
