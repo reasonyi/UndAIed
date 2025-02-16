@@ -18,6 +18,17 @@ import { IMessage } from "../../types/gameroom";
 import { IAnonimus } from "../../types/gameplay";
 import { toast } from "sonner";
 
+//띄운 메세지, max_time 을 저장장
+export const STAGE_INFO = {
+  start: ["게임 준비 중...", 0],
+  day: ["라운드 준비 중...", 5],
+  subject_debate: ["주제 토론 시간", 15],
+  free_debate: ["자유 토론 시간", 10],
+  vote: ["투표 시간", 10],
+  night: ["인간 공격 중...", 5],
+  finish: ["게임 종료", 0],
+};
+
 interface IChatSend {
   number: number;
   content: string;
@@ -26,7 +37,7 @@ interface IChatSend {
 interface IGameInfoSend {
   gameId: number;
   round: number;
-  stage: string;
+  stage: keyof typeof STAGE_INFO;
   timer: number;
   players: IAnonimus[];
 }
