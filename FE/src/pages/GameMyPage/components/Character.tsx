@@ -1,6 +1,7 @@
 import CharacterImage1 from "../../../assets/character/character-demo.png";
 import CharacterImage2 from "../../../assets/character/character-demo.png";
 import CharacterImage3 from "../../../assets/character/character-demo.png";
+import { useClickSound } from "../../../hooks/useClickSound";
 import { useUpdateProfile, useUserProfile } from "../../../hooks/useUserData";
 import { useState } from "react";
 
@@ -12,6 +13,7 @@ function Character() {
   const blockActive =
     "active:bg-[#f837644e] active:border-[#f837644e] active:shadow-sm";
 
+  const clickSound = useClickSound();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(1);
   const [isRotating, setIsRotating] = useState(false);
@@ -121,6 +123,7 @@ function Character() {
         </div>
         <button
           onClick={() => setIsModalOpen(true)}
+          onMouseDown={clickSound}
           className={`${blockStyle} ${blockHover} ${blockActive} text-center py-4 mb-5 text-sm md:text-base md:w-44 absolute bottom-0 left-1/2 transform -translate-x-1/2`}
         >
           캐릭터 선택
