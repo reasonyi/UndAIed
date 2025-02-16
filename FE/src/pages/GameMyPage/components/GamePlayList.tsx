@@ -52,29 +52,35 @@ function MyPlayList() {
     <>
       <style>{customScrollbarStyle}</style>
       <div className="p-4 md:p-6 relative z-20">
-        <div className="text-lg md:text-2xl mb-3  md:mb-4 text-white">
+        <div className="text-lg md:text-2xl mb-3 md:mb-4 text-white">
           플레이 기록
         </div>
-        <div className="custom-scrollbar space-y-2 overflow-y-auto max-h-[740px]  ">
-          {gameList.map((game: Game, index: number) => (
-            <div
-              key={index}
-              onClick={() => handleGameClick(game)}
-              onMouseDown={clickSound}
-              className={`${blockStyle} ${blockHover} ${blockActive} p-2 md:p-3 md:px-6 md:w-96 w-96 px-6 flex justify-between items-center text-sm md:text-base cursor-pointer`}
-            >
-              <span className="text-center">{game.gameId}</span>
-              <span className="text-center truncate px-2">
-                {game.roomTitle}
-              </span>
-              <span className="text-center">
-                {new Date(game.startedAt).toLocaleDateString()}
-              </span>
-              <span className="text-center">
-                {game.playTime.split(":").slice(1).join(":")}
-              </span>
+        <div className="custom-scrollbar space-y-2 overflow-y-auto max-h-[740px]">
+          {gameList && gameList.length > 0 ? (
+            gameList.map((game: Game, index: number) => (
+              <div
+                key={index}
+                onClick={() => handleGameClick(game)}
+                onMouseDown={clickSound}
+                className={`${blockStyle} ${blockHover} ${blockActive} p-2 md:p-3 md:px-6 md:w-96 w-96 px-6 flex justify-between items-center text-sm md:text-base cursor-pointer`}
+              >
+                <span className="text-center">{game.gameId}</span>
+                <span className="text-center truncate px-2">
+                  {game.roomTitle}
+                </span>
+                <span className="text-center">
+                  {new Date(game.startedAt).toLocaleDateString()}
+                </span>
+                <span className="text-center">
+                  {game.playTime.split(":").slice(1).join(":")}
+                </span>
+              </div>
+            ))
+          ) : (
+            <div className={`${blockStyle} p-4 text-center text-white`}>
+              아직 플레이 기록이 없습니다
             </div>
-          ))}
+          )}
         </div>
 
         {/* 게임 기록 상세 모달 */}
