@@ -75,9 +75,9 @@ public class GameResultService {
         GameResultResponseDto responseDto = createGameResultResponse(gameId, winner, message,
                 playerStatus, mappingKey, userNicknameKey);
         socketIOServer.getRoomOperations(GAME_KEY_PREFIX + gameId)
-                .sendEvent("game:result", responseDto);
+                .sendEvent("game:result:send", responseDto);
 
-        log.info("Game result broadcast - gameId: {}, winner: {}", gameId, winner);
+        log.info("게임 결과 - gameId: {}, winner: {}", gameId, winner);
 
         return responseDto;  // ✅ 게임 결과를 반환하도록 변경
     }

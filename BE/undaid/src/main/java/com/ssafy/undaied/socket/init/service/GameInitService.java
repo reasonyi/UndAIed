@@ -301,6 +301,7 @@ public class GameInitService {
         String statusKey = GAME_KEY_PREFIX + gameId + ":player_status";
         String userNicknameKey = GAME_KEY_PREFIX + gameId + ":user_nicknames";
         String numberNicknameKey = GAME_KEY_PREFIX + gameId + ":number_nicknames";
+        String aiKey = GAME_KEY_PREFIX + gameId + ":ai_numbers";
 
         // 실제 플레이어 닉네임 매핑
         Map<Integer, String> userNicknames = room.getCurrentPlayers().stream()
@@ -333,6 +334,9 @@ public class GameInitService {
             redisTemplate.opsForHash().put(mappingKey, String.valueOf(aiId), String.valueOf(aiNumber));
             redisTemplate.opsForHash().put(userNicknameKey, String.valueOf(aiId), "AI-" + aiId);
             savePlayerStatus(statusKey, String.valueOf(aiNumber), false, true);
+
+            // AI 번호를 바로 Redis Set에 추가
+            redisTemplate.opsForSet().add(aiKey, String.valueOf(aiNumber));
         
             // AI 정보 리스트 구성 (Python 서버로 전송용)
             aiInfoList.add(new AiInfo(aiId, aiNumber));
