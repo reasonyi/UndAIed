@@ -39,8 +39,8 @@ public class StageService {
     private final GameInitService gameInitService;
 
     private static final Map<String, Integer> STAGE_DURATIONS = Map.of(
-            "notify", 3,
-            "result", 5,
+            "notify", 5,
+            "result", 8,
             StageType.SUBJECT_DEBATE.getRedisValue(), 15,  // 2분
             StageType.FREE_DEBATE.getRedisValue(), 10,     // 3분
             StageType.VOTE.getRedisValue(), 10             // 30초
