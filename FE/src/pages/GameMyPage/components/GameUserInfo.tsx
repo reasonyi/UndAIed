@@ -1,19 +1,20 @@
 import { useState } from "react";
 import DonutChart from "../../GameMain/components/DonutChart";
 import { GameProfileEditor } from "./GameProfileEditor";
-import { getPlayerIcon } from "../../Util/PlayerIcon";
+import { getPlayerIcon } from "../../../util/PlayerIcon";
 import { useUserProfile } from "../../../hooks/useUserData";
+import { useClickSound } from "../../../hooks/useClickSound";
 
+const blockStyle =
+  "bg-[#0000006c] border border-[#f74a5c]/40 backdrop-blur-[12.20px] text-[#fffbfb] rounded-[5px] transition-all duration-200";
+const blockHover =
+  "hover:bg-[#f8376467] hover:border-[#f93c4f] hover:shadow-[0_0_15px_0] hover:shadow-[#F74A5C]";
+const blockActive =
+  "active:bg-[#f837644e] active:border-[#f837644e] active:shadow-sm";
 export function GameUserInfo() {
-  const blockStyle =
-    "bg-[#0000006c] border border-[#f74a5c]/40 backdrop-blur-[12.20px] text-[#fffbfb] rounded-[5px] transition-all duration-200";
-  const blockHover =
-    "hover:bg-[#f8376467] hover:border-[#f93c4f] hover:shadow-[0_0_15px_0] hover:shadow-[#F74A5C]";
-  const blockActive =
-    "active:bg-[#f837644e] active:border-[#f837644e] active:shadow-sm";
-
-  const [isOpen, setIsOpen] = useState(false);
+  const clickSound = useClickSound();
   const { data: response, isLoading, error } = useUserProfile();
+  const [isOpen, setIsOpen] = useState(false);
   const userInfo = response?.data;
   const handleClick = () => {
     setIsOpen(!isOpen);
@@ -71,6 +72,7 @@ export function GameUserInfo() {
         </div>
         <div
           onClick={handleClick}
+          onMouseDown={clickSound}
           className={`${blockStyle} ${blockActive} ${blockHover} hover:bg-[#f8376441] text-center py-2 px-3 md:py-2 mt-3 md:mt-4 text-sm md:text-base cursor-pointer`}
         >
           정보 수정

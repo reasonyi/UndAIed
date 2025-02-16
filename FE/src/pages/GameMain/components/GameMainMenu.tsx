@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import settingIcon from "../../../assets/icon/setting.png";
 import bellIcon from "../../../assets/icon/bell.svg";
 import friendsIcon from "../../../assets/icon/friends.svg";
-import SoundSettingsModal from "../../Util/Option"; // 경로는 실제 위치에 맞게 조정해주세요
+import SoundSettingsModal from "../../../util/Option"; // 경로는 실제 위치에 맞게 조정해주세요
 
 function GameMainMenu() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);

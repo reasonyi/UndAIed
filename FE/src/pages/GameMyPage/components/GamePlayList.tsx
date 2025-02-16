@@ -4,6 +4,7 @@ import rightIcon from "../../../assets/icon/right.svg";
 import { useUserProfile } from "../../../hooks/useUserData";
 import { Game } from "../../../types/User";
 import GamePlayDetail from "./GamePlayDetail";
+import { useClickSound } from "../../../hooks/useClickSound";
 
 const customScrollbarStyle = `
 .custom-scrollbar::-webkit-scrollbar {
@@ -26,6 +27,8 @@ const customScrollbarStyle = `
 `;
 
 function MyPlayList() {
+  const { data: response, isLoading, error } = useUserProfile();
+  const clickSound = useClickSound();
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -36,7 +39,6 @@ function MyPlayList() {
   const blockActive =
     "active:bg-[#f837644e] active:border-[#f837644e] active:shadow-sm";
 
-  const { data: response, isLoading, error } = useUserProfile();
   const gameList = response?.data.game;
 
   const handleGameClick = (game: Game) => {
@@ -58,6 +60,7 @@ function MyPlayList() {
             <div
               key={index}
               onClick={() => handleGameClick(game)}
+              onMouseDown={clickSound}
               className={`${blockStyle} ${blockHover} ${blockActive} p-2 md:p-3 md:px-6 md:w-96 w-96 px-6 flex justify-between items-center text-sm md:text-base cursor-pointer`}
             >
               <span className="text-center">{game.gameId}</span>
@@ -73,20 +76,6 @@ function MyPlayList() {
             </div>
           ))}
         </div>
-        {/* 
-      <div className="text-center mt-3 md:mt-5 text-xl md:text-base text-white">
-        <button
-          className={`${blockActive} ${blockHover} ${blockStyle} mr-3 px-3 py-1.5 align-middle`}
-        >
-          <img src={leftIcon} alt="left" className="filter invert" />
-        </button>
-        1 / 10
-        <button
-          className={`${blockActive} ${blockHover} ${blockStyle} ml-3 px-3 py-1.5 align-middle`}
-        >
-          <img src={rightIcon} alt="right" className="filter invert" />
-        </button>
-      </div> */}
 
         {/* 게임 기록 상세 모달 */}
         {selectedGame && (
