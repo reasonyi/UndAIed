@@ -1,5 +1,6 @@
 package com.ssafy.undaied.socket.chat.handler;
 
+import com.corundumstudio.socketio.AckRequest;
 import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.SocketIONamespace;
 import com.corundumstudio.socketio.SocketIOServer;
@@ -32,49 +33,43 @@ public class GameChatHandler {
                 (client, data, ackRequest) -> {
                     try {
                         log.info("게임 채팅 요청 확인");
-
-                        // data 객체 자체 확인
                         log.info("Received data object: {}", data);
-
-                        // content 필드 값 확인
                         log.info("Content from data: {}", data.getContent());
 
                         Integer gameId = client.get("gameId");
-                        log.warn("gameId를 찾았습니다: {}", gameId);
                         Integer userId = client.get("userId");
-                        log.warn("userId를 찾았습니다: {}", userId);
+
+                        if (gameId == null || userId == null) {
+                            throw new IllegalStateException("게임 또는 사용자 정보를 찾을 수 없습니다.");
+                        }
+
                         String stageKey = GAME_KEY_PREFIX + gameId + ":stage";
-
                         String currentStage = redisTemplate.opsForValue().get(stageKey);
-
                         log.info("현재 stage: {}", currentStage);
 
                         if ("subject_debate".equals(currentStage)) {
-                            gameChatService.storeSubjectChat(gameId, client, userId, data);
+                            String errorMessage = gameChatService.storeSubjectChat(gameId, client, userId, data);
+                            sendResponse(ackRequest, errorMessage == null, errorMessage);
                         } else {
-                            gameChatService.processFreeChat(gameId, client, userId, data);
-                        }
-
-                        // 성공 응답 전송
-                        if (ackRequest.isAckRequested()) {
-                            Map<String, Object> response = new HashMap<>();
-                            response.put("success", true);
-                            response.put("errorMessage", null);
-                            response.put("data", null);
-                            ackRequest.sendAckData(response);
+                            String errorMessage = gameChatService.processFreeChat(gameId, client, userId, data);
+                            sendResponse(ackRequest, errorMessage == null, errorMessage);
                         }
 
                     } catch (Exception e) {
-                        log.error("Game chat failed: {}", e.getMessage());
-
-                        // 클라이언트에게 오류 이벤트 전송
-                        Map<String, Object> errorData = new HashMap<>();
-                        errorData.put("code", "GAME_CHAT_FAILED");
-                        errorData.put("message", "게임 채팅 전송 실패");
-                        client.sendEvent("error", errorData);
+                        log.error("채팅 처리 중 오류 발생: {}", e.getMessage(), e);
+                        sendResponse(ackRequest, false, "채팅 처리 중 오류가 발생했습니다. 다시 시도해 주세요.");
                     }
                 });
     }
-}
 
+    private void sendResponse(AckRequest ackRequest, boolean success, String errorMessage) {
+        if (ackRequest.isAckRequested()) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", success);
+            response.put("errorMessage", errorMessage);
+            response.put("data", null);
+            ackRequest.sendAckData(response);
+        }
+    }
+}
 
