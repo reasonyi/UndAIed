@@ -17,7 +17,6 @@ import { userState } from "../../store/userState";
 import LoginContainer from "./components/LoginContainer";
 import LogoutContainer from "./components/LogoutContainer";
 
-import Setting from "../../util/Setting";
 import { preloadAudio } from "../../util/AudioCache";
 import lobbyBgm from "../../assets/bgm/lobby.mp3";
 import gameRoomBgm from "../../assets/bgm/game-room.mp3";
@@ -137,7 +136,6 @@ function Home() {
 
   return (
     <div className="">
-      <Setting></Setting>
       <Header scrollRatio={scrollRatio} />
       <HeaderTemp />
       <div className="on-scroll flex w-screen min-h-[calc(100vh-3.5rem)]">
