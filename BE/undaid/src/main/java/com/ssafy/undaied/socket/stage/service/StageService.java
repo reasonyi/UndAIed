@@ -49,7 +49,7 @@ public class StageService {
     public void handleGameStart(Integer gameId) {
         String roundKey = "game:" + gameId + ":round";
         redisTemplate.opsForValue().set(roundKey, "0");
-
+        
         handleNotifyStartStage(gameId, StageType.START);
         gameTimer.setTimer(gameId, GameTimerConstants.STAGE_START_NOTIFY, STAGE_DURATIONS.get("notify"), () -> {
             try {
@@ -58,6 +58,7 @@ public class StageService {
                 handleGameError(gameId, e);
             }
         });
+        gameInitService.sendGameInfo(gameId);
     }
 
     private void startStage(Integer gameId, StageType currentStage) throws SocketException {
@@ -112,7 +113,6 @@ public class StageService {
     }
 
     private void handleStageUpdate(Integer gameId, StageType currentStage) {
-        gameInitService.sendGameInfo(gameId);
         switch (currentStage) {
             case START -> handleGameStart(gameId);
             case DAY -> handleDayStage(gameId);
@@ -137,6 +137,8 @@ public class StageService {
                 handleGameError(gameId, e);
             }
         });
+        gameInitService.sendGameInfo(gameId);
+
     }
 
     private void handleInfection(Integer gameId) {
@@ -154,7 +156,6 @@ public class StageService {
 
     private void handleSubjectDebate(Integer gameId) {
         gameTimer.setTimer(gameId, GameTimerConstants.STAGE_START_NOTIFY, STAGE_DURATIONS.get("notify"), () -> {
-            gameInitService.sendGameInfo(gameId);
             gameChatService.sendSubject(gameId);
 
             gameTimer.setTimer(gameId, GameTimerConstants.STAGE_MAIN, STAGE_DURATIONS.get(StageType.SUBJECT_DEBATE.getRedisValue()), () -> {
@@ -173,6 +174,7 @@ public class StageService {
                         handleGameError(gameId, e);
                     }
                 });
+                gameInitService.sendGameInfo(gameId);
             });
         });
     }
@@ -192,6 +194,7 @@ public class StageService {
                     }
                 });
             });
+            gameInitService.sendGameInfo(gameId);
         });
     }
 
@@ -214,6 +217,7 @@ public class StageService {
                     }
                 });
             });
+            gameInitService.sendGameInfo(gameId);
         });
     }
 
@@ -230,6 +234,7 @@ public class StageService {
                 handleGameError(gameId, e);
             }
         });
+        gameInitService.sendGameInfo(gameId);
     }
 
     private void handleGameEnd(Integer gameId) {
