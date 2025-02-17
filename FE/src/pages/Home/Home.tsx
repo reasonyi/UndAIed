@@ -94,30 +94,27 @@ function Home() {
   }, []);
 
   useEffect(() => {
-    const ONE_HOUR = 3600000; // 1시간
-    const visitedTime = localStorage.getItem("visitedTime");
-    const now = Date.now();
-
-    // 방문 기록이 없는 경우 => 현재 시간 저장, tutorial 시작 (top: 0)
-    if (!visitedTime) {
-      localStorage.setItem("visitedTime", now.toString());
-      return;
-    }
-
-    // 방문 기록이 존재하는 경우
-    const diff = now - parseInt(visitedTime, 10);
-
-    if (diff < ONE_HOUR) {
-      // 1시간 이내 재방문 => 튜토리얼 스킵
-      window.scrollTo({
-        top: window.innerHeight * 3,
-        behavior: "instant", // 'smooth'로 변경 가능
-      });
-    } else {
-      // 1시간 이상 지남 => visitedTime 갱신, 다시 튜토리얼 보여주기
-      localStorage.setItem("visitedTime", now.toString());
-      // 굳이 따로 scrollTo(0) 할 필요 없이, 기본이 0 위치이므로 생략 가능
-    }
+    // const ONE_HOUR = 3600000; // 1시간
+    // const visitedTime = localStorage.getItem("visitedTime");
+    // const now = Date.now();
+    // // 방문 기록이 없는 경우 => 현재 시간 저장, tutorial 시작 (top: 0)
+    // if (!visitedTime) {
+    //   localStorage.setItem("visitedTime", now.toString());
+    //   return;
+    // }
+    // // 방문 기록이 존재하는 경우
+    // const diff = now - parseInt(visitedTime, 10);
+    // if (diff < ONE_HOUR) {
+    //   // 1시간 이내 재방문 => 튜토리얼 스킵
+    //   window.scrollTo({
+    //     top: window.innerHeight * 3,
+    //     behavior: "instant", // 'smooth'로 변경 가능
+    //   });
+    // } else {
+    //   // 1시간 이상 지남 => visitedTime 갱신, 다시 튜토리얼 보여주기
+    //   localStorage.setItem("visitedTime", now.toString());
+    //   // 굳이 따로 scrollTo(0) 할 필요 없이, 기본이 0 위치이므로 생략 가능
+    // }
   }, []);
 
   const onChervonClick = () => {

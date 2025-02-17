@@ -173,7 +173,7 @@ function LoginContainer({ userInfo }: ILoginContainer) {
         <button onClick={handleGameStart} className="game-button">
           GAME START
         </button>
-        <div className="w-[22.5rem] h-[10rem] flex justify-center items-center bg-black text-white border-2 border-[#872341] rounded-sm">
+        <div className="w-[22.5rem] h-[10rem] flex justify-center items-center bg-black text-white border-2 border-[#822424] rounded-sm">
           <div className="w-24 h-24 flex justify-center items-center mr-5">
             <img
               className="w-28 h-28"
@@ -181,29 +181,35 @@ function LoginContainer({ userInfo }: ILoginContainer) {
               alt=""
             />
           </div>
-          <div>
-            <div className="flex items-end text-lg">
-              <h1 className="font-semibold max-w-[10rem] truncate">
-                {userInfo.nickname}님
-              </h1>
+          <div className="flex flex-col">
+            <div className="flex items-center justify-between text-lg pb-0.5">
+              <div className="font-semibold">{userInfo.nickname}님</div>
               <button
-                className="text-xs ml-3 border-[1px] p-1 hover:bg-[#872341] transition-colors"
+                className="text-[11px] h-6 ml-3 border-[1px] rounded-sm px-2 hover:bg-[#4e4e4e60] transition-colors flex items-center justify-center"
                 onClick={handleLogout}
               >
                 로그아웃
               </button>
             </div>
             <h2 className="text-sm">{userInfo.email}</h2>
-            <div className="text-xs">
-              승률 | {userInfo.totalWin}승 | {userInfo.totalLose}패{" | "}
-              {userInfo.totalWin + userInfo.totalLose === 0
-                ? "0"
-                : (
-                    (userInfo.totalWin /
-                      (userInfo.totalWin + userInfo.totalLose)) *
-                    100
-                  ).toFixed(1)}
-              %
+            <div className="text-xs flex items-center space-x-2">
+              <span className="text-red-400">승률</span>
+              <div className="flex items-center space-x-1">
+                <span>{userInfo.totalWin}승</span>
+                <span>|</span>
+                <span>{userInfo.totalLose}패</span>
+                <span>|</span>
+                <span>
+                  {userInfo.totalWin + userInfo.totalLose === 0
+                    ? "0"
+                    : (
+                        (userInfo.totalWin /
+                          (userInfo.totalWin + userInfo.totalLose)) *
+                        100
+                      ).toFixed(1)}
+                  %
+                </span>
+              </div>
             </div>
           </div>
         </div>
