@@ -47,7 +47,7 @@ json input example:
 ```
 [
     {
-        "round_num" : {
+        1 : {
             "topic_debate" : [
                 {
                     "user_id": 0,
