@@ -12,6 +12,8 @@ interface IRightGameSideBarProps {
   players?: IAnonimus[];
   /** 플레이어 아이콘 배열 */
   iconArr: string[];
+  stage?: string;
+  onVoteSubmit: (target: number) => void;
 }
 const peopleGroup: IconDefinition = faPeopleGroup;
 
@@ -20,7 +22,12 @@ const peopleGroup: IconDefinition = faPeopleGroup;
  * playerNum(1~6)에 해당하는 유저를 찾아서
  * GameProfile / DiedProfile을 렌더링
  */
-function RightGameSideBar({ players, iconArr }: IRightGameSideBarProps) {
+function RightGameSideBar({
+  players,
+  iconArr,
+  stage,
+  onVoteSubmit,
+}: IRightGameSideBarProps) {
   const [isRightOpen, setIsRightOpen] = useState(true);
   return (
     <>
@@ -44,6 +51,8 @@ function RightGameSideBar({ players, iconArr }: IRightGameSideBarProps) {
                   />
                 ) : (
                   <GameProfile
+                    stage={stage}
+                    onVoteSubmit={onVoteSubmit}
                     nickname={`익명${players[0].number}`}
                     playerNum={players[0].number}
                     icon={iconArr[players[0].number]}
@@ -63,6 +72,8 @@ function RightGameSideBar({ players, iconArr }: IRightGameSideBarProps) {
                   />
                 ) : (
                   <GameProfile
+                    stage={stage}
+                    onVoteSubmit={onVoteSubmit}
                     nickname={`익명${players[1].number}`}
                     playerNum={players[1].number}
                     icon={iconArr[players[1].number]}
@@ -82,6 +93,8 @@ function RightGameSideBar({ players, iconArr }: IRightGameSideBarProps) {
                   />
                 ) : (
                   <GameProfile
+                    stage={stage}
+                    onVoteSubmit={onVoteSubmit}
                     nickname={`익명${players[2].number}`}
                     playerNum={players[2].number}
                     icon={iconArr[players[2].number]}
@@ -101,6 +114,8 @@ function RightGameSideBar({ players, iconArr }: IRightGameSideBarProps) {
                   />
                 ) : (
                   <GameProfile
+                    stage={stage}
+                    onVoteSubmit={onVoteSubmit}
                     nickname={`익명${players[3].number}`}
                     playerNum={players[3].number}
                     icon={iconArr[players[3].number]}
@@ -120,6 +135,8 @@ function RightGameSideBar({ players, iconArr }: IRightGameSideBarProps) {
                   />
                 ) : (
                   <GameProfile
+                    stage={stage}
+                    onVoteSubmit={onVoteSubmit}
                     nickname={`익명${players[4].number}`}
                     playerNum={players[4].number}
                     icon={iconArr[players[4].number]}
@@ -139,6 +156,8 @@ function RightGameSideBar({ players, iconArr }: IRightGameSideBarProps) {
                   />
                 ) : (
                   <GameProfile
+                    stage={stage}
+                    onVoteSubmit={onVoteSubmit}
                     nickname={`익명${players[5].number}`}
                     playerNum={players[5].number}
                     icon={iconArr[players[5].number]}
@@ -158,6 +177,8 @@ function RightGameSideBar({ players, iconArr }: IRightGameSideBarProps) {
                   />
                 ) : (
                   <GameProfile
+                    stage={stage}
+                    onVoteSubmit={onVoteSubmit}
                     nickname={`익명${players[6].number}`}
                     playerNum={players[6].number}
                     icon={iconArr[players[6].number]}
@@ -177,6 +198,8 @@ function RightGameSideBar({ players, iconArr }: IRightGameSideBarProps) {
                   />
                 ) : (
                   <GameProfile
+                    stage={stage}
+                    onVoteSubmit={onVoteSubmit}
                     nickname={`익명${players[7].number}`}
                     playerNum={players[7].number}
                     icon={iconArr[players[7].number]}
