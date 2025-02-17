@@ -76,10 +76,10 @@ public class GameResultService {
                 throw new SocketException(NO_PLAYERS_FOUND);
             }
 
-            boolean isHumanDefeated = isHumanDefeated(playerStatus, humanNumbers);
-            boolean isAIDefeated = isAIDefeated(playerStatus, aiNumbers);
+            int aliveHumans = countAliveHuman(playerStatus, humanNumbers);
+            int aliveAIs = countAliveAI(playerStatus, aiNumbers);
 
-            return isHumanDefeated ? "AI" : (isAIDefeated ? "HUMAN" : null);
+            return aliveHumans <= aliveAIs ? "AI" : (aliveAIs == 0 ? "HUMAN" : null);
 
         } catch (Exception e) {
             log.error("Error checking game result for game {}: {}", gameId, e.getMessage());
@@ -87,32 +87,38 @@ public class GameResultService {
         }
     }
 
-    private boolean isHumanDefeated(Map<Object, Object> playerStatus, List<String> humanNumbers) {
+    private int countAliveHuman(Map<Object, Object> playerStatus, List<String> humanNumbers) {
         try {
-            return humanNumbers.stream()
-                    .allMatch(number -> {
+            long count = humanNumbers.stream()
+                    .filter(number ->  {
                         String status = playerStatus.get(number).toString();
-                        if (!status.contains("isInGame=true")) {
-                            return false;
-                        }
-                        return status.contains("isDied=true");
-                    });
+                        boolean isAlive = !status.contains("isDied=true") && status.contains("isInGame=true");
+                        log.debug("Player {} status: {}, isAlive: {}", number, status, isAlive);
+                        return  isAlive;
+                    }).count();
+
+            return (int) count;
+
         } catch (Exception e) {
-            log.error("인간 패배 여부 확인 중 에러: {}", e.getMessage());
-            return false;
+            log.error("인간 생존 수 확인 중 에러: {}", e.getMessage());
+            return -1;
         }
     }
 
-    private boolean isAIDefeated(Map<Object, Object> playerStatus, Set<String> aiNumbers) {
+    private int countAliveAI(Map<Object, Object> playerStatus, Set<String> aiNumbers) {
         try {
-            return aiNumbers.stream()
-                    .allMatch(number -> {
+            long count = aiNumbers.stream()
+                    .filter(number -> {
                         String status = playerStatus.get(number).toString();
-                        return status.contains("isDied=true") && status.contains("isInGame=true");
-                    });
+                        boolean isAlive = !status.contains("isDied=true") && status.contains("isInGame=true");
+                        log.debug("AI {} status: {}, isAlive: {}", number, status, isAlive);
+                        return isAlive;
+                    }).count();
+
+            return (int) count;
         } catch (Exception e) {
-            log.error("AI 패배 조건 확인 중 에러: {}", e.getMessage());
-            return false;
+            log.error("AI 생존 수 확인 중 에러: {}", e.getMessage());
+            return -1;
         }
     }
 

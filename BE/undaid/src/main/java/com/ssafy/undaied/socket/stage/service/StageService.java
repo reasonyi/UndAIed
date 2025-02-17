@@ -141,7 +141,7 @@ public class StageService {
             log.info("InfectedPlayerNumber: {}", infectedPlayerNumber);
             namespace.getRoomOperations("game:" + gameId).sendEvent(
                     EventType.GAME_CHAT_SEND.getValue(),
-                    Map.of("number", 0, "content", "밤 사이에 인간 플레이어가 AI에게 감염되었습니다.")
+                    Map.of("number", 0, "content", "밤 사이에 인간 한 명이 사라졌습니다.")
             );
         } catch (Exception e) {
             log.error("Infection stage error: {}", e.getMessage());
@@ -242,7 +242,7 @@ public class StageService {
         saveCurrentStage(gameId, StageType.FINISH);
         gameInitService.sendGameInfo(gameId);
 
-        StageNotifyDto.notifyEndStage(StageType.FINISH);
+        handleNotifyEndStage(gameId, StageType.FINISH);
         gameTimer.setTimer(gameId, GameTimerConstants.GAME_END, STAGE_DURATIONS.get("notify"), () -> {
             gameOver(gameId, winner);
         });
