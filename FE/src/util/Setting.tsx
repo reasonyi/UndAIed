@@ -1,7 +1,16 @@
-import React, { useEffect } from "react";
-import { atom, useRecoilState, RecoilRoot } from "recoil";
-// import { Maximize2, Minimize2, Volume2, VolumeX } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { atom, useRecoilState, useSetRecoilState } from "recoil";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faMaximize,
+  faMinimize,
+  faVolumeHigh,
+  faVolumeXmark,
+  faXmark,
+} from "@fortawesome/free-solid-svg-icons";
+import setting from "../assets/icon/setting.png";
 
+import { setShowIntroState } from "../store/showState";
 // Recoil 상태 정의
 interface SettingsState {
   isFullscreen: boolean;
@@ -9,10 +18,16 @@ interface SettingsState {
   volume: number;
 }
 
+interface SettingProps {
+  title: string;
+  first: boolean;
+  setFirst: (value: boolean) => void;
+}
+
 const blockStyle =
   "bg-[#0000006c] border border-[#f74a5c]/40 backdrop-blur-[12.20px] text-[#fffbfb] rounded-[5px] transition-all duration-200";
 const blockHover =
-  "hover:bg-[#f8376467] hover:border-[#f93c4f] hover:shadow-[0_0_15px_0] hover:shadow-[#F74A5C]";
+  "hover: hover:border-[#f93c4f] hover:shadow-[0_0_15px_0] hover:shadow-[#F74A5C]";
 const blockActive =
   "active:bg-[#f837644e] active:border-[#f837644e] active:shadow-sm";
 
@@ -38,12 +53,16 @@ export const settingsState = atom<SettingsState>({
   ],
 });
 
-// Settings 컴포넌트
-const Settings = () => {
-  const [settings, setSettings] = useRecoilState(settingsState);
+// 설정 아이콘 컴포넌트
+function SettingIcon() {
+  return <img src={setting} alt="settings" className="w-7" />;
+}
 
-  console.log(settings, " 세팅입니다");
-  // 모든 미디어 요소에 설정 적용
+function Settings({ title, first, setFirst }: SettingProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [settings, setSettings] = useRecoilState(settingsState);
+  const [showIntro, setShowIntro] = useRecoilState(setShowIntroState);
+
   const applySettingsToMedia = () => {
     document.querySelectorAll("video, audio").forEach((element) => {
       if (element instanceof HTMLMediaElement) {
@@ -53,17 +72,14 @@ const Settings = () => {
     });
   };
 
-  // 초기 설정 적용
   useEffect(() => {
     applySettingsToMedia();
   }, []);
 
-  // 설정 변경시 적용
   useEffect(() => {
     applySettingsToMedia();
   }, [settings.volume, settings.isMuted]);
 
-  // 새로 추가되는 미디어 요소 감지
   useEffect(() => {
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
@@ -84,7 +100,6 @@ const Settings = () => {
     return () => observer.disconnect();
   }, [settings.volume, settings.isMuted]);
 
-  // 전체화면 감지
   useEffect(() => {
     const handleFullscreenChange = () => {
       setSettings((prev) => ({
@@ -125,68 +140,103 @@ const Settings = () => {
     }));
   };
 
+  const handleAccept = () => {
+    setIsOpen(false);
+    setShowIntro(true);
+    setFirst(false);
+    console.log(first, isOpen, showIntro);
+  };
   return (
-    <div className="z-50 fixed inset-0 flex items-center justify-center">
-      <div
-        className={`${blockStyle} ${blockHover} ${blockActive} flex items-center gap-4 p-4`}
-      >
+    <>
+      {/* 설정 아이콘만 반환 */}
+      {!first && (
         <button
-          onClick={toggleFullscreen}
-          className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-[#ffffff1a] transition-colors"
-          aria-label={
-            settings.isFullscreen ? "Exit fullscreen" : "Enter fullscreen"
-          }
+          onClick={() => setIsOpen(true)}
+          className="flex justify-center items-center"
         >
-          {settings.isFullscreen ? (
-            <>
-              <Minimize2 className="w-5 h-5" /> <span>Exit Fullscreen</span>
-            </>
-          ) : (
-            <>
-              <Maximize2 className="w-5 h-5" /> <span>Fullscreen</span>
-            </>
-          )}
+          <SettingIcon />
         </button>
+      )}
 
-        <button
-          onClick={toggleMute}
-          className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-[#ffffff1a] transition-colors"
-          aria-label={settings.isMuted ? "Unmute" : "Mute"}
-        >
-          {settings.isMuted ? (
-            <>
-              <VolumeX className="w-5 h-5" /> <span>Unmute</span>
-            </>
-          ) : (
-            <>
-              <Volume2 className="w-5 h-5" /> <span>Mute</span>
-            </>
+      {/* 모달 */}
+
+      {(isOpen || first) && (
+        <>
+          {first && (
+            <div className="fixed inset-0 bg-black z-50 flex items-center justify-center"></div>
           )}
-        </button>
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+            <div
+              className={`${blockStyle} ${blockHover} ${blockActive} relative`}
+            >
+              {!first && (
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="absolute top-2 right-2 p-2 rounded-full hover:bg-[#ffffff1a] transition-colors"
+                  aria-label="Close settings"
+                >
+                  <FontAwesomeIcon icon={faXmark} className="w-4 h-4" />
+                </button>
+              )}
+              <div className="p-6 space-y-6">
+                <h2 className="text-xl font-semibold mb-4">{title}</h2>
 
-        <div className="flex items-center gap-2">
-          <span className="text-sm">Volume</span>
-          <input
-            type="range"
-            min="0"
-            max="1"
-            step="0.01"
-            value={settings.volume}
-            onChange={(e) => setVolume(parseFloat(e.target.value))}
-            className="w-24 accent-[#f74a5c]"
-            aria-label="Volume control"
-          />
-        </div>
-      </div>
-    </div>
+                <div className="space-y-4">
+                  <button
+                    onClick={toggleFullscreen}
+                    className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-[#ffffff1a] transition-colors w-full"
+                    aria-label={settings.isFullscreen ? "창모드" : "전체화면"}
+                  >
+                    <FontAwesomeIcon
+                      icon={settings.isFullscreen ? faMinimize : faMaximize}
+                      className="w-5 h-5"
+                    />
+                    <span>{settings.isFullscreen ? "창모드" : "전체화면"}</span>
+                  </button>
+
+                  <button
+                    onClick={toggleMute}
+                    className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-[#ffffff1a] transition-colors w-full"
+                    aria-label={settings.isMuted ? "음소거 해제" : "음소거"}
+                  >
+                    <FontAwesomeIcon
+                      icon={settings.isMuted ? faVolumeXmark : faVolumeHigh}
+                      className="w-5 h-5"
+                    />
+                    <span>{settings.isMuted ? "음소거 해제" : "음소거"}</span>
+                  </button>
+
+                  <div className="flex items-center gap-4 px-3 py-2">
+                    <span className="text-sm">음량 조절</span>
+                    <input
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.01"
+                      value={settings.volume}
+                      onChange={(e) => setVolume(parseFloat(e.target.value))}
+                      className="flex-1 accent-[#f74a5c]"
+                      aria-label="Volume control"
+                    />
+                  </div>
+                </div>
+              </div>
+              {first && (
+                <div className="flex justify-around">
+                  <button
+                    className={`${blockStyle} ${blockActive} ${blockHover} py-2 px-4 mb-5`}
+                    onClick={handleAccept}
+                  >
+                    확인
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </>
+      )}
+    </>
   );
-};
-
-// // RecoilRoot로 감싼 컴포넌트 내보내기
-// export const SettingsWrapper = () => (
-//   <RecoilRoot>
-//     <Settings />
-//   </RecoilRoot>
-// );
+}
 
 export default Settings;
