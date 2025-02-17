@@ -4,6 +4,7 @@ import { useSetRecoilState } from "recoil";
 import { useNavigate } from "react-router";
 import { userState } from "../../../store/userState";
 import GoogleLoginButton2 from "./GoogleLoginBtn2";
+import { HashLink } from "react-router-hash-link";
 
 function LogoutContainer() {
   const setUser = useSetRecoilState(userState);
@@ -70,7 +71,9 @@ function LogoutContainer() {
   };
 
   return (
-    <div className="flex flex-col w-full items-center">
+    <div id="login" className="flex flex-col w-full items-center">
+      <HashLink to="/#login" smooth></HashLink>
+
       <button
         onClick={() => navigate("/game")}
         className="w-[22.5rem] h-[5.5rem] flex justify-center items-center mb-10 bg-black text-white font-mono border-2 border-[#872341] rounded-sm text-3xl font-semibold"
