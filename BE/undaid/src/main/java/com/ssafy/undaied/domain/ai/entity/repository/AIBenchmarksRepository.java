@@ -10,6 +10,6 @@ import java.util.Optional;
 @Repository
 public interface AIBenchmarksRepository extends JpaRepository<AIBenchmarks, Integer> {
     Optional<AIBenchmarks> findById(Integer id);
-//    List<AIBenchmarks> findByGames_GameIdOrderByDeadRoundAsc(Integer gameId);
-//    List<AIBenchmarks> findByAi_AiIdOrderByDeadRoundAsc(Integer aiId);
+    List<AIBenchmarks> findByGame_GameIdOrderByDeadRoundAsc(Integer gameId);
+    List<AIBenchmarks> findByAi_AiIdOrderByDeadRoundAsc(Integer aiId);
 }

@@ -60,3 +60,12 @@ CREATE TABLE `game_records` (
     FOREIGN KEY (`game_id`) REFERENCES `games` (`game_id`) ON DELETE CASCADE,
     FOREIGN KEY (`subject_id`) REFERENCES `subjects` (`subject_id`)
 );
+
+CREATE TABLE ai_benchmarks (
+    ai_benchmarks_id INT PRIMARY KEY AUTO_INCREMENT,
+    game_id INT NOT NULL,
+    ai_id INT,
+    dead_round INT NOT NULL,
+    FOREIGN KEY (game_id) REFERENCES games (game_id),
+    FOREIGN KEY (ai_id) REFERENCES ais (ai_id)
+);

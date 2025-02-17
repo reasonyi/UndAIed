@@ -101,3 +101,18 @@ def dialogue_parser(dialogue: str) -> dict:
         }
 
     return round_dict
+
+
+
+
+def parse_nunchi_status(text:str) -> bool:
+    # "nunchi": "X" 또는 "nunchi": "O" 패턴을 찾는 정규식
+    pattern = r'"nunchi":\s*"(O|)"'
+    
+    # 정규식으로 매칭 찾기
+    match = re.search(pattern, text)
+    
+    # 해당 AI가 대화에 참여해야한다면 True를 반환
+    if match:
+        return match.group(1) == "O"
+    return False
