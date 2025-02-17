@@ -118,7 +118,7 @@ public class GameResultService {
             movePlayersToLobby(client, gameId);
 
             namespace.getRoomOperations(GAME_KEY_PREFIX + gameId)
-                    .sendEvent("game:chat:send", responseDto);
+                    .sendEvent("game:result:send", responseDto);
 
             saveGameResult(gameId);
 
