@@ -43,13 +43,16 @@ public class GameResultHandler {
                             gameId = Integer.parseInt(gameIdStr);
                         }
 
-                        log.info("Game result check requested - gameId: {}", gameId);
+                        log.info("게임종료 여부 확인 - gameId: {}", gameId);
 
                         // 🔹 게임 결과 확인
                         GameResultResponseDto result = gameResultService.checkGameResult(client, gameId);
 
                         // 🔹 게임 종료 후 게임방에서 나가고 원래 room으로 이동
                         boolean movedToRoom = gameResultService.movePlayersToRoom(client, gameId);
+
+                        // 게임 결과 DB에 저장
+                        gameResultService.saveGameResult(gameId);
 
                         // 🔹 클라이언트에게 응답 반환
                         if (ackRequest.isAckRequested()) {

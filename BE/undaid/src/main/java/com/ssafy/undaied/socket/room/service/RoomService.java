@@ -50,6 +50,7 @@ public class RoomService {
 
             if (!Boolean.TRUE.equals(jsonRedisTemplate.hasKey(ROOM_SEQUENCE_KEY))) {
                 // 시퀀스 키가 없으면 새로 생성하고 0으로 초기화
+                // 레디스 테스트 필요
                 log.info("redis에 방 시퀀스 키가 없어 새로 추가합니다.");
                 jsonRedisTemplate.opsForValue().set(ROOM_SEQUENCE_KEY, 0);
             }
@@ -154,6 +155,7 @@ public class RoomService {
                 LobbyUpdateResponseDto lobbyUpdateResponseDto = leaveRoom(roomId, client);
                 if(lobbyUpdateResponseDto != null) {
                     namespace.getRoomOperations(LOBBY_ROOM).sendEvent(UPDATE_ROOM_AT_LOBBY.getValue(), lobbyUpdateResponseDto);
+                    log.debug("lobby:room:update sendEvent 실행. - eventType: {}, roomId: {}", lobbyUpdateResponseDto.getType(), lobbyUpdateResponseDto.getData().getRoomId());
                 }
                 client.leaveRoom(room);
             } else {
@@ -346,17 +348,22 @@ public class RoomService {
     public RoomEnterResponseDto enterRoom(SocketIOClient client, Long roomId, Integer password) throws SocketException {
         String key = ROOM_KEY_PREFIX + roomId;
         String roomKey = ROOM_LIST + key;  // "rooms:room:1"
-        log.debug("User enter room try - userId: {}, room: {}", client.get("userId"), key);
+        log.debug("유저가 방 입장을 시도합니다. - userId: {}, room: {}", client.get("userId"), key);
 
         // Redis에서 rooms: 네임스페이스의 방 정보 조회
         Object roomObj = jsonRedisTemplate.opsForValue().get(roomKey);
         Room room = objectMapper.convertValue(roomObj, Room.class);
         if (room == null) {
+            log.debug("입장하려는 방을 찾을 수 없습니다. - userId: {}, room: {}", client.get("userId"), key);
             throw new SocketException(ROOM_NOT_FOUND);
         }
 
         if(room.getCurrentPlayers().size() >= 6) {
+            log.debug("정원이 다 찬 방에 입장을 시도했습니다. - userId: {}, room: {}", client.get("userId"), key);
             throw new SocketException(FULL_USER_IN_ROOM);
+        } else if(room.getCurrentPlayers().size() <= 0) {
+            log.debug("이미 없어진 방에 입장을 시도했습니다. - userId: {}, room: {}", client.get("userId"), key);
+            throw new SocketException(ROOM_NOT_FOUND);
         }
 
         Integer enterId = 0;
@@ -365,6 +372,7 @@ public class RoomService {
         if (!isUserInRoom(client, roomId)) {
             // 방이 private인 경우 비밀번호 체크
             if (room.getIsPrivate() && !room.getRoomPassword().equals(password)) {
+                log.debug("비밀번호가 일치하지 않습니다. - userId: {}, room: {}", client.get("userId"), key);
                 throw new SocketException(INVALID_ROOM_PASSWORD);
             }
 
@@ -377,7 +385,7 @@ public class RoomService {
             int newEnterId = room.getCurrentPlayers().stream()
                     .mapToInt(RoomUser::getEnterId)
                     .max()
-                    .orElse(-1) + 1;  // 방이 비어있다면 0이 됨
+                    .orElse(0) + 1;  // 방이 비어있다면 1이 됨
 
             enterId = newEnterId;
 
@@ -391,10 +399,15 @@ public class RoomService {
 
             room.getCurrentPlayers().add(newUser);
             jsonRedisTemplate.opsForValue().set(roomKey, room);
+            log.debug("reids에 새로운 유저 정보를 성공적으로 저장했습니다. - userId: {}, room: {}", client.get("userId"), key);
 
             // 입장하는 사용자를 이동시키기
             client.leaveRoom(LOBBY_ROOM);
+            log.debug("클라이언트를 로비에서 퇴장시켰습니다. - userId: {}", (Integer) client.get("userId"));
             client.joinRoom(key);  // room:1 형태의 키로 방 입장
+            log.debug("클라이언트가 방에 입장했습니다. - userId: {}, key: {}", (Integer) client.get("userId"), key);
+        } else {
+            log.debug("이미 해당 방에 있는 유저입니다. - userId: {}, room: {}", client.get("userId"), key);
         }
 
         // RoomUser를 RoomUserResponseDto로 변환
@@ -423,52 +436,51 @@ public class RoomService {
     }
 
     public LobbyRoomListResponseDto findWaitingRoomList() {
+        log.debug("대기중인 모든 방을 조회를 시도하는 중...");
         List<UpdateData> waitingRooms = new ArrayList<>();
 
         try {
             Set<String> waitingKeys = stringRedisTemplate.keys(WAITING_LIST + "*");
-            log.debug("Found waiting keys: {}", waitingKeys);
+            log.debug("찾아낸 대기중인 방 리스트: {}", waitingKeys);
 
-            if (waitingKeys != null) {
-                for (String waitingKey : waitingKeys) {
-                    try {
-                        String roomKey = waitingKey.substring(WAITING_LIST.length());
-                        String fullRoomKey = ROOM_LIST + roomKey;
-                        log.debug("Attempting to get room data for key: {}", fullRoomKey);
+            for (String waitingKey : waitingKeys) {
+                try {
+                    String key = waitingKey.substring(WAITING_LIST.length());
+                    String roomKey = ROOM_LIST + key;
+//                    log.debug("Attempting to get room data for key: {}", roomKey);
 
-                        Object roomData = jsonRedisTemplate.opsForValue().get(fullRoomKey);
+                    Object roomData = jsonRedisTemplate.opsForValue().get(roomKey);
 //                        log.debug("Raw room data: {}", roomData);
 //                        log.debug("Raw room data class: {}", roomData != null ? roomData.getClass().getName() : "null");
 
-                        if (roomData instanceof LinkedHashMap<?, ?> map) {
-                            // Integer를 Long으로 안전하게 변환
-                            Object roomIdObj = map.get("roomId");
-                            Long roomId;
-                            if (roomIdObj instanceof Integer) {
-                                roomId = ((Integer) roomIdObj).longValue();
-                            } else if (roomIdObj instanceof Long) {
-                                roomId = (Long) roomIdObj;
-                            } else {
-                                roomId = Long.valueOf(roomIdObj.toString());
-                            }
-
-                            UpdateData updateData = UpdateData.builder()
-                                    .roomId(roomId)  // 변환된 Long 값 사용
-                                    .roomTitle((String) map.get("roomTitle"))
-                                    .isPrivate((Boolean) map.get("isPrivate"))
-                                    .currentPlayerNum(((List<?>) map.get("currentPlayers")).size())
-                                    .playing((Boolean) map.get("playing"))
-                                    .build();
-                            waitingRooms.add(updateData);
-
+                    if (roomData instanceof LinkedHashMap<?, ?> map) {
+                        // Integer를 Long으로 안전하게 변환
+                        Object roomIdObj = map.get("roomId");
+                        Long roomId;
+                        if (roomIdObj instanceof Integer) {
+                            roomId = ((Integer) roomIdObj).longValue();
+                        } else if (roomIdObj instanceof Long) {
+                            roomId = (Long) roomIdObj;
+                        } else {
+                            roomId = Long.valueOf(roomIdObj.toString());
                         }
-                    } catch (Exception e) {
-                        log.error("Error processing room key {}: {}", waitingKey, e.getMessage(), e);
+
+                        UpdateData updateData = UpdateData.builder()
+                                .roomId(roomId)  // 변환된 Long 값 사용
+                                .roomTitle((String) map.get("roomTitle"))
+                                .isPrivate((Boolean) map.get("isPrivate"))
+                                .currentPlayerNum(((List<?>) map.get("currentPlayers")).size())
+                                .playing((Boolean) map.get("playing"))
+                                .build();
+                        waitingRooms.add(updateData);
+
                     }
+                } catch (Exception e) {
+                    log.error("{} 대기방의 정보를 찾던 중 예상하지 못한 오류가 발생했습니다. : {}", waitingKey, e.getMessage(), e);
                 }
             }
         } catch (Exception e) {
-            log.error("Error in findWaitingRoomList: {}", e.getMessage(), e);
+            log.error("대기중인 방 리스트를 찾던 중 예상하지 못한 오류가 발생했습니다.: {}", e.getMessage(), e);
             throw e;
         }
 

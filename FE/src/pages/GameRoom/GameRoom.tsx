@@ -16,6 +16,8 @@ import { useSocket } from "../../hooks/useSocket";
 import LeftSideBar from "./components/LeftSideBar";
 import RightSideBar from "./components/RightSideBar";
 import { IMessage, IPlayer } from "../../types/gameroom";
+import AudioPlayer from "../../util/AudioPlayer";
+import gameRoomBgm from "../../assets/bgm/game-room.mp3";
 
 interface IRoomInfo {
   roomId: number;
@@ -79,9 +81,8 @@ function GameRoom() {
   const [playerEnterId, setPlayerEnterId] = useState<number>();
   const [playerInfo, setPlayerInfo] = useState<IPlayer | undefined>();
 
-  //방 참여자 전원 더미
+  //방 전체 정보보
   const [roomInfo, setRoomInfo] = useState<IRoomInfo>();
-
   const [messages, setMessages] = useState<IMessage[]>([]);
 
   const addMessage = (newMessage: IMessage) => {
@@ -151,15 +152,16 @@ function GameRoom() {
       }
     });
 
-    // socket.on("game:init:send", (data: any) => {
-    //   console.log("게임으로 이동 이벤트 수신:", data);
-    //   navigate(`game/play/${data.gameId}`);
-    // });
+    socket.on("game:init:send", (data: { gameId: number }) => {
+      console.log("게임으로 이동 이벤트 수신:", data);
+      navigate(`/game/play/${data.gameId}`);
+    });
+
     return () => {
       socket.off("room:enter:send");
       socket.off("room:leave:send");
       socket.off("room:chat:send");
-      // socket.off("game:init:send");
+      socket.off("game:init:send");
     };
   }, [socket, messages, playerEnterId, roomInfo]);
 
@@ -197,6 +199,7 @@ function GameRoom() {
             errorMessage || "입장 도중 에러러가 발생했습니다."
           );
           console.log(errorMessage);
+          toast.error(errorMessage);
           return;
         }
       }
@@ -266,7 +269,7 @@ function GameRoom() {
       //데이터 형식 맞는지 잘 확인하기. 현재 백에서 data는 gameId임!!
       ({ success, errorMessage, data }: IGameStartDone) => {
         if (success) {
-          debugger;
+          console.log("game:init:emit 잘 동작함");
         } else {
           //게임 시작 실패 안내내
           toast.error(errorMessage);
@@ -283,6 +286,32 @@ function GameRoom() {
 
   // (1) chat-input-temp 너비를 저장할 state
   const [chatInputWidth, setChatInputWidth] = useState<number>(0);
+
+  //새로고침 관련
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (socket) {
+        event.preventDefault();
+        // 보안 및 사용자 정책에 의해 현재는 개발자가 출력 문구를 정할 수 없음.
+        // event.returnValue = "게임에서 나가시겠습니까?";
+      }
+    };
+
+    const handleUnload = () => {
+      if (socket) {
+        socket.emit("pre-disconnect");
+        console.log("새로고침 확인 후 실행됨");
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("unload", handleUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("unload", handleUnload);
+    };
+  }, [socket]); // socket을 의존성 배열에 추가
 
   useEffect(() => {
     // (3) ResizeObserver를 통한 너비 측정
@@ -305,64 +334,67 @@ function GameRoom() {
     scrollToBottom();
   }, [messages]);
   return (
-    <div className="bg-[#07070a]">
-      <div className="background-gradient max-w-[90rem] mx-auto px-4 sm:px-4 md:px-6">
-        <LeftSideBar
-          roomId={roomInfo?.roomId}
-          roomTitle={roomInfo?.roomTitle}
-          nickname={playerInfo ? playerInfo.nickname : "연결이 끊어졌습니다."}
-          icon={PlayerIcon1}
-          socket={socket}
-          onLeaveRoom={handleLeaveRoom}
-          onGameStart={handleGameStart}
-          player={playerInfo}
-        />
-        <div className="lg:pl-[19.5rem]">
-          <div className="max-w-3xl mx-auto xl:max-w-none xl:ml-0 xl:mr-[32rem]">
-            <div className="chat-container flex flex-col h-screen overflow-auto">
-              {/* 메시지 리스트 영역 */}
-              <div className="flex-1 px-5 pt-4">
-                {messages.map((msg: IMessage, index) => {
-                  if (msg.player === 10) {
-                    return <SystemBubble key={index} message={msg} />;
-                  } else {
-                    return (
-                      <ChatBubble
-                        key={index}
-                        message={msg}
-                        playerName={
-                          roomInfo?.currentPlayers.find(
-                            (user) => user.enterId === msg.player
-                          )?.nickname
-                        }
-                      />
-                    );
-                  }
-                })}
-                <div
-                  ref={scrollRef}
-                  className="chat-input-temp h-[4.5rem] w-full"
-                ></div>
-                <div
-                  className="chat-input fixed z-10 h-10 bottom-4"
-                  style={{ width: chatInputWidth }}
-                >
-                  <ChatForm
-                    playerNum={playerInfo?.enterId}
-                    socket={socket}
-                    onSendChat={handleRoomChat}
-                  />
+ <>
+      <AudioPlayer src={gameRoomBgm} isPlaying={true} shouldLoop={true} />
+      <div className="bg-[#07070a]">
+        <div className="background-gradient max-w-[90rem] mx-auto px-4 sm:px-4 md:px-6">
+          <LeftSideBar
+            roomId={roomInfo?.roomId}
+            roomTitle={roomInfo?.roomTitle}
+            nickname={playerInfo ? playerInfo.nickname : "연결이 끊어졌습니다."}
+            icon={iconArr[playerInfo ? playerInfo.enterId : 1]}
+            socket={socket}
+            onLeaveRoom={handleLeaveRoom}
+            onGameStart={handleGameStart}
+            player={playerInfo}
+          />
+          <div className="lg:pl-[19.5rem]">
+            <div className="max-w-3xl mx-auto xl:max-w-none xl:ml-0 xl:mr-[32rem]">
+              <div className="chat-container flex flex-col h-screen overflow-auto">
+                {/* 메시지 리스트 영역 */}
+                <div className="flex-1 px-5 pt-4">
+                  {messages.map((msg: IMessage, index) => {
+                    if (msg.player === 0) {
+                      return <SystemBubble key={index} message={msg} />;
+                    } else {
+                      return (
+                        <ChatBubble
+                          key={index}
+                          message={msg}
+                          playerName={
+                            roomInfo?.currentPlayers.find(
+                              (user) => user.enterId === msg.player
+                            )?.nickname
+                          }
+                        />
+                      );
+                    }
+                  })}
+                  <div
+                    ref={scrollRef}
+                    className="chat-input-temp h-[4.5rem] w-full"
+                  ></div>
+                  <div
+                    className="chat-input fixed z-10 h-10 bottom-4"
+                    style={{ width: chatInputWidth }}
+                  >
+                    <ChatForm
+                      playerNum={playerInfo?.enterId}
+                      socket={socket}
+                      onSendChat={handleRoomChat}
+                    />
+                  </div>
                 </div>
+                <RightSideBar
+                  players={roomInfo?.currentPlayers}
+                  iconArr={iconArr}
+                />
               </div>
-              <RightSideBar
-                players={roomInfo?.currentPlayers}
-                iconArr={iconArr}
-              />
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 

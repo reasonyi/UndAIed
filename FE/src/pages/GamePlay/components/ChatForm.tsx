@@ -6,14 +6,14 @@ import { toast } from "sonner";
 import { Socket } from "socket.io-client";
 
 interface IFormProps {
-  playerNum: number | undefined;
   socket: Socket | null; // 부모에서 전달받을 소켓 인스턴스
+  onSendChat: (input: string) => void;
 }
 interface IForm {
   chat: string;
 }
 
-function ChatForm({ playerNum, socket }: IFormProps) {
+function ChatForm({ socket, onSendChat }: IFormProps) {
   const paperPlane: IconDefinition = faPaperPlane;
   const {
     register,
@@ -26,22 +26,9 @@ function ChatForm({ playerNum, socket }: IFormProps) {
     //local storage에서 토큰 가져오기, player num 가져오기기
     //axios api 작성성
     e?.preventDefault();
-    if (!socket) {
-      console.log("socket이 없습니다");
-      return;
-    }
 
     try {
-      // 1) 서버로 메시지 전송
-      // 서버에서도 "chat" 이벤트를 수신하여 모든 클라이언트에게 broadcast하도록 구현
-      const newMessage = {
-        id: Date.now(), // 간단히 임시 ID
-        player: playerNum,
-        text: data.chat,
-      };
-      socket.emit("chat1", newMessage);
-
-      // 메시지 전송 로직 성공 시 input 비우기
+      onSendChat(data.chat);
       resetField("chat");
     } catch (error) {
       // 에러 처리

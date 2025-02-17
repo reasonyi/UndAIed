@@ -9,6 +9,7 @@ import com.ssafy.undaied.socket.common.exception.SocketErrorCode;
 import com.ssafy.undaied.socket.common.exception.SocketException;
 import com.ssafy.undaied.socket.init.dto.request.GameInitRequestDto;
 import com.ssafy.undaied.socket.init.dto.response.GameInfoResponseDto;
+import com.ssafy.undaied.socket.init.dto.response.NumberResponseDto;
 import com.ssafy.undaied.socket.init.dto.response.PlayerInfoDto;
 import com.ssafy.undaied.socket.init.service.GameInitService;
 import com.ssafy.undaied.socket.lobby.dto.response.LobbyUpdateResponseDto;
@@ -45,7 +46,7 @@ public class GameInitHandler {
     public void init() {
         namespace.addEventListener("game:init:emit", Object.class, (client, data, ackRequest) -> {
             try {
-                log.info("Game init request received.");
+                log.info("게임 초기화 요청 확인");
 
                 // 클라이언트가 속한 방 찾기
                 Set<String> rooms = client.getAllRooms();
@@ -56,9 +57,7 @@ public class GameInitHandler {
 
                 // roomKey에서 roomId 추출 (예: "room:456" -> 456)
                 int roomId = Integer.parseInt(roomKey.substring(ROOM_KEY_PREFIX.length()));
-
-                log.info("Game initialization requested - roomId: {}", roomId);
-
+                log.info("방 번호 확인 roomId: {}", roomId);
                 if (gameInitializationStatus.putIfAbsent(roomId, true) != null) {
                     throw new SocketException(SocketErrorCode.GAME_ALREADY_INITIALIZING);
                 }
@@ -66,79 +65,91 @@ public class GameInitHandler {
                 try {
                     int gameId = gameInitService.startGame(client, roomId);
 
-                    log.info("Checking ackRequest: {}", ackRequest);
-                    stageService.handleGameStart(gameId);
-
-
-                    sendResponse(ackRequest, true, null, gameId);
-                    log.info("After sending ACK response");
-
                     // ✅ 로비 업데이트 이벤트 전송
-//                    LobbyUpdateResponseDto updateResponseDto = gameInitService.createLobbyUpdateResponse(roomId);
-//                    namespace.getRoomOperations(LOBBY_ROOM)
-//                            .sendEvent(UPDATE_ROOM_AT_LOBBY.getValue(), updateResponseDto);
+                    LobbyUpdateResponseDto updateResponseDto = gameInitService.createLobbyUpdateResponse(roomId);
+                    namespace.getRoomOperations(LOBBY_ROOM)
+                            .sendEvent(UPDATE_ROOM_AT_LOBBY.getValue(), updateResponseDto);
+                    log.info("방 목록 업데이트 및 대기방 삭제");
 
                     gameInitService.broadcastGameInit(gameId);
-                    log.info("Game initialization completed - gameId: {}, roomId: {}", gameId, roomId);
+                    log.info("게임 초기화 완료 - gameId: {}, roomId: {}", gameId, roomId);
 
+                    log.info("ACK 요청 확인: {}", ackRequest);
+                    sendResponse(ackRequest, true, null);
+                    log.info("ACK 요청 보냄");
 
+                    log.info("게임 시작");
+                    stageService.handleGameStart(gameId);
                 } finally {
                     gameInitializationStatus.remove(roomId);
                 }
 
             } catch (SocketException e) {
                 log.error("Failed to initialize game: {}", e.getMessage());
-                sendResponse(ackRequest, false, e.getMessage(), null);  // null 사용
+                sendResponse(ackRequest, false, e.getMessage());  // null 사용
             } catch (Exception e) {
                 log.error("Unexpected error during game initialization: {}", e.getMessage(), e);
-                sendResponse(ackRequest, false, e.getMessage(), null);  // null 사용
+                sendResponse(ackRequest, false, e.getMessage());  // null 사용
             }
         });
 
         // Handle game info requests
-        namespace.addEventListener("game:info", Integer.class, (client, gameId, ackRequest) -> {
+        namespace.addEventListener("game:info:emit", Object.class, (client, data, ackRequest) -> {
             try {
-
-                //임시 저장. 수정 필요
-                gameId =1;
-
+                Integer gameId = client.get("gameId");
                 if (gameId == null) {
                     throw new SocketException(SocketErrorCode.GAME_NOT_FOUND);
                 }
 
-                log.info("Game info requested - gameId: {}", gameId);
-                GameInfoResponseDto gameInfo = gameInitService.createGameInfoResponse(gameId);
-                sendGameInfo(gameId, gameInfo, ackRequest);
+                Integer userId = client.get("userId");
+                if (userId == null) {
+                    throw new SocketException(SocketErrorCode.SOCKET_AUTHENTICATION_FAILED);
+                }
+
+                // 🔹 Redis에서 userId에 해당하는 number 조회
+                String numberMappingKey = GAME_KEY_PREFIX + gameId + ":number_mapping";
+                String assignedNumberStr = (String) redisTemplate.opsForHash().get(numberMappingKey, userId.toString());
+
+                Integer assignedNumber = (assignedNumberStr != null) ? Integer.parseInt(assignedNumberStr) : null;
+
+                log.info("Game info requested - gameId: {}, userId: {}, assignedNumber: {}", gameId, userId, assignedNumber);
+
+                // ✅ `NumberResponseDto` 객체 생성
+                NumberResponseDto numberResponse = NumberResponseDto.builder()
+                        .number(assignedNumber)
+                        .build();
+
+                // 🔹 응답 전송 (ACK 응답에 number 포함)
+                sendResponse(ackRequest, true, numberResponse);
+                gameInitService.sendGameInfo(gameId);
 
             } catch (SocketException e) {
                 log.error("Failed to retrieve game info: {}", e.getMessage());
-                sendResponse(ackRequest, false, e.getMessage(), null);
+                sendResponse(ackRequest, false, e.getMessage());
             } catch (Exception e) {
                 log.error("Unexpected error while retrieving game info: {}", e.getMessage(), e);
-                sendResponse(ackRequest, false, "Unexpected error occurred", null);
+                sendResponse(ackRequest, false, "Unexpected error occurred");
             }
         });
     }
 
-    // 게임 정보를 특정 요청에 대한 응답으로 전송 (ackRequest가 있는 경우)
-    private void sendGameInfo(int gameId, GameInfoResponseDto gameInfo, AckRequest ackRequest) {
-        // 1. 요청한 클라이언트에게 응답 전송
-        sendResponse(ackRequest, true, null, gameId);
-
-        // 2. 다른 모든 클라이언트에게도 최신 정보 브로드캐스트
-        namespace.getRoomOperations(GAME_KEY_PREFIX + gameId)
-                .sendEvent("game:info", gameInfo);
-    }
-
-    private void sendResponse(AckRequest ackRequest, boolean success, String errorMessage, Integer gameId) {  // Integer로 변경
-        if (ackRequest.isAckRequested())
-        {
+    private void sendResponse(AckRequest ackRequest, boolean success, Object data) {
+        if (ackRequest.isAckRequested()) {
             Map<String, Object> response = new HashMap<>();
             response.put("success", success);
-            response.put("errorMessage", errorMessage);
-            response.put("data", gameId);  // gameId가 null이면 그대로 null이 전달됨
+            response.put("errorMessage", success ? null : data);
+            response.put("data", success ? data : null);  // ✅ 성공 시 `data`에 NumberResponseDto 포함
+
+            // success가 true이고 data가 NumberResponseDto인 경우에만 number 추출
+            if (success && data instanceof NumberResponseDto) {
+                response.put("number", ((NumberResponseDto) data).getNumber());
+            } else {
+                response.put("number", null);
+            }
+
             ackRequest.sendAckData(response);
             log.info("📢 Sending ACK Response: {}", response);
         }
     }
 }
+
