@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { atom, useRecoilState } from "recoil";
+import { atom, useRecoilState, useSetRecoilState } from "recoil";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faMaximize,
@@ -10,6 +10,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import setting from "../assets/icon/setting.png";
 
+import { setShowIntroState } from "../store/showState";
 // Recoil 상태 정의
 interface SettingsState {
   isFullscreen: boolean;
@@ -19,6 +20,8 @@ interface SettingsState {
 
 interface SettingProps {
   title: string;
+  first: boolean;
+  setFirst: (value: boolean) => void;
 }
 
 const blockStyle =
@@ -55,9 +58,10 @@ function SettingIcon() {
   return <img src={setting} alt="settings" className="w-7" />;
 }
 
-function Settings({ title }: SettingProps) {
+function Settings({ title, first, setFirst }: SettingProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [settings, setSettings] = useRecoilState(settingsState);
+  const [showIntro, setShowIntro] = useRecoilState(setShowIntroState);
 
   const applySettingsToMedia = () => {
     document.querySelectorAll("video, audio").forEach((element) => {
@@ -136,75 +140,100 @@ function Settings({ title }: SettingProps) {
     }));
   };
 
+  const handleAccept = () => {
+    setIsOpen(false);
+    setShowIntro(true);
+    setFirst(false);
+    console.log(first, isOpen, showIntro);
+  };
   return (
     <>
       {/* 설정 아이콘만 반환 */}
-      <button
-        onClick={() => setIsOpen(true)}
-        className="flex justify-center items-center"
-      >
-        <SettingIcon />
-      </button>
+      {!first && (
+        <button
+          onClick={() => setIsOpen(true)}
+          className="flex justify-center items-center"
+        >
+          <SettingIcon />
+        </button>
+      )}
 
       {/* 모달 */}
-      {isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-          <div
-            className={`${blockStyle} ${blockHover} ${blockActive} relative`}
-          >
-            <button
-              onClick={() => setIsOpen(false)}
-              className="absolute top-2 right-2 p-2 rounded-full hover:bg-[#ffffff1a] transition-colors"
-              aria-label="Close settings"
+
+      {(isOpen || first) && (
+        <>
+          {first && (
+            <div className="fixed inset-0 bg-black z-50 flex items-center justify-center"></div>
+          )}
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+            <div
+              className={`${blockStyle} ${blockHover} ${blockActive} relative`}
             >
-              <FontAwesomeIcon icon={faXmark} className="w-4 h-4" />
-            </button>
-
-            <div className="p-6 space-y-6">
-              <h2 className="text-xl font-semibold mb-4">{title}</h2>
-
-              <div className="space-y-4">
+              {!first && (
                 <button
-                  onClick={toggleFullscreen}
-                  className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-[#ffffff1a] transition-colors w-full"
-                  aria-label={settings.isFullscreen ? "창모드" : "전체화면"}
+                  onClick={() => setIsOpen(false)}
+                  className="absolute top-2 right-2 p-2 rounded-full hover:bg-[#ffffff1a] transition-colors"
+                  aria-label="Close settings"
                 >
-                  <FontAwesomeIcon
-                    icon={settings.isFullscreen ? faMinimize : faMaximize}
-                    className="w-5 h-5"
-                  />
-                  <span>{settings.isFullscreen ? "창모드" : "전체화면"}</span>
+                  <FontAwesomeIcon icon={faXmark} className="w-4 h-4" />
                 </button>
+              )}
+              <div className="p-6 space-y-6">
+                <h2 className="text-xl font-semibold mb-4">{title}</h2>
 
-                <button
-                  onClick={toggleMute}
-                  className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-[#ffffff1a] transition-colors w-full"
-                  aria-label={settings.isMuted ? "음소거 해제" : "음소거"}
-                >
-                  <FontAwesomeIcon
-                    icon={settings.isMuted ? faVolumeXmark : faVolumeHigh}
-                    className="w-5 h-5"
-                  />
-                  <span>{settings.isMuted ? "음소거 해제" : "음소거"}</span>
-                </button>
+                <div className="space-y-4">
+                  <button
+                    onClick={toggleFullscreen}
+                    className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-[#ffffff1a] transition-colors w-full"
+                    aria-label={settings.isFullscreen ? "창모드" : "전체화면"}
+                  >
+                    <FontAwesomeIcon
+                      icon={settings.isFullscreen ? faMinimize : faMaximize}
+                      className="w-5 h-5"
+                    />
+                    <span>{settings.isFullscreen ? "창모드" : "전체화면"}</span>
+                  </button>
 
-                <div className="flex items-center gap-4 px-3 py-2">
-                  <span className="text-sm">음량 조절</span>
-                  <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.01"
-                    value={settings.volume}
-                    onChange={(e) => setVolume(parseFloat(e.target.value))}
-                    className="flex-1 accent-[#f74a5c]"
-                    aria-label="Volume control"
-                  />
+                  <button
+                    onClick={toggleMute}
+                    className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-[#ffffff1a] transition-colors w-full"
+                    aria-label={settings.isMuted ? "음소거 해제" : "음소거"}
+                  >
+                    <FontAwesomeIcon
+                      icon={settings.isMuted ? faVolumeXmark : faVolumeHigh}
+                      className="w-5 h-5"
+                    />
+                    <span>{settings.isMuted ? "음소거 해제" : "음소거"}</span>
+                  </button>
+
+                  <div className="flex items-center gap-4 px-3 py-2">
+                    <span className="text-sm">음량 조절</span>
+                    <input
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.01"
+                      value={settings.volume}
+                      onChange={(e) => setVolume(parseFloat(e.target.value))}
+                      className="flex-1 accent-[#f74a5c]"
+                      aria-label="Volume control"
+                    />
+                  </div>
                 </div>
               </div>
+              {first && (
+                <div className="flex justify-around">
+                  <button
+                    className={`${blockStyle} ${blockActive} ${blockHover} py-2 px-4 mb-5`}
+                    onClick={handleAccept}
+                  >
+                    확인
+                  </button>
+                </div>
+              )}
             </div>
           </div>
-        </div>
+        </>
       )}
     </>
   );

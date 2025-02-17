@@ -11,7 +11,11 @@ function GameMainMenu() {
           <img src={bellIcon} alt="notifications" className="w-7" />
         </button> */}
         <div className={`${footerButtonStyle} border-l-2`}>
-          <Setting title="게임 설정"></Setting>
+          <Setting
+            title="게임 설정"
+            first={false}
+            setFirst={() => {}}
+          ></Setting>
         </div>
         {/* <button className={`${footerButtonStyle}`}>
           <img src={friendsIcon} alt="friends" className="h-7" />
