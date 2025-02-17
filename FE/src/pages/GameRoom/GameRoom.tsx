@@ -85,10 +85,6 @@ function GameRoom() {
   const [roomInfo, setRoomInfo] = useState<IRoomInfo>();
   const [messages, setMessages] = useState<IMessage[]>([]);
 
-  const addMessage = (newMessage: IMessage) => {
-    setMessages([...messages, newMessage]);
-  };
-
   const scrollToBottom = () => {
     scrollRef.current?.scrollIntoView({ block: "end" });
   };
@@ -110,7 +106,14 @@ function GameRoom() {
           (a: IPlayer, b: IPlayer) => a.enterId - b.enterId
         );
         const data_ = data;
-        data_.currentPlayers = newUsers;
+        const setNumberUsers = newUsers.map((user, index) => {
+          if (user.enterId === playerEnterId) {
+            setPlayerEnterId(index + 1);
+          }
+          user.enterId = index + 1;
+          return user;
+        });
+        data_.currentPlayers = setNumberUsers;
         setRoomInfo(data_);
         debugger;
       }
@@ -125,7 +128,11 @@ function GameRoom() {
           (a: IPlayer, b: IPlayer) => a.enterId - b.enterId
         );
         const data_ = data;
-        data_.currentPlayers = newUsers;
+        const setNumberUsers = newUsers.map((user, index) => {
+          user.enterId = index + 1;
+          return user;
+        });
+        data_.currentPlayers = setNumberUsers;
         setRoomInfo(data_);
       }
     });
@@ -137,7 +144,6 @@ function GameRoom() {
         const player = roomInfo.currentPlayers.find(
           (player) => player.nickname === data.nickname
         );
-        debugger;
 
         if (player) {
           const newMessage: IMessage = {
@@ -146,7 +152,7 @@ function GameRoom() {
             text: data.message,
             isMine: Boolean(player.enterId === playerEnterId),
           };
-          setMessages([...messages, newMessage]);
+          setMessages((prevMessages) => [...prevMessages, newMessage]);
           debugger;
         }
       }
@@ -334,7 +340,7 @@ function GameRoom() {
     scrollToBottom();
   }, [messages]);
   return (
- <>
+    <>
       <AudioPlayer src={gameRoomBgm} isPlaying={true} shouldLoop={true} />
       <div className="bg-[#07070a]">
         <div className="background-gradient max-w-[90rem] mx-auto px-4 sm:px-4 md:px-6">

@@ -18,6 +18,9 @@ import { IMessage } from "../../types/gameroom";
 import { IAnonimus } from "../../types/gameplay";
 import { toast } from "sonner";
 import { STAGE_INFO } from "./components/info";
+import { useRecoilState } from "recoil";
+import { isGameEndState } from "../../store/gamePlayState";
+import GameEndModal from "./components/GameEndModal";
 
 interface IChatSend {
   number: number;
@@ -66,6 +69,8 @@ function GamePlay() {
   //게임 전체 정보보 (유저 정보 포함)
   const [gameInfo, setGameInfo] = useState<IGameInfoSend>();
   const [gameResult, setGameResult] = useState<IGameResultSend>();
+
+  const [isGameEnd, setIsGameEnd] = useRecoilState(isGameEndState);
 
   //유저 아이콘
   const iconArr = [
@@ -128,10 +133,12 @@ function GamePlay() {
 
     //게임 결과 받기
     //useEffect로 gameResult가 초기 값이 아니면 결과 화면 출력하게 하자
+    //IGameResultSend
     socket.on("game:result:send", (data: any) => {
       console.log("game:result:send 발생! data 수신:", data);
+      setIsGameEnd(true);
       if (data) {
-        console.log("게임 결과: ", data);
+        setGameResult(data);
       }
     });
 
@@ -305,6 +312,7 @@ function GamePlay() {
 
   return (
     <div className="bg-[#07070a]">
+      {isGameEnd ?? <GameEndModal />}
       <div className="background-gradient max-w-[90rem] mx-auto px-4 sm:px-4 md:px-6">
         <LeftGameSideBar
           nickname={
