@@ -7,6 +7,7 @@ import com.corundumstudio.socketio.SocketIOServer;
 import com.corundumstudio.socketio.annotation.OnEvent;
 import com.ssafy.undaied.socket.chat.dto.request.GameChatRequestDto;
 import com.ssafy.undaied.socket.chat.service.GameChatService;
+import com.ssafy.undaied.socket.common.exception.SocketException;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +18,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.ssafy.undaied.socket.common.constant.SocketRoom.GAME_KEY_PREFIX;
+import static com.ssafy.undaied.socket.common.exception.SocketErrorCode.GAME_NOT_FOUND;
+import static com.ssafy.undaied.socket.common.exception.SocketErrorCode.USER_INFO_NOT_FOUND;
 
 @Component
 @Slf4j
@@ -39,8 +42,30 @@ public class GameChatHandler {
                         Integer gameId = client.get("gameId");
                         Integer userId = client.get("userId");
 
-                        if (gameId == null || userId == null) {
-                            throw new IllegalStateException("게임 또는 사용자 정보를 찾을 수 없습니다.");
+                        if (userId == null) {
+                            throw new SocketException(USER_INFO_NOT_FOUND);
+                        }
+
+                        if(gameId==null){
+                            throw new SocketException(GAME_NOT_FOUND);
+                        }
+
+                        // 플레이어 상태 확인
+                        String mappingKey = GAME_KEY_PREFIX + gameId + ":number_mapping";
+                        String playerNumber = (String) redisTemplate.opsForHash().get(mappingKey, userId.toString());
+
+                        if (playerNumber == null) {
+                            sendResponse(ackRequest, false, "플레이어 정보를 찾을 수 없습니다.");
+                            return;
+                        }
+
+                        // 플레이어 생존 상태 확인
+                        String statusKey = GAME_KEY_PREFIX + gameId + ":player_status";
+                        String playerStatus = (String) redisTemplate.opsForHash().get(statusKey, playerNumber);
+
+                        if (playerStatus != null && playerStatus.contains("isDied=true")) {
+                            sendResponse(ackRequest, false, "죽은 플레이어는 채팅을 할 수 없습니다.");
+                            return;
                         }
 
                         String stageKey = GAME_KEY_PREFIX + gameId + ":stage";

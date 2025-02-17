@@ -235,11 +235,11 @@ public class GameInitService {
             // Redis에 음수 AI ID로 정보 저장
             redisTemplate.opsForHash().put(mappingKey, String.valueOf(negativeAiId), String.valueOf(aiNumber));
             redisTemplate.opsForHash().put(userNicknameKey, String.valueOf(negativeAiId), "AI" + originalAiId);
+            redisTemplate.opsForHash().put(numberNicknameKey, String.valueOf(aiNumber), "AI" + originalAiId);
             savePlayerStatus(statusKey, String.valueOf(aiNumber), false, true);
 
             // AI 번호를 Redis Set에 추가
             redisTemplate.opsForSet().add(aiKey, String.valueOf(aiNumber));
-
         }
 
         // Redis 키 만료시간 설정
