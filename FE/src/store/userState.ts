@@ -11,6 +11,7 @@ export const userState = atom<IUser>({
     nickname: "nickname",
     totalWin: 0,
     totalLose: 0,
+    profileImage: 0,
   },
   effects_UNSTABLE: [persistAtom],
 });
