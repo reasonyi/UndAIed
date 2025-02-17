@@ -160,7 +160,7 @@ public class AIChatService {
                                 if (aiId != null) {
                                     String message = String.format("{%d} [%s] <%d>(%s) %s|",
                                             aiId,
-                                            "AI-" + response.getNumber(),
+                                            "AI" + response.getNumber(),
                                             response.getNumber(),
                                             response.getContent(),
                                             LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
@@ -330,11 +330,22 @@ public class AIChatService {
             return new ArrayList<>();
         }
 
+        // 플레이어 상태 키
+        String statusKey = GAME_KEY_PREFIX + gameId + ":player_status";
+
         // AI 번호에 해당하는 AI ID 찾기
         List<AINumberDto> aiList = new ArrayList<>();
         String mappingKey = GAME_KEY_PREFIX + gameId + ":number_mapping";
 
         for (String number : aiNumbers) {
+            // 플레이어 상태 확인
+            String status = (String) redisTemplate.opsForHash().get(statusKey, number);
+            // 죽은 AI는 제외
+            if (status != null && status.contains("isDied=true")) {
+                log.info("AI number {} is dead, skipping", number);
+                continue;
+            }
+
             // number_mapping에서 해당 번호에 매핑된 AI ID 찾기
             for (Object key : redisTemplate.opsForHash().keys(mappingKey)) {
                 String mappedNumber = (String) redisTemplate.opsForHash().get(mappingKey, key);
@@ -350,6 +361,7 @@ public class AIChatService {
             }
         }
 
+        log.info("Found {} alive AIs for game {}", aiList.size(), gameId);
         return aiList;
     }
 

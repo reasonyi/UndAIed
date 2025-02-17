@@ -12,37 +12,27 @@ logger = logging.getLogger(__name__)
 # ai 봇 생성
 geminiBot = Gemini.GeminiBot()
 chatGPTBot = ChatGPT.ChatGPTBot()
+class AINumberDto(BaseModel):
+    aiId: int
+    number: int
 
-# 요청 모델 정의
-class Request(BaseModel):
-    selectedAIs: list[dict[str, int]]  # [{"aiId": 1, "number": 7}, ...]
+class AIInputDataDto(BaseModel):
+    selectedAIs: list[AINumberDto]
     message: str
 
-# app 생성
 app = FastAPI()
 
 @app.post("/api/ai/{game_id}/", status_code=status.HTTP_201_CREATED)
-async def create_message(game_id: int, request: Request):
-    precise_timestamp = datetime.now().isoformat()
+async def create_message(game_id: int, request: AIInputDataDto):
+    # 요청에서 AI 번호들 추출
+    ai_numbers = [ai.number for ai in request.selectedAIs]
     
-    # AI 정보와 메시지 각각 로깅
-    # logger.info(f"[{precise_timestamp}] Game ID: {game_id}")
-    # logger.info(f"Selected AIs: {request.selectedAIs}")
-    # logger.info(f"Message: {request.message}")
+    # 간단한 응답 생성
+    responses = []
+    for ai_info in request.selectedAIs:
+        responses.append({
+            "number": ai_info.number,
+            "content": f"AI-{ai_info.number}의 테스트 응답입니다"
+        })
     
-    # 응답 생성
-    parsed_dialogue = dialogue_parser(request.message)
-    logger.info(f"\n\n")
-    # logger.info(f"--------------------------------------------------------")
-    # logger.info(f"{geminiBot.chat.history}")
-    # logger.info(f"--------------------------------------------------------")
-    geminiBotResponse = geminiBot.generate_response(parsed_dialogue)
-    # chatGPTBotResponse = ...
-    
-    return {
-        "timeStamp": f"{precise_timestamp}",
-        "answeredAI": 1,
-        "gameId": game_id,
-        "message": "hello world!",
-        # "message": f"{geminiBotResponse}",
-    }
+    return responses

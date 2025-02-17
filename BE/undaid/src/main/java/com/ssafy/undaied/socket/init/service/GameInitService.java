@@ -38,7 +38,6 @@ import static com.ssafy.undaied.socket.common.constant.SocketRoom.*;
 public class GameInitService {
     private final RedisTemplate<String, String> redisTemplate;
     private final RedisTemplate<String, Object> jsonRedisTemplate;
-    private final SocketIOServer socketIOServer;
     private final ObjectMapper objectMapper;
     private final SocketIONamespace namespace;
     private final GameTimer gameTimer;
@@ -49,7 +48,6 @@ public class GameInitService {
 
     // AI 후보 리스트
     private static final Map<String, String> AI_POOL = new HashMap<>() {{
-        put("1", "deepseek");
         put("2", "gemini");
         put("3", "chatgpt");
     }};
@@ -77,8 +75,9 @@ public class GameInitService {
 
         handleSocketConnections(gameId, roomId);
 
-        //일단 주석처리
-//        aiChatService.startGameMessageScheduling(gameId);
+        // AI 요청 스케줄링 시작
+        aiChatService.startGameMessageScheduling(gameId);
+        log.info("AI 요청 시작: {}", gameId);
 
         return gameId;
     }
