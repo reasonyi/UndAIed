@@ -4,6 +4,10 @@ import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.SocketIONamespace;
 import com.corundumstudio.socketio.SocketIOServer;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ssafy.undaied.domain.ai.entity.AIBenchmarks;
+import com.ssafy.undaied.domain.ai.entity.AIs;
+import com.ssafy.undaied.domain.ai.entity.repository.AIBenchmarksRepository;
+import com.ssafy.undaied.domain.ai.entity.repository.AIRepository;
 import com.ssafy.undaied.domain.game.entity.GameRecords;
 import com.ssafy.undaied.domain.game.entity.Games;
 import com.ssafy.undaied.domain.game.entity.Subjects;
@@ -26,6 +30,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.ssafy.undaied.socket.common.constant.SocketRoom.*;
+
+import com.fasterxml.jackson.core.type.TypeReference;
 import static com.ssafy.undaied.socket.common.constant.SocketRoom.WAITING_LIST;
 import static com.ssafy.undaied.socket.common.exception.SocketErrorCode.*;
 
@@ -35,11 +41,12 @@ import static com.ssafy.undaied.socket.common.exception.SocketErrorCode.*;
 public class GameResultService {
     private final RedisTemplate<String, String> redisTemplate;
     private final RedisTemplate<String, Object> jsonRedisTemplate;
-    private final SocketIOServer socketIOServer;
     private final ObjectMapper objectMapper;
     private final GamesRepository gamesRepository;
     private final GameRecordsRepository gameRecordsRepository;
     private final SubjectsRepository subjectsRepository;
+    private final AIBenchmarksRepository aiBenchmarksRepository;
+    private final AIRepository aiRepository;
     private final SocketIONamespace namespace;
 
     public String checkGameResult(int gameId) throws SocketException {
@@ -109,16 +116,19 @@ public class GameResultService {
         }
     }
 
-    public void gameEnd(SocketIOClient client, int gameId, String winner) throws SocketException {
+    public void gameEnd(int gameId, String winner) throws SocketException {
         try {
             log.info("게임 종료 과정이 시행됩니다.: {}", gameId);
 
             updateGameEndStatus(gameId, winner);
+            // 게임 결과 발표
             GameResultResponseDto responseDto = createGameResultResponse(gameId, winner);
-            movePlayersToLobby(client, gameId);
-
             namespace.getRoomOperations(GAME_KEY_PREFIX + gameId)
                     .sendEvent("game:result:send", responseDto);
+
+            // 플레이어 로비로 이동
+            movePlayersToLobby(gameId);
+            // Redis 게임 결과 저장
 
             saveGameResult(gameId);
 
@@ -206,13 +216,17 @@ public class GameResultService {
         }
     }
 
-    public void movePlayersToLobby(SocketIOClient client, int gameId) throws SocketException {
+    public void movePlayersToLobby(int gameId) throws SocketException {
+        Collection<SocketIOClient> clients = namespace.getRoomOperations(GAME_KEY_PREFIX+gameId).getClients();
         try {
-            if (client == null) {
+            if (clients == null) {
                 log.error("Client가 null 입니다 : {}", gameId);
                 throw new SocketException(CLIENT_NOT_FOUND);
             }
-            client.getAllRooms().forEach(client::leaveRoom);
+            for (SocketIOClient client : clients) {
+                client.leaveRoom(GAME_KEY_PREFIX + gameId);
+                client.joinRoom(LOBBY_ROOM);
+            }
             log.info("백엔드상 게임방 나가기 처리됩니다");
         } catch (Exception e) {
             log.error("백엔드상 게임방 나가기 처리 중 에러가 발생했습니다. {}: {}", gameId, e.getMessage());
@@ -261,6 +275,44 @@ public class GameResultService {
 
             gamesRepository.save(game);
             log.debug("Games 객체 성공적으로 저장");
+
+            // AI 죽은 결과 저장.
+            // AI 죽은 결과 저장.
+            String aiDeadKey = GAME_KEY_PREFIX + gameId + ":ai_died";
+            Object aiDeadObj = jsonRedisTemplate.opsForValue().get(aiDeadKey);
+            if(aiDeadObj == null) {
+                log.error("redis에서 AI 탈락 데이터를 찾을 수 없어 저장에 실패 - roomId: {}", roomId);
+                return;
+            }
+
+            if(aiDeadObj != null) {  // null이 아닐 때만 처리
+                // Object를 Map으로 변환
+                Map<String, Object> aiDeadResult = objectMapper.convertValue(aiDeadObj, new TypeReference<Map<String, Object>>() {});
+
+                // AI 탈락 결과를 순회하면서 처리
+                aiDeadResult.forEach((aiId, eliminatedRound) -> {
+
+                    AIs ai = aiRepository.findById(Integer.parseInt(aiId))
+                            .orElse(null);
+
+                    if (ai == null) {
+                        log.error("AI를 찾을 수 없어 데이터 저장 실패");
+                        return;
+                    }
+
+                    AIBenchmarks aiBenchmarks = AIBenchmarks.builder()
+                            .game(game)
+                            .ai(ai)
+                            .deadRound(Integer.parseInt(eliminatedRound.toString()))
+                            .build();
+
+                    aiBenchmarksRepository.save(aiBenchmarks);
+                });
+
+                log.debug("AI 탈락 결과 성공적으로 저장");
+            } else {
+                log.debug("AI 탈락 데이터가 없습니다 - gameId: {}", gameId);
+            }
 
             // 레코드마다 저장....
 

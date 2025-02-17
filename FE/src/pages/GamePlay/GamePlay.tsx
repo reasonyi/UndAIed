@@ -17,17 +17,7 @@ import LeftGameSideBar from "./components/LeftGameSideBar";
 import { IMessage } from "../../types/gameroom";
 import { IAnonimus } from "../../types/gameplay";
 import { toast } from "sonner";
-
-//띄운 메세지, max_time 을 저장장
-export const STAGE_INFO = {
-  start: ["게임 준비 중...", 0],
-  day: ["라운드 준비 중...", 5],
-  subject_debate: ["주제 토론 시간", 15],
-  free_debate: ["자유 토론 시간", 10],
-  vote: ["투표 시간", 10],
-  night: ["인간 공격 중...", 5],
-  finish: ["게임 종료", 0],
-};
+import { STAGE_INFO } from "./components/info";
 
 interface IChatSend {
   number: number;
@@ -53,6 +43,16 @@ interface IGameChatEmitDone {
   errorMessage?: string;
   data: null;
 }
+interface IVoteEmitDone {
+  success: boolean;
+  errorMessage?: string;
+  data: {
+    number: number; // 투표 대상자 번호
+    message: string;
+  };
+}
+
+interface IGameResultSend {}
 
 function GamePlay() {
   const { number } = useParams();
@@ -65,6 +65,7 @@ function GamePlay() {
 
   //게임 전체 정보보 (유저 정보 포함)
   const [gameInfo, setGameInfo] = useState<IGameInfoSend>();
+  const [gameResult, setGameResult] = useState<IGameResultSend>();
 
   //유저 아이콘
   const iconArr = [
@@ -125,8 +126,18 @@ function GamePlay() {
       }
     });
 
+    //게임 결과 받기
+    //useEffect로 gameResult가 초기 값이 아니면 결과 화면 출력하게 하자
+    socket.on("game:result:send", (data: any) => {
+      console.log("game:result:send 발생! data 수신:", data);
+      if (data) {
+        console.log("게임 결과: ", data);
+      }
+    });
+
     return () => {
       socket.off("game:info:send");
+      socket.off("game:result:send");
     };
   }, [socket, playerEnterId, gameInfo]);
 
@@ -148,7 +159,7 @@ function GamePlay() {
             text: data.content,
             isMine: false,
           };
-          setMessages([...messages, newMessage]);
+          setMessages((prevMessages) => [...prevMessages, newMessage]);
         } else if (gameInfo) {
           const player = gameInfo.players.find(
             (player) => player.number === data.number
@@ -160,7 +171,7 @@ function GamePlay() {
               text: data.content,
               isMine: Boolean(player.number === playerEnterId),
             };
-            setMessages([...messages, newMessage]);
+            setMessages((prevMessages) => [...prevMessages, newMessage]);
           }
         }
       }
@@ -171,22 +182,15 @@ function GamePlay() {
       console.log("chat:subject:send 발생! data 수신:", data);
       debugger;
       if (data) {
-        if (gameInfo) {
-          data.map((msg) => {
-            const player = gameInfo.players.find(
-              (player) => player.number === msg.number
-            );
-            if (player) {
-              const newMessage: IMessage = {
-                player: player.number,
-                nickname: `익명${player.number}`,
-                text: msg.content,
-                isMine: Boolean(player.number === playerEnterId),
-              };
-              setMessages([...messages, newMessage]);
-            }
-          });
-        }
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          ...data.map((msg) => ({
+            player: msg.number,
+            nickname: `익명${msg.number}`,
+            text: msg.content,
+            isMine: msg.number === playerEnterId,
+          })),
+        ]);
       }
     });
 
@@ -263,6 +267,32 @@ function GamePlay() {
     [socket, playerEnterId]
   );
 
+  const handleVoteSubmit = useCallback(
+    (target: number) => {
+      debugger;
+      if (!socket) {
+        console.log("enter: socket 이 존재하지 않습니다");
+        return;
+      }
+      socket.emit(
+        "vote:submit:emit",
+        {
+          target: target,
+        },
+        ({ success, errorMessage, data }: IVoteEmitDone) => {
+          debugger;
+          if (success) {
+            toast.success(`익명${data.number}에게 ${data.message}`);
+          } else {
+            console.error("채팅 전송 오류:", errorMessage);
+            toast.error(errorMessage);
+          }
+        }
+      );
+    },
+    [socket]
+  );
+
   const scrollToBottom = () => {
     scrollRef.current?.scrollIntoView({ block: "end" });
   };
@@ -316,7 +346,12 @@ function GamePlay() {
                   <ChatForm socket={socket} onSendChat={handleGameChat} />
                 </div>
               </div>
-              <RightGameSideBar players={gameInfo?.players} iconArr={iconArr} />
+              <RightGameSideBar
+                players={gameInfo?.players}
+                iconArr={iconArr}
+                onVoteSubmit={handleVoteSubmit}
+                stage={gameInfo?.stage}
+              />
             </div>
           </div>
         </div>
