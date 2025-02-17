@@ -3,9 +3,10 @@ import { useState, useEffect, useRef } from "react";
 interface ISecondsProps {
   initialSeconds: number;
   maxSeconds: number | string;
+  stage: string | number;
 }
 
-function SecondCounter({ initialSeconds, maxSeconds }: ISecondsProps) {
+function SecondCounter({ initialSeconds, maxSeconds, stage }: ISecondsProps) {
   const [seconds, setSeconds] = useState(initialSeconds);
   const circleRef = useRef<SVGCircleElement | null>(null);
   console.log("타이머 관련 정보: ", initialSeconds, maxSeconds, seconds);
@@ -30,7 +31,7 @@ function SecondCounter({ initialSeconds, maxSeconds }: ISecondsProps) {
 
     // 컴포넌트 언마운트 시 인터벌 정리
     return () => clearInterval(intervalId);
-  }, [initialSeconds, maxSeconds]);
+  }, [initialSeconds, maxSeconds, stage]);
 
   useEffect(() => {
     // 원형 진행도 업데이트
