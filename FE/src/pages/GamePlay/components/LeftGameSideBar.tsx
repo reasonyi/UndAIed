@@ -12,7 +12,7 @@ import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Socket } from "socket.io-client";
 import SecondCounter from "./SecondCounter";
-import { STAGE_INFO } from "../GamePlay";
+import { STAGE_INFO } from "./info";
 
 interface ILeftGameSideBarProps {
   nickname: string;
