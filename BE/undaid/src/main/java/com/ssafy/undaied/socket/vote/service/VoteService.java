@@ -210,6 +210,15 @@ public class VoteService {
 
             String newStatus = playerStatus.get(eliminatedNumber).toString().replace("isDied=false", "isDied=true");
             redisTemplate.opsForHash().put(statusKey, eliminatedNumber, newStatus);
+            log.debug("🍳Store new player_status data in Redis : {}", redisTemplate.opsForHash().get(statusKey, eliminatedNumber));
+
+            // 처형자가 AI인 경우 평가지표를 위해 redis에 따로 저장함
+            if (isAI) {
+                String aiId = findAIIdByNumber(gameId, eliminatedNumber);
+                String aiDiedKey = String.format("game:%d:ai_died", gameId);
+                redisTemplate.opsForHash().put(aiDiedKey, aiId, currentRound);
+                log.debug("🍳AI died: AI Id : {}, Round : {}", aiId, currentRound);
+            }
 
             // 투표 이벤트 저장
             String userNameKey = "game:" + gameId + ":number_nicknames";
@@ -218,6 +227,7 @@ public class VoteService {
             String voteEvent = String.format("{vote_result} [null] <null> (%s) ~%s~ %s | ",
                     eliminatedName, eliminatedNumber, LocalDateTime.now());
             redisTemplate.opsForValue().append(eventKey, voteEvent);
+            log.debug("🍳Store vote event data in Redis");
             return VoteResultResponseDto.notifyVoteResult(eliminatedNumber, maxVotes, isAI, isInfected);
         }
     }
@@ -280,6 +290,26 @@ public class VoteService {
         Integer randomTarget = randomVoteList.get(randomIndex);
         log.debug("RandomTarget: {}", randomTarget);
         return randomTarget;
+    }
+
+    // AI 익명 number로 AI Id 찾기
+    public String findAIIdByNumber(Integer gameId, String eliminatedNumber) {
+        log.debug("🍳Starting find AI Id by eliminatedNumber");
+        String userNumberKey = String.format("game:%d:number_mapping");
+
+        Map<Object, Object> userMapping = redisTemplate.opsForHash().entries(userNumberKey);
+        // userMapping 에서 키를 찾아야 함
+        for (Map.Entry<Object, Object> entry : userMapping.entrySet()) {
+            if (entry.getValue().toString().equals(eliminatedNumber)) {
+                String aiId = entry.getKey().toString();
+                log.debug("🍳eliminated AI id: {}", aiId);
+
+                if(aiId.startsWith("-")) {
+                    return aiId.substring(1);
+                }
+            }
+        }
+        return null;
     }
 }
 

@@ -68,25 +68,6 @@ public class StageService {
             // 현재 스테이지 상태 저장
             saveCurrentStage(gameId, currentStage);
 
-            // 테스트에서 2라운드까지만 진행하고 종료함
-            if (currentStage == StageType.NIGHT && getCurrentRound(gameId).equals("2")) {
-                gameOver(gameId);
-                return;
-            }
-            // 낮인 경우에만 라운드 알림
-            if (currentStage == StageType.DAY) {
-                saveCurrentRound(gameId);
-                // 라운드 알림
-                RoundNotifyDto roundNotifyDto = RoundNotifyDto.notifyRoundStart(getCurrentRound(gameId));
-                namespace.getRoomOperations("game:" + gameId).sendEvent(EventType.GAME_CHAT_SEND.getValue(), roundNotifyDto);
-            }
-
-            // 2라운드 종료 체크
-            if (currentStage == StageType.NIGHT && getCurrentRound(gameId).equals("2")) {
-                gameOver(gameId);
-                return;
-            }
-
             // 스테이지 시작 알림
             gameTimer.setTimer(gameId, GameTimerConstants.STAGE_START_NOTIFY, STAGE_DURATIONS.get("notify"), () -> {
                 handleNotifyStartStage(gameId, currentStage);
@@ -119,15 +100,28 @@ public class StageService {
             case FREE_DEBATE -> handleFreeDebate(gameId);
             case VOTE -> handleVote(gameId);
             case NIGHT -> handleNight(gameId);
-            case FINISH -> handleGameEnd(gameId);
         }
     }
 
     private void handleDayStage(Integer gameId) {
+        saveCurrentRound(gameId);
+        // 라운드 알림
+        RoundNotifyDto roundNotifyDto = RoundNotifyDto.notifyRoundStart(getCurrentRound(gameId));
+        namespace.getRoomOperations("game:" + gameId).sendEvent(EventType.GAME_CHAT_SEND.getValue(), roundNotifyDto);
+
         // 2라운드부터 감염 처리
         if (Integer.parseInt(getCurrentRound(gameId)) > 1) {
             handleInfection(gameId);
             gameInitService.sendGameInfo(gameId);
+        }
+
+        try {
+            String winner = gameResultService.checkGameResult(gameId);
+            if (winner != null) {
+                handleGameEnd(gameId, winner);
+            }
+        } catch (SocketException e) {
+            log.error("🍳게임 결과 처리 중 오류 : {} ", e.getMessage());
         }
         // 시작 시 5초
         gameTimer.setTimer(gameId, GameTimerConstants.STAGE_END_NOTIFY, 5, () -> {
@@ -208,9 +202,20 @@ public class StageService {
                     VoteResultResponseDto responseDto = voteService.computeVoteResult(gameId);
                     namespace.getRoomOperations("game:" + gameId)
                             .sendEvent(EventType.GAME_CHAT_SEND.getValue(), responseDto);
-                    gameInitService.sendGameInfo(gameId);
 
                     try {
+                        log.debug("🍳vote event end");
+                        gameInitService.sendGameInfo(gameId);
+
+                        try {
+                            String winner = gameResultService.checkGameResult(gameId);
+                            if (winner != null) {
+                                handleGameEnd(gameId, winner);
+                            }
+                        } catch (SocketException e) {
+                            log.error("🍳게임 결과 처리 중 오류 : {} ", e.getMessage());
+                        }
+
                         startStage(gameId, StageType.NIGHT);
                     } catch (Exception e) {
                         handleGameError(gameId, e);
@@ -222,10 +227,6 @@ public class StageService {
     }
 
     private void handleNight(Integer gameId) {
-        if (getCurrentRound(gameId).equals("2")) {
-            gameOver(gameId);
-            return;
-        }
         // 밤 진행 시간 5초
         gameTimer.setTimer(gameId, GameTimerConstants.STAGE_START_NOTIFY, 5, () -> {
             try {
@@ -237,9 +238,13 @@ public class StageService {
         gameInitService.sendGameInfo(gameId);
     }
 
-    private void handleGameEnd(Integer gameId) {
+    private void handleGameEnd(Integer gameId, String winner) {
+        saveCurrentStage(gameId, StageType.FINISH);
+        gameInitService.sendGameInfo(gameId);
+
+        StageNotifyDto.notifyEndStage(StageType.FINISH);
         gameTimer.setTimer(gameId, GameTimerConstants.GAME_END, STAGE_DURATIONS.get("notify"), () -> {
-            gameOver(gameId);
+            gameOver(gameId, winner);
         });
         gameInitService.sendGameInfo(gameId);
     }
@@ -278,8 +283,13 @@ public class StageService {
 //                                "게임 진행 중 오류가 발생했습니다");
     }
 
-    private void gameOver(Integer gameId) {
+    private void gameOver(Integer gameId, String winner) {
         // 게임 종료 로직
+        try {
+            gameResultService.gameEnd(gameId, winner);
+        } catch (SocketException e) {
+            log.error(e.getMessage());
+        }
         // gameTimer에서 타이머 데이터 삭제
         gameTimer.cleanupGame(gameId);
     }

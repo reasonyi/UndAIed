@@ -35,7 +35,6 @@ import static com.ssafy.undaied.socket.common.exception.SocketErrorCode.*;
 public class GameResultService {
     private final RedisTemplate<String, String> redisTemplate;
     private final RedisTemplate<String, Object> jsonRedisTemplate;
-    private final SocketIOServer socketIOServer;
     private final ObjectMapper objectMapper;
     private final GamesRepository gamesRepository;
     private final GameRecordsRepository gameRecordsRepository;
@@ -109,17 +108,18 @@ public class GameResultService {
         }
     }
 
-    public void gameEnd(SocketIOClient client, int gameId, String winner) throws SocketException {
+    public void gameEnd(int gameId, String winner) throws SocketException {
         try {
             log.info("게임 종료 과정이 시행됩니다.: {}", gameId);
 
             updateGameEndStatus(gameId, winner);
+            // 게임 결과 발표
             GameResultResponseDto responseDto = createGameResultResponse(gameId, winner);
-            movePlayersToLobby(client, gameId);
-
             namespace.getRoomOperations(GAME_KEY_PREFIX + gameId)
-                    .sendEvent("game:chat:send", responseDto);
-
+                    .sendEvent("game:result:send", responseDto);
+            // 플레이어 로비로 이동
+            movePlayersToLobby(gameId);
+            // Redis 게임 결과 저장
             saveGameResult(gameId);
 
             log.info("게임 종료가 성공적으로 진행됐습니다.: {}", gameId);
@@ -206,13 +206,17 @@ public class GameResultService {
         }
     }
 
-    public void movePlayersToLobby(SocketIOClient client, int gameId) throws SocketException {
+    public void movePlayersToLobby(int gameId) throws SocketException {
+        Collection<SocketIOClient> clients = namespace.getRoomOperations(GAME_KEY_PREFIX+gameId).getClients();
         try {
-            if (client == null) {
+            if (clients == null) {
                 log.error("Client가 null 입니다 : {}", gameId);
                 throw new SocketException(CLIENT_NOT_FOUND);
             }
-            client.getAllRooms().forEach(client::leaveRoom);
+            for (SocketIOClient client : clients) {
+                client.leaveRoom(GAME_KEY_PREFIX + gameId);
+                client.joinRoom(LOBBY_ROOM);
+            }
             log.info("백엔드상 게임방 나가기 처리됩니다");
         } catch (Exception e) {
             log.error("백엔드상 게임방 나가기 처리 중 에러가 발생했습니다. {}: {}", gameId, e.getMessage());
