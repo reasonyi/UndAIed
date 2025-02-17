@@ -24,62 +24,61 @@ public class QuitService {
     private final SocketIOServer socketIOServer;
     private final GameInitService gameInitService;
 
-    public boolean leaveGame(SocketIOClient client, boolean isInGame) throws SocketException {
-        // 🔹 게임 ID 가져오기
-        Integer gameId = client.get("gameId");
-        if (gameId == null) {
-            throw new SocketException(SocketErrorCode.SOCKET_AUTHENTICATION_FAILED);
-        }
-
-        // 🔹 유저 ID 가져오기
-        Integer userId = client.get("userId");
-        if (userId == null) {
-            throw new SocketException(SocketErrorCode.SOCKET_AUTHENTICATION_FAILED);
-        }
-
-        // 🔹 Redis에서 playerNumber 가져오기
-        String mappingKey = GAME_KEY_PREFIX + gameId + ":number_mapping";
-        Object playerNumberObj = redisTemplate.opsForHash().get(mappingKey, userId.toString());
-        if (playerNumberObj == null) {
-            log.warn("Player number not found in Redis - gameId: {}, userId: {}", gameId, userId);
-            throw new SocketException(SocketErrorCode.PLAYER_NOT_FOUND);
-        }
-
-        int playerNumber = Integer.parseInt(playerNumberObj.toString());
-
-        // 🔹 현재 상태 가져오기
-        String statusKey = GAME_KEY_PREFIX + gameId + ":player_status";
-        Object statusObj = redisTemplate.opsForHash().get(statusKey, String.valueOf(playerNumber));
-        if (statusObj == null) {
-            log.warn("Player status not found - gameId: {}, playerNumber: {}", gameId, playerNumber);
-            return false;
-        }
-        String currentStatus = statusObj.toString();
-
-        // 🔹 플레이어 상태 업데이트
-        gameInitService.updatePlayerStatus(gameId, playerNumber,
-                currentStatus.contains("isDied=true"),
-                currentStatus.contains("isInfected=true"),
-                isInGame);
-
-        // 🔹 상태 변경 브로드캐스트
-        GameInfoResponseDto statusUpdate = gameInitService.createGameInfoResponse(gameId);
-        String gameRoomKey = GAME_KEY_PREFIX + gameId;
-        socketIOServer.getRoomOperations(gameRoomKey).sendEvent("game:info", statusUpdate);
-
-        // 🔹 게임 퇴장 메시지 브로드캐스트
-        String playerNickname = "익명" + playerNumber;
-        Map<String, String> chatMessage = Map.of("message", playerNickname + "번 님이 게임을 나가셨습니다.");
-        socketIOServer.getRoomOperations(gameRoomKey).sendEvent("game:chat", chatMessage);
-
-        // 🔹 클라이언트가 게임에서 나가고 로비로 이동
-        client.leaveRoom(gameRoomKey);
-        client.joinRoom(LOBBY_ROOM);
-        log.info("Player {} (userId: {}) left game {} and joined lobby", playerNumber, userId, gameId);
-
-        return true;
-    }
-
+    //일단 기능에서 제외
+//    public boolean leaveGame(SocketIOClient client, boolean isInGame) throws SocketException {
+//        // 🔹 게임 ID 가져오기
+//        Integer gameId = client.get("gameId");
+//        if (gameId == null) {
+//            throw new SocketException(SocketErrorCode.SOCKET_AUTHENTICATION_FAILED);
+//        }
+//
+//        // 🔹 유저 ID 가져오기
+//        Integer userId = client.get("userId");
+//        if (userId == null) {
+//            throw new SocketException(SocketErrorCode.SOCKET_AUTHENTICATION_FAILED);
+//        }
+//
+//        // 🔹 Redis에서 playerNumber 가져오기
+//        String mappingKey = GAME_KEY_PREFIX + gameId + ":number_mapping";
+//        Object playerNumberObj = redisTemplate.opsForHash().get(mappingKey, userId.toString());
+//        if (playerNumberObj == null) {
+//            log.warn("Player number not found in Redis - gameId: {}, userId: {}", gameId, userId);
+//            throw new SocketException(SocketErrorCode.PLAYER_NOT_FOUND);
+//        }
+//
+//        int playerNumber = Integer.parseInt(playerNumberObj.toString());
+//
+//        // 🔹 현재 상태 가져오기
+//        String statusKey = GAME_KEY_PREFIX + gameId + ":player_status";
+//        Object statusObj = redisTemplate.opsForHash().get(statusKey, String.valueOf(playerNumber));
+//        if (statusObj == null) {
+//            log.warn("Player status not found - gameId: {}, playerNumber: {}", gameId, playerNumber);
+//            return false;
+//        }
+//        String currentStatus = statusObj.toString();
+//
+//        // 🔹 플레이어 상태 업데이트
+//        gameInitService.updatePlayerStatus(gameId, playerNumber,
+//                currentStatus.contains("isDied=true"),
+//                isInGame);
+//
+//        // 🔹 상태 변경 브로드캐스트
+//        GameInfoResponseDto statusUpdate = gameInitService.createGameInfoResponse(gameId);
+//        String gameRoomKey = GAME_KEY_PREFIX + gameId;
+//        socketIOServer.getRoomOperations(gameRoomKey).sendEvent("game:info", statusUpdate);
+//
+//        // 🔹 게임 퇴장 메시지 브로드캐스트
+//        String playerNickname = "익명" + playerNumber;
+//        Map<String, String> chatMessage = Map.of("message", playerNickname + "번 님이 게임을 나가셨습니다.");
+//        socketIOServer.getRoomOperations(gameRoomKey).sendEvent("game:chat", chatMessage);
+//
+//        // 🔹 클라이언트가 게임에서 나가고 로비로 이동
+//        client.leaveRoom(gameRoomKey);
+//        client.joinRoom(LOBBY_ROOM);
+//        log.info("Player {} (userId: {}) left game {} and joined lobby", playerNumber, userId, gameId);
+//
+//        return true;
+//    }
 
     //연결 끊겼을 경우
     public void handleGameDisconnect(SocketIOClient client, String gameRoom) throws SocketException {
@@ -108,7 +107,7 @@ public class QuitService {
             boolean isInfected = currentStatus.contains("isInfected=true");
 
             // 플레이어 상태 업데이트 (게임에서 나감)
-            gameInitService.updatePlayerStatus(gameId, Integer.parseInt(number), isDied, isInfected, false);
+            gameInitService.updatePlayerStatus(gameId, Integer.parseInt(number), isDied, false);
 
             // 게임방에서 나가기
             client.leaveRoom("game:" + gameId);
