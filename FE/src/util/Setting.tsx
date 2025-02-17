@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { atom, useRecoilState, useSetRecoilState } from "recoil";
+import { useEffect, useState } from "react";
+import { useRecoilState } from "recoil";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faMaximize,
@@ -9,20 +9,9 @@ import {
   faXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import setting from "../assets/icon/setting.png";
-
 import { setShowIntroState } from "../store/showState";
-// Recoil 상태 정의
-interface SettingsState {
-  isFullscreen: boolean;
-  isMuted: boolean;
-  volume: number;
-}
-
-interface SettingProps {
-  title: string;
-  first: boolean;
-  setFirst: (value: boolean) => void;
-}
+import { SettingProps } from "../types/setting";
+import { settingsState } from "../store/settingState";
 
 const blockStyle =
   "bg-[#0000006c] border border-[#f74a5c]/40 backdrop-blur-[12.20px] text-[#fffbfb] rounded-[5px] transition-all duration-200";
@@ -30,28 +19,6 @@ const blockHover =
   "hover: hover:border-[#f93c4f] hover:shadow-[0_0_15px_0] hover:shadow-[#F74A5C]";
 const blockActive =
   "active:bg-[#f837644e] active:border-[#f837644e] active:shadow-sm";
-
-export const settingsState = atom<SettingsState>({
-  key: "settingsState",
-  default: (() => {
-    const savedSettings = localStorage.getItem("appSettings");
-    if (savedSettings) {
-      return JSON.parse(savedSettings);
-    }
-    return {
-      isFullscreen: false,
-      isMuted: false,
-      volume: 1.0,
-    };
-  })(),
-  effects: [
-    ({ onSet }) => {
-      onSet((newSettings) => {
-        localStorage.setItem("appSettings", JSON.stringify(newSettings));
-      });
-    },
-  ],
-});
 
 // 설정 아이콘 컴포넌트
 function SettingIcon() {
