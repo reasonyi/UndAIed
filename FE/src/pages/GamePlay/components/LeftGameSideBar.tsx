@@ -89,6 +89,7 @@ ILeftGameSideBarProps) {
             <SecondCounter
               initialSeconds={timer ? timer : 0}
               maxSeconds={stage ? STAGE_INFO[stage][1] : 0}
+              stage={stage ? STAGE_INFO[stage][0] : "Disconnected"}
             />
           </div>
         </div>
