@@ -28,6 +28,8 @@ public enum EventType {
     GAME_CHAT_SEND("game:chat:send"),
     GAME_CHAT_EMIT("game:chat:emit"),
 
+    GAME_RESULT_SEND("game:result:send"),
+
     // 투표
     SUBMIT_VOTE("vote:submit:emit"),
     SHOW_VOTE_RESULT("vote:result:send"),

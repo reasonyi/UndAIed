@@ -28,8 +28,8 @@ import static com.ssafy.undaied.socket.common.constant.SocketRoom.GAME_KEY_PREFI
 @RequiredArgsConstructor
 public class AIChatService {
     private static final long EXPIRE_TIME = 7200;
-    private static final long MIN_DELAY = 3000;  // AI 응답 최소 지연 시간 (3초)
-    private static final long MAX_DELAY = 7000;  // AI 응답 최대 지연 시간 (7초)
+    private static final long MIN_DELAY = 5000;  // AI 응답 최소 지연 시간 (5초)
+    private static final long MAX_DELAY = 4000;  // AI 응답 최대 지연 시간 (7초)
 
     private final WebClient webClient;
     private final RedisTemplate<String, String> redisTemplate;
@@ -122,7 +122,7 @@ public class AIChatService {
 
             // AI 서버로 요청 전송
             webClient.post()
-                    .uri("/api/ai/{gameId}/chat", gameId)
+                    .uri("/api/ai/{gameId}/", gameId)
                     .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                     .bodyValue(sendData)
                     .retrieve()
@@ -155,7 +155,7 @@ public class AIChatService {
             Map<String, String> roundData = collectRoundData(gameId, String.valueOf(round));
 
             // 라운드 시작 표시
-            allRoundsData.append("<").append(round).append("> //라운드 정보\n");
+            allRoundsData.append("<").append(round).append(">");
 
             // 주제 정보 추가
             String subjectKey = String.format("%s%d:round:%s:used_subjects",
@@ -293,7 +293,7 @@ public class AIChatService {
         }
 
         // {aiId} [AI-number] <number>(content) timestamp|
-        String message = String.format("{%d} [AI-%d] <%d>(%s) %s|",
+        String message = String.format("{%d} [AI%d] <%d>(%s) %s|",
                 aiId,                    // AI ID (음수값)
                 response.getNumber(),    // AI 닉네임용 번호
                 response.getNumber(),    // 표시용 번호
