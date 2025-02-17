@@ -12,11 +12,11 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 public class VoteResultResponseDto {
     private final Integer number = 0;
-    private String message;
+    private String content;
 
     @Builder
-    public VoteResultResponseDto(String message) {
-        this.message = message;
+    public VoteResultResponseDto(String content) {
+        this.content = content;
     }
 
     public static VoteResultResponseDto notifyVoteResult(String eliminatedNumber, int receivedCount, boolean isAI, boolean isInfected) {
@@ -33,17 +33,17 @@ public class VoteResultResponseDto {
         }
 
         return VoteResultResponseDto.builder()
-                .message(type + " 익명" + eliminatedNumber + " 플레이어가 총 " + receivedCount + "표를 받아 처형되었습니다.")
+                .content(type + " 익명" + eliminatedNumber + " 플레이어가 총 " + receivedCount + "표를 받아 처형되었습니다.")
                 .build();
     }
 
     public static VoteResultResponseDto notifyDraw(List<Integer> maxVotedCandidates, int receivedCount) {
         List<String> numbers = maxVotedCandidates.stream().map(number -> "익명 " + number.toString()).collect(Collectors.toList());
         String numbersString = String.join(", ", numbers);
-        String message = numbersString + " 플레이어가 각각" + receivedCount + " 표를 받아 처형 대상자가 없습니다.";
+        String content = numbersString + " 플레이어가 각각 " + receivedCount + "표를 받아 처형 대상자가 없습니다.";
 
         return VoteResultResponseDto.builder()
-                .message(message)
+                .content(content)
                 .build();
     }
 }

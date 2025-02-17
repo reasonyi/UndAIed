@@ -32,8 +32,7 @@ public class VoteHandler {
                 (client, data, ack) -> {
                     try {
                         Integer userId = client.get("userId");
-                        Integer gameId = 1;
-//                        Integer gameId = client.get("gameId");
+                        Integer gameId = client.get("gameId");
 
                         VoteSubmitResponseDto responseDto = voteService.submitVote(userId, gameId, data);
                         if (ack.isAckRequested()) {

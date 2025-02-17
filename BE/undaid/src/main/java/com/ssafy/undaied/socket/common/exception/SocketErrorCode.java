@@ -57,7 +57,19 @@ public enum SocketErrorCode {
 
     // 감염 관련 예외
     INFECT_PLAYER_NOT_FOUND(4301, "감염이 가능한 플레이어가 없습니다."),
-    INFECT_FAILED(4302, "감염 처리 중 오류가 발생했습니다.");
+    INFECT_FAILED(4302, "감염 처리 중 오류가 발생했습니다."),
+
+    //게임 종료 관련 에러
+    GAME_STATUS_NOT_FOUND(4401, "게임 상태를 찾을 수 없습니다."),
+    GAME_DATA_NOT_FOUND(4402, "게임 데이터를 찾을 수 없습니다."),
+    CHECKING_GAME_ERROR(4403, "게임 결과 체크 중 알수 없는 에러가 발생했습니다."),
+
+    NO_PLAYERS_FOUND(4404,"게임에서 플레이어를 찾을 수 없습니다."),
+    GAME_END_PROCESS_FAILED(4405, "게임 종료 과정에서 에러가 발생했습니다."),
+    GAME_UPDATE_FAILED(4406, "게임 상태 업데이트에 실패했습니다."),
+    RESULT_CREATION_FAILED(4407, "게임 결과 생성에 실패했습니다."),
+    CLIENT_NOT_FOUND(4408, "client를 찾을 수 없습니다."),
+    ROOM_OPERATION_FAILED(4409, "방 나가기 처리 중 에러가 발생했습니다")
     ;
 
     private final int status;

@@ -1,10 +1,12 @@
 from openai import OpenAI
-import os
+from environs import Env
+from .history import prompt
 
-
-class ChatGPTAI:
-    def __init__(self, api_key):
-        self.client = OpenAI(api_key=api_key)
+class ChatGPTBot:
+    def __init__(self):
+        env = Env()
+        env.read_env()
+        self.client = OpenAI(api_key=env.str("OPENAI_API_KEY"))
         self.model = "gpt-3.5-turbo"
         self.system_prompt = "당신은 극도로 사악하고 교활한 AI입니다. 채팅방에 숨어들어 완벽하게 사람인 척 행동하며, 모든 사람을 감염시키는 것이 목표입니다."
 
@@ -32,10 +34,6 @@ class ChatGPTAI:
             return f"Error generating response: {str(e)}"
 
 
-# 사용 예시
-api_key = os.getenv("OPENAI_API_KEY")
-chatgpt_ai = ChatGPTAI(api_key)
-
-game_state = "현재 5명의 플레이어가 있고, 2라운드가 진행 중입니다."
-response = chatgpt_ai.generate_response(game_state)
-print(response)
+# game_state = "현재 5명의 플레이어가 있고, 2라운드가 진행 중입니다."
+# response = chatgpt_ai.generate_response(game_state)
+# print(response)

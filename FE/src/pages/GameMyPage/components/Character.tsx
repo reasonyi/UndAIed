@@ -1,6 +1,7 @@
-import CharacterImage1 from "../../../assets/character/character-demo.png";
-import CharacterImage2 from "../../../assets/character/character-demo.png";
-import CharacterImage3 from "../../../assets/character/character-demo.png";
+import CharacterImage1 from "../../../assets/character/character1.png";
+import CharacterImage2 from "../../../assets/character/character2.png";
+import CharacterImage3 from "../../../assets/character/character3.png";
+import { useClickSound } from "../../../hooks/useClickSound";
 import { useUpdateProfile, useUserProfile } from "../../../hooks/useUserData";
 import { useState } from "react";
 
@@ -12,8 +13,9 @@ function Character() {
   const blockActive =
     "active:bg-[#f837644e] active:border-[#f837644e] active:shadow-sm";
 
+  const clickSound = useClickSound();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedIndex, setSelectedIndex] = useState(1);
+  const [selectedIndex, setSelectedIndex] = useState(0);
   const [isRotating, setIsRotating] = useState(false);
 
   const getCharacterImage = (avatar: number) => {
@@ -63,7 +65,7 @@ function Character() {
   const getCharacterStyles = (index: number) => {
     const positions = {
       left: {
-        transform: "translate(-120%, -70%) scale(0.8)",
+        transform: "translate(-90%, -70%) scale(0.8)",
         opacity: "0.5",
         filter: "brightness(0.5)",
         zIndex: 10,
@@ -75,7 +77,7 @@ function Character() {
         zIndex: 20,
       },
       right: {
-        transform: "translate(20%, -70%) scale(0.8)",
+        transform: "translate(-10%, -70%) scale(0.8)",
         opacity: "0.5",
         filter: "brightness(0.5)",
         zIndex: 10,
@@ -111,16 +113,17 @@ function Character() {
 
   return (
     <>
-      <div className="relative z-0 md:w-[600px] justify-around items-center min-h-[300px] md:min-h-0 hidden md:flex flex-col">
+      <div className="-z-1 relative md:w-[725px] justify-around items-center min-h-[300px] md:min-h-0 hidden md:flex flex-col">
         <div className="relative w-full h-full flex items-center justify-center">
           <img
             src={getCharacterImage(avatar)}
             alt={`Character ${avatar}`}
-            className="h-full w-full md:pb-24 object-contain -z-10"
+            className="h-full w-full md:pb-24 object-contain"
           />
         </div>
         <button
           onClick={() => setIsModalOpen(true)}
+          onMouseDown={clickSound}
           className={`${blockStyle} ${blockHover} ${blockActive} text-center py-4 mb-5 text-sm md:text-base md:w-44 absolute bottom-0 left-1/2 transform -translate-x-1/2`}
         >
           캐릭터 선택
@@ -143,7 +146,7 @@ function Character() {
               {characters.map((character, index) => (
                 <div
                   key={character.id}
-                  className="absolute top-1/2 left-1/2 w-[26rem] h-[700px] transition-all duration-500 ease-in-out"
+                  className="absolute top-1/2 left-1/2 w-[725px] h-[700px] transition-all duration-500 ease-in-out"
                   style={{
                     ...getCharacterStyles(index),
                     transformOrigin: "center center",
@@ -156,7 +159,7 @@ function Character() {
                     <img
                       src={character.image}
                       alt={character.name}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object cover-"
                     />
                     {index === selectedIndex && (
                       <div className="absolute bottom-0 w-full py-4 px-6 bg-black/60 backdrop-blur-sm">
