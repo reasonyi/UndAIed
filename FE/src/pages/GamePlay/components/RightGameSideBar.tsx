@@ -193,8 +193,8 @@ function RightGameSideBar({
               {players[7].inGame ? (
                 players[7].died ? (
                   <DiedProfile
-                    nickname={`익명${players[2].number}`}
-                    icon={iconArr[players[2].number]}
+                    nickname={`익명${players[7].number}`}
+                    icon={iconArr[players[7].number]}
                   />
                 ) : (
                   <GameProfile
