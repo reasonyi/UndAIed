@@ -166,9 +166,7 @@ function Settings({ title, first, setFirst }: SettingProps) {
             <div className="fixed inset-0 bg-black z-50 flex items-center justify-center"></div>
           )}
           <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-            <div
-              className={`${blockStyle} ${blockHover} ${blockActive} relative`}
-            >
+            <div className={`${blockStyle} ${blockHover} relative`}>
               {!first && (
                 <button
                   onClick={() => setIsOpen(false)}
