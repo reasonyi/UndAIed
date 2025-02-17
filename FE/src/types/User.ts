@@ -5,6 +5,7 @@ export interface IUser {
   nickname: string;
   totalWin: number;
   totalLose: number;
+  profileImage: number;
 }
 export interface Game {
   gameId: number;

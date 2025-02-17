@@ -94,30 +94,27 @@ function Home() {
   }, []);
 
   useEffect(() => {
-    const ONE_HOUR = 3600000; // 1시간
-    const visitedTime = localStorage.getItem("visitedTime");
-    const now = Date.now();
-
-    // 방문 기록이 없는 경우 => 현재 시간 저장, tutorial 시작 (top: 0)
-    if (!visitedTime) {
-      localStorage.setItem("visitedTime", now.toString());
-      return;
-    }
-
-    // 방문 기록이 존재하는 경우
-    const diff = now - parseInt(visitedTime, 10);
-
-    if (diff < ONE_HOUR) {
-      // 1시간 이내 재방문 => 튜토리얼 스킵
-      window.scrollTo({
-        top: window.innerHeight * 3,
-        behavior: "instant", // 'smooth'로 변경 가능
-      });
-    } else {
-      // 1시간 이상 지남 => visitedTime 갱신, 다시 튜토리얼 보여주기
-      localStorage.setItem("visitedTime", now.toString());
-      // 굳이 따로 scrollTo(0) 할 필요 없이, 기본이 0 위치이므로 생략 가능
-    }
+    // const ONE_HOUR = 3600000; // 1시간
+    // const visitedTime = localStorage.getItem("visitedTime");
+    // const now = Date.now();
+    // // 방문 기록이 없는 경우 => 현재 시간 저장, tutorial 시작 (top: 0)
+    // if (!visitedTime) {
+    //   localStorage.setItem("visitedTime", now.toString());
+    //   return;
+    // }
+    // // 방문 기록이 존재하는 경우
+    // const diff = now - parseInt(visitedTime, 10);
+    // if (diff < ONE_HOUR) {
+    //   // 1시간 이내 재방문 => 튜토리얼 스킵
+    //   window.scrollTo({
+    //     top: window.innerHeight * 3,
+    //     behavior: "instant", // 'smooth'로 변경 가능
+    //   });
+    // } else {
+    //   // 1시간 이상 지남 => visitedTime 갱신, 다시 튜토리얼 보여주기
+    //   localStorage.setItem("visitedTime", now.toString());
+    //   // 굳이 따로 scrollTo(0) 할 필요 없이, 기본이 0 위치이므로 생략 가능
+    // }
   }, []);
 
   const onChervonClick = () => {
@@ -127,52 +124,48 @@ function Home() {
     });
   };
 
-  const toTutorialClick = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  };
-
   return (
     <div className="">
       <Header scrollRatio={scrollRatio} />
       <HeaderTemp />
-      <div className="on-scroll flex w-screen min-h-[calc(100vh-3.5rem)]">
-        <div className="w-[1px] h-[300vh] primary-bg-black"></div>
-        <div className="grow flex flex-col sticky top-[3.5rem] overflow-hidden h-[calc(100vh-3.5rem)] primary-bg-black">
-          <div className="flex flex-col flex-grow w-full max-w-screen-md self-center pt-8 pb-4 px-4">
-            <span className="text-white mb-8 text-4xl font-extrabold leading-none tracking-tight">
-              채팅방 속에 숨어든 AI를 찾아라!
-            </span>
-            <div className="grow relative">
-              <div
-                className="absolute top-0 left-0 w-auto h-full flex gap-4 transition-transform"
-                style={{
-                  transform: `translateX(calc(-${infoScrollRatio}% + ${
-                    (infoScrollRatio / 100) * 720
-                  }px))`,
-                }}
-              >
-                <InfoContainer
-                  title="1."
-                  context="6명의 플레이어들과 한 방에서 게임을 시작합니다."
-                />
-                <InfoContainer
-                  title="2."
-                  context="2명의 AI가 추가되어 8명이 실시간 채팅을 시작합니다다."
-                />
-                <InfoContainer
-                  title="3."
-                  context="주어진 퀴즈에 답변하고 자유 토론을 진행합니다다."
-                />
-                <InfoContainer
-                  title="4."
-                  context="가장 AI같은 플레이어에게 투표합니다."
-                />
+
+      {/* 메인 튜토리얼 소개 컴포넌트 */}
+      <div className="flex">
+        <div className="on-scroll flex w-screen min-h-[calc(100vh-3.5rem)]">
+          <div className="w-[1px] h-[300vh] primary-bg-black"></div>
+          <div className="grow flex flex-col sticky top-[3.5rem] overflow-hidden h-[calc(100vh-3.5rem)] primary-bg-black">
+            <div className="flex flex-col flex-grow h-full w-full max-w-screen-md self-start pt-8 pb-4 px-14">
+              <span className="text-white mb-8 text-4xl font-extrabold leading-none tracking-tight">
+                누가 인간이고 누가 AI인가..
+              </span>
+              <div className="grow relative">
+                <div
+                  className="absolute top-0 left-0 w-auto h-[90%] flex gap-8 transition-transform"
+                  style={{
+                    transform: `translateX(calc(-${infoScrollRatio}% + ${
+                      (infoScrollRatio / 100) * 720
+                    }px))`,
+                  }}
+                >
+                  <InfoContainer
+                    title="1."
+                    context="6명의 플레이어들과 한 방에서 게임을 시작합니다."
+                  />
+                  <InfoContainer
+                    title="2."
+                    context="2명의 AI가 추가되어 8명이 실시간 채팅을 시작합니다."
+                  />
+                  <InfoContainer
+                    title="3."
+                    context="주어진 퀴즈에 답변하고 자유 토론을 진행합니다."
+                  />
+                  <InfoContainer
+                    title="4."
+                    context="가장 AI같은 플레이어에게 투표합니다."
+                  />
+                </div>
               </div>
-            </div>
-            <div className="flex justify-center">
+              {/* <div className="flex justify-center">
               <button
                 className="group w-[4.5rem] h-[4.5rem] flex flex-col justify-center items-center text-white transition-all mt-2"
                 onClick={onChervonClick}
@@ -185,11 +178,22 @@ function Home() {
                   게임 시작
                 </h1>
               </button>
+            </div> */}
             </div>
           </div>
         </div>
+        {/* 우측 사이드바 컴포넌트 */}
+        <div className="fixed right-0 z-50 w-[600px] min-h-[calc(100vh-3.5rem)] bg-gradient-to-l from-black via-black to-transparent flex flex-col justify-center items-end pr-8">
+          {userInfo.isLogin ? (
+            <LoginContainer userInfo={userInfo} />
+          ) : (
+            <LogoutContainer />
+          )}
+        </div>
       </div>
-      <div className="flex justify-center bg-[#f7f7f7]">
+
+      {/* 아래 공지사항 목록 컴포넌트 */}
+      {/* <div className="flex justify-center bg-[#f7f7f7]">
         <div className="relative white-container min-h-[calc(70vh-3.5rem)] py-10 flex md:pl-[calc(32rem+2rem)] lg:pl-[calc(42rem+2rem)]">
           <div className="md:flex hidden w-[32rem] lg:w-[42rem] left-[max(0px,calc(50%-45rem))] absolute mr-[2rem]">
             <div className="w-1/2 pr-6">
@@ -235,13 +239,10 @@ function Home() {
               </ul>
             </div>
           </div>
-          {userInfo.isLogin ? (
-            <LoginContainer userInfo={userInfo} />
-          ) : (
-            <LogoutContainer />
-          )}
         </div>
-      </div>
+      </div> */}
+
+      {/* footer */}
       <div className="footer min-h-[calc(30vh)] primary-bg-black p-9 text-white flex flex-col items-center">
         <img src={Logo} alt="" className="mb-9" />
         <span className="text-[#a1a1aa] text-xs mb-4">
@@ -280,10 +281,6 @@ function Home() {
           </ul>
         </nav>
       </div>
-      {/* <div className="login-div">
-          {isLoggedIn ? <LoggedInHome /> : <LoggedOutHome />}
-        </div>
-        <footer className="w-full"></footer> */}
     </div>
   );
 }
