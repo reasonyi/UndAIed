@@ -165,6 +165,7 @@ public class StageService {
                     String currentRound = getCurrentRound(gameId);
                     List<GameChatResponseDto> subjectChatList =
                             gameChatService.getSubjectDebateChats(gameId, currentRound);
+                            log.info("주제토론 뭉치 넘기기");
                     namespace.getRoomOperations("game:" + gameId)
                             .sendEvent(EventType.CHAT_SUBJECT_SEND.getValue(), subjectChatList);
 

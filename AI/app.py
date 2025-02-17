@@ -43,5 +43,6 @@ async def create_message(game_id: int, request: Request):
         "timeStamp": f"{precise_timestamp}",
         "answeredAI": 1,
         "gameId": game_id,
-        "message": f"{geminiBotResponse}",
+        "message": "hello world!",
+        # "message": f"{geminiBotResponse}",
     }
