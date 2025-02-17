@@ -29,6 +29,7 @@ function LogoutContainer() {
           nickname,
           totalWin,
           totalLose,
+          profileImage,
         } = response.data.data;
 
         // Recoil userState에 사용자 정보 저장
@@ -39,6 +40,7 @@ function LogoutContainer() {
           nickname,
           totalWin,
           totalLose,
+          profileImage,
         });
 
         // 신규 회원가입(201)과 기존 회원 로그인(200) 분기 처리
@@ -71,25 +73,71 @@ function LogoutContainer() {
   };
 
   return (
-    <div id="login" className="flex flex-col w-full items-center">
-      <HashLink to="/#login" smooth></HashLink>
+    <>
+      <style>
+        {`
+        @import url(https://fonts.googleapis.com/css?family=Abril+Fatface|Roboto:400,400italic,500,500italic);
+        
+        .game-button {
+          position: relative;
+          width: 22.5rem;
+          height: 9rem;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          margin-bottom: 2rem;
+          background-color: black;
+          color: rgba(255,255,255,0.95);
+          font-family: sans-serif;
+          font-size: 1.875rem;
+          font-weight: normal;
+          border: 1px solid white;
+          cursor: pointer;
+          text-shadow: 1px 1px rgba(246, 0, 153,0.8),
+                      -1px -1px rgba(15, 210, 255,0.8),
+                      -1px 0px rgba(255, 210, 0, 1);
+          transition: text-shadow 0.3s ease;
+        }
 
-      <button
-        onClick={() => navigate("/game")}
-        className="w-[22.5rem] h-[5.5rem] flex justify-center items-center mb-10 bg-black text-white font-mono border-2 border-[#872341] rounded-sm text-3xl font-semibold"
-      >
-        GAME START
-      </button>
-      <GoogleLoginButton2 onTokenReceive={handleTokenReceive} />
-      {/* <GoogleLoginButton onTokenReceive={handleTokenReceive} /> */}
-      {/* <button className="w-[22.5rem] h-9 border border-[#dadce0] bg-white rounded-[20px] flex items-center justify-between px-3 mt-5">
+        @-webkit-keyframes wiggle {
+          0% { -webkit-transform: skewX(24deg); } 
+          10% { -webkit-transform: skewX(-8deg); }
+          20% { -webkit-transform: skewX(55deg); }
+          30% { -webkit-transform: skewX(-90deg); }
+          40% { -webkit-transform: skewX(29deg); }
+          50% { -webkit-transform: skewX(-90deg); }
+          60% { -webkit-transform: skewX(3deg); }
+          70% { -webkit-transform: skewX(-2deg); }
+          80% { -webkit-transform: skewX(1deg); }
+          90% { -webkit-transform: skewX(10deg); }
+          100% { -webkit-transform: skewX(0deg); }
+        }
+
+        .game-button:hover {
+           border:none;
+          -webkit-animation: wiggle 0.2s 4;
+          text-shadow: 15px 13px rgba(246, 0, 153,0.8),
+                      -18px -4px rgba(15, 210, 255,0.8);
+        }
+      `}
+      </style>
+      <div id="login" className="flex flex-col w-full items-center">
+        <HashLink to="/#login" smooth></HashLink>
+
+        <button onClick={() => navigate("/game")} className="game-button">
+          GAME START
+        </button>
+        <GoogleLoginButton2 onTokenReceive={handleTokenReceive} />
+        {/* <GoogleLoginButton onTokenReceive={handleTokenReceive} /> */}
+        {/* <button className="w-[22.5rem] h-9 border border-[#dadce0] bg-white rounded-[20px] flex items-center justify-between px-3 mt-5">
         <div></div>
         <div className="text-[#3c4043] text-sm font-medium font-['Roboto']">
           가입하기
         </div>
         <div></div>
       </button> */}
-    </div>
+      </div>
+    </>
   );
 }
 

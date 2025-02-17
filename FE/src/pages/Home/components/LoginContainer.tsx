@@ -1,6 +1,5 @@
 import { useNavigate } from "react-router-dom";
 import { IUser } from "../../../types/User";
-import PlayerIcon1 from "../../../assets/player-icon/player-icon-1.svg";
 import { userState } from "../../../store/userState";
 import { useRecoilState, useSetRecoilState } from "recoil";
 import IntroOverlay from "../../../util/IntroOverlay";
@@ -8,6 +7,7 @@ import { useState } from "react";
 import Policy from "../../../pages/Policy";
 import FirstSetting from "../../../util/FirstSetting";
 import { setShowIntroState } from "../../../store/showState";
+import { getPlayerIcon } from "../../../util/PlayerIcon";
 
 interface ILoginContainer {
   userInfo: IUser;
@@ -106,54 +106,109 @@ function LoginContainer({ userInfo }: ILoginContainer) {
       nickname: "",
       totalWin: 0,
       totalLose: 0,
+      profileImage: 0,
     });
     navigate("/");
   };
 
   return (
-    <div className="flex flex-col w-full items-center">
-      {showIntro && <IntroOverlay />}
-      {showSetting && <FirstSetting />}
-      {showPolicy && (
-        <Policy onAccept={handlePolicyAccept} onDecline={handlePolicyDecline} />
-      )}
-      <button
-        onClick={handleGameStart}
-        className="w-[22.5rem] h-[5.5rem] flex justify-center items-center mb-8 bg-black text-white font-mono border-2 border-[#872341] rounded-sm text-3xl font-semibold hover:bg-[#872341] transition-colors"
-      >
-        GAME START
-      </button>
-      <div className="w-[22.5rem] h-[10rem] flex justify-center items-center bg-black text-white border-2 border-[#872341] rounded-sm">
-        <div className="w-24 h-24 flex justify-center items-center mr-3">
-          <img className="w-20 h-20" src={PlayerIcon1} alt="" />
-        </div>
-        <div>
-          <div className="flex items-end text-lg">
-            <h1 className="font-semibold max-w-[10rem] truncate">
-              {userInfo.nickname}님
-            </h1>
-            <button
-              className="text-xs ml-3 border-[1px] p-1 hover:bg-[#872341] transition-colors"
-              onClick={handleLogout}
-            >
-              로그아웃
-            </button>
+    <>
+      <style>
+        {`
+        @import url(https://fonts.googleapis.com/css?family=Abril+Fatface|Roboto:400,400italic,500,500italic);
+        
+        .game-button {
+          position: relative;
+          width: 22.5rem;
+          height: 9rem;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          margin-bottom: 2rem;
+          background-color: black;
+          color: rgba(255,255,255,0.95);
+          font-family: sans-serif;
+          font-size: 1.875rem;
+          font-weight: normal;
+          border: 1px solid white;
+          cursor: pointer;
+          text-shadow: 1px 1px rgba(246, 0, 153,0.8),
+                      -1px -1px rgba(15, 210, 255,0.8),
+                      -1px 0px rgba(255, 210, 0, 1);
+          transition: text-shadow 0.3s ease;
+        }
+
+        @-webkit-keyframes wiggle {
+          0% { -webkit-transform: skewX(24deg); } 
+          10% { -webkit-transform: skewX(-8deg); }
+          20% { -webkit-transform: skewX(55deg); }
+          30% { -webkit-transform: skewX(-90deg); }
+          40% { -webkit-transform: skewX(29deg); }
+          50% { -webkit-transform: skewX(-90deg); }
+          60% { -webkit-transform: skewX(3deg); }
+          70% { -webkit-transform: skewX(-2deg); }
+          80% { -webkit-transform: skewX(1deg); }
+          90% { -webkit-transform: skewX(10deg); }
+          100% { -webkit-transform: skewX(0deg); }
+        }
+
+        .game-button:hover {
+           border:none;
+          -webkit-animation: wiggle 0.2s 4;
+          text-shadow: 15px 13px rgba(246, 0, 153,0.8),
+                      -18px -4px rgba(15, 210, 255,0.8);
+        }
+      `}
+      </style>
+
+      <div className="flex flex-col w-full items-center">
+        {showIntro && <IntroOverlay />}
+        {showSetting && <FirstSetting />}
+        {showPolicy && (
+          <Policy
+            onAccept={handlePolicyAccept}
+            onDecline={handlePolicyDecline}
+          />
+        )}
+        <button onClick={handleGameStart} className="game-button">
+          GAME START
+        </button>
+        <div className="w-[22.5rem] h-[10rem] flex justify-center items-center bg-black text-white border-2 border-[#872341] rounded-sm">
+          <div className="w-24 h-24 flex justify-center items-center mr-5">
+            <img
+              className="w-28 h-28"
+              src={getPlayerIcon(userInfo.profileImage)}
+              alt=""
+            />
           </div>
-          <h2 className="text-sm">{userInfo.email}</h2>
-          <div className="text-xs">
-            승률 | {userInfo.totalWin}승 | {userInfo.totalLose}패{" | "}
-            {userInfo.totalWin + userInfo.totalLose === 0
-              ? "0"
-              : (
-                  (userInfo.totalWin /
-                    (userInfo.totalWin + userInfo.totalLose)) *
-                  100
-                ).toFixed(1)}
-            %
+          <div>
+            <div className="flex items-end text-lg">
+              <h1 className="font-semibold max-w-[10rem] truncate">
+                {userInfo.nickname}님
+              </h1>
+              <button
+                className="text-xs ml-3 border-[1px] p-1 hover:bg-[#872341] transition-colors"
+                onClick={handleLogout}
+              >
+                로그아웃
+              </button>
+            </div>
+            <h2 className="text-sm">{userInfo.email}</h2>
+            <div className="text-xs">
+              승률 | {userInfo.totalWin}승 | {userInfo.totalLose}패{" | "}
+              {userInfo.totalWin + userInfo.totalLose === 0
+                ? "0"
+                : (
+                    (userInfo.totalWin /
+                      (userInfo.totalWin + userInfo.totalLose)) *
+                    100
+                  ).toFixed(1)}
+              %
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
