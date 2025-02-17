@@ -6,12 +6,12 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class AIChatSendRedisResponseDto {
-    private AIChatAIListResponseDto[] selectedAIs;
+public class AIInputDataDto {
+    private AINumberDto[] selectedAIs;
     private String message;
 
     @Builder
-    public AIChatSendRedisResponseDto(AIChatAIListResponseDto[] selectedAIs, String message) {
+    public AIInputDataDto(AINumberDto[] selectedAIs, String message) {
         this.selectedAIs = selectedAIs;
         this.message = message;
     }
