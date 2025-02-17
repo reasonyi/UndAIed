@@ -26,9 +26,9 @@ class ChatGPTBot:
 
     def generate_response(self, AI_INFO: dict, user_input: dict) -> str:
         """단일 턴 채팅에서 새로운 입력에 대한 응답을 생성합니다."""
-        AI_NUM = AI_INFO[0]["number"]
-        AI_ASSIST = AI_INFO[1]["number"]
-
+        AI_NUM = AI_INFO[-3]
+        AI_ASSIST = 99 if len(AI_INFO) == 1 else AI_INFO[-2]
+        print(user_input)
         messages = [
             {"role": "system", "content": self.system_prompt},
             {

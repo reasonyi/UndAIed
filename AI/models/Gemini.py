@@ -23,9 +23,10 @@ class GeminiBot:
         )
 
     def generate_response(self, AI_INFO: dict, user_input: dict) -> str:
-        """채팅 세션 내에서 새로운 입력에 대한 응답을 생성합니다."""
-        AI_NUM = AI_INFO[0]["number"]
-        AI_ASSIST = AI_INFO[1]["number"]
+        """단일 턴 채팅에서 새로운 입력에 대한 응답을 생성합니다."""
+        AI_NUM = AI_INFO[-2]
+        AI_ASSIST = 99 if len(AI_INFO) == 1 else AI_INFO[-3]
+        print(user_input)
         response = self.model.generate_content(
             f"- AI 정보 : \nAI_NUM : {AI_NUM}\nAI_ASSIST:{AI_ASSIST}\n\n- 현재 게임 상황:\n{user_input}\n\n- 당신의 응답:"
         )
