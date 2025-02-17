@@ -127,6 +127,7 @@ public class StageService {
         // 2라운드부터 감염 처리
         if (Integer.parseInt(getCurrentRound(gameId)) > 1) {
             handleInfection(gameId);
+            gameInitService.sendGameInfo(gameId);
         }
         // 시작 시 5초
         gameTimer.setTimer(gameId, GameTimerConstants.STAGE_END_NOTIFY, 5, () -> {
@@ -207,6 +208,7 @@ public class StageService {
                     VoteResultResponseDto responseDto = voteService.computeVoteResult(gameId);
                     namespace.getRoomOperations("game:" + gameId)
                             .sendEvent(EventType.GAME_CHAT_SEND.getValue(), responseDto);
+                    gameInitService.sendGameInfo(gameId);
 
                     try {
                         startStage(gameId, StageType.NIGHT);
