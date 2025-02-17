@@ -1,5 +1,6 @@
 package com.ssafy.undaied.socket.chat.handler;
 
+import com.corundumstudio.socketio.AckRequest;
 import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.SocketIONamespace;
 import com.corundumstudio.socketio.SocketIOServer;
@@ -31,51 +32,44 @@ public class GameChatHandler {
         namespace.addEventListener("game:chat:emit", GameChatRequestDto.class,
                 (client, data, ackRequest) -> {
                     try {
-                        log.info("들어옴");
+                        log.info("게임 채팅 요청 확인");
+                        log.info("Received data object: {}", data);
+                        log.info("Content from data: {}", data.getContent());
 
-                        //임시
-                        String gameIdStr = client.getHandshakeData().getSingleUrlParam("gameId");
-                        Integer gameId = Integer.parseInt(gameIdStr);
-
-                        log.info("여기가 문제?");
-                        //복구해야
-//                        Integer gameId = client.get("gameId");
-
+                        Integer gameId = client.get("gameId");
                         Integer userId = client.get("userId");
+
+                        if (gameId == null || userId == null) {
+                            throw new IllegalStateException("게임 또는 사용자 정보를 찾을 수 없습니다.");
+                        }
+
                         String stageKey = GAME_KEY_PREFIX + gameId + ":stage";
+                        String currentStage = redisTemplate.opsForValue().get(stageKey);
+                        log.info("현재 stage: {}", currentStage);
 
-                        //임시 변수
-                        String currentStage="free_debate";
-//                        String currentStage = redisTemplate.opsForValue().get(stageKey);
-
-
-                        log.info("currentStage: {}", currentStage);
-
-
-                        if ("free_debate".equals(currentStage)) {
-                            log.info("6. 자유토론 처리 시작");
-                            gameChatService.processFreeChat(client, userId, data);
+                        if ("subject_debate".equals(currentStage)) {
+                            String errorMessage = gameChatService.storeSubjectChat(gameId, client, userId, data);
+                            sendResponse(ackRequest, errorMessage == null, errorMessage);
                         } else {
-                            gameChatService.storeSubjectChat(client, userId, data);
+                            String errorMessage = gameChatService.processFreeChat(gameId, client, userId, data);
+                            sendResponse(ackRequest, errorMessage == null, errorMessage);
                         }
-                        // 저장 성공 응답 전송
-                        if (ackRequest.isAckRequested()) {
-                            Map<String, Object> response = new HashMap<>();
-                            response.put("success", true);
-                            response.put("errorMessage", null);
-                            response.put("data", null);
-                            ackRequest.sendAckData(response);
-                        }
-                    } catch (Exception e) {
-                        log.error("Game chat failed: {}", e.getMessage());
 
-                        // 클라이언트에게 오류 이벤트 전송
-                        Map<String, Object> errorData = new HashMap<>();
-                        errorData.put("code", "GAME_CHAT_FAILED");
-                        errorData.put("message", "게임 채팅 전송 실패");
-                        client.sendEvent("error", errorData);
+                    } catch (Exception e) {
+                        log.error("채팅 처리 중 오류 발생: {}", e.getMessage(), e);
+                        sendResponse(ackRequest, false, "채팅 처리 중 오류가 발생했습니다. 다시 시도해 주세요.");
                     }
                 });
+    }
+
+    private void sendResponse(AckRequest ackRequest, boolean success, String errorMessage) {
+        if (ackRequest.isAckRequested()) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", success);
+            response.put("errorMessage", errorMessage);
+            response.put("data", null);
+            ackRequest.sendAckData(response);
+        }
     }
 }
 

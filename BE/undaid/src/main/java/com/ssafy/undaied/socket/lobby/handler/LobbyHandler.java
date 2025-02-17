@@ -30,13 +30,15 @@ public class LobbyHandler {
         namespace.addEventListener(ROOM_LIST_AT_LOBBY.getValue(), Object.class,
                 (client, data, ackRequest) -> {
                     try {
+                        log.debug("lobby:room:list emit 이벤트 발생 - userId: {}", (Integer) client.get("userId"));
 
                         // 방에 있었다면 방에서 전부 나가고 로비에 입장
                         roomService.clientLeaveAllRooms(client);
+                        log.debug("성공적으로 모든 방에서 퇴장하였습니다. - userId: {}", (Integer) client.get("userId"));
                         lobbyService.joinLobby(client);
 
                         LobbyRoomListResponseDto responseData = roomService.findWaitingRoomList();
-                        log.info("Successfully find waiting room list");
+                        log.debug("성공적으로 대기중인 방 리스트를 찾았습니다.");
 
                         // 로비에 입장한 사용자에게 데이터 전송
                         if (ackRequest.isAckRequested()) {
@@ -45,6 +47,7 @@ public class LobbyHandler {
                             response.put("errorMessage", null);
                             response.put("data", responseData);
                             ackRequest.sendAckData(response);
+                            log.debug("lobby:room:list에 대한 ack응답 성공적으로 전송 - userId: {}, userNickname: {}", client.get("userId"), client.get("nickname"));
                         }
 
                     } catch (Exception e) {
@@ -54,6 +57,7 @@ public class LobbyHandler {
                             response.put("errorMessage", e.getMessage());
                             response.put("data", null);
                             ackRequest.sendAckData(response);
+                            log.debug("lobby:room:list에 대한 ack응답 정송 실패 - userId: {}, userNickname: {}", client.get("userId"), client.get("nickname"));
                         }
                     }
                 }

@@ -27,6 +27,9 @@ function ChatBubble({ message, playerName }: ChatBubbleProps) {
     ["255", "255", "255", PlayerIcon8],
   ];
 
+  // message.player가 유효하지 않은 경우 기본값 사용
+  const currentPlayer = playerColor[message.player - 1] || playerColor[0];
+
   return (
     <div>
       {/* 닉네임/아이콘 영역 */}
@@ -38,8 +41,8 @@ function ChatBubble({ message, playerName }: ChatBubbleProps) {
         <img
           className="w-6 h-6 mr-1"
           src={
-            playerColor[message.player]
-              ? playerColor[message.player][3]
+            playerColor[message.player - 1]
+              ? playerColor[message.player - 1][3]
               : undefined
           }
           alt="player-icon"
@@ -54,9 +57,7 @@ function ChatBubble({ message, playerName }: ChatBubbleProps) {
             isMine ? "rounded-b-lg rounded-tl-lg" : "rounded-b-lg rounded-tr-lg"
           }`}
           style={{
-            borderColor: `rgba(${playerColor[message.player][0]}, 
-              ${playerColor[message.player][1]}, 
-              ${playerColor[message.player][2]}, 0.4)`,
+            borderColor: `rgba(${currentPlayer[0]}, ${currentPlayer[1]}, ${currentPlayer[2]}, 0.4)`,
           }}
         >
           {message.text}

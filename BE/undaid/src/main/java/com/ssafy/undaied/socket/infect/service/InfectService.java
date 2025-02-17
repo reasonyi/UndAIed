@@ -42,18 +42,19 @@ public class InfectService {
             String infectedPlayerNumber = eligiblePlayers.get(new Random().nextInt(eligiblePlayers.size()));
 
             // 감염 처리(상태 변경)
-            String newStatus = playerStatus.get(infectedPlayerNumber).toString().replace("isInfected=false", "isInfected=true");
+//            String newStatus = playerStatus.get(infectedPlayerNumber).toString().replace("isInfected=false", "isInfected=true");
+            String newStatus = playerStatus.get(infectedPlayerNumber).toString().replace("isDied=false", "isDied=true");
             redisTemplate.opsForHash().put(statusKey, infectedPlayerNumber, newStatus);
 
             String roundKey = "game:" + gameId + ":round";
             String currentRound = redisTemplate.opsForValue().get(roundKey).toString();
-            String eventKey = "game:" + gameId + ":round" + currentRound + ":events";
+            String eventKey = "game:" + gameId + ":round:" + currentRound + ":events";
             String userNameKey = "game:" + gameId + ":number_nicknames";
 
             String infectedPlayerName = redisTemplate.opsForHash().get(userNameKey, infectedPlayerNumber).toString();
 
 
-            redisTemplate.opsForList().rightPush(eventKey, String.format("{infection} [null] <null> (%s) ~%s~ %s |",
+            redisTemplate.opsForValue().append(eventKey, String.format("{infection} [null] <null> (%s) ~%s~ %s | ",
                     infectedPlayerName, infectedPlayerNumber, LocalDateTime.now())
             );
 
