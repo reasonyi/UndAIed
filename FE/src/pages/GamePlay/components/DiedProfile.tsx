@@ -1,10 +1,6 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
-import {
-  faRobot,
-  faNoteSticky,
-  faCheckToSlot,
-} from "@fortawesome/free-solid-svg-icons";
+import { faRobot, faNoteSticky } from "@fortawesome/free-solid-svg-icons";
 
 interface IDiedProfileProps {
   nickname: string;
@@ -14,7 +10,6 @@ interface IDiedProfileProps {
 function DiedProfile({ nickname, icon }: IDiedProfileProps) {
   const robot: IconDefinition = faRobot;
   const noteSticky: IconDefinition = faNoteSticky;
-  const checkToSlot: IconDefinition = faCheckToSlot;
   return (
     <div className="opacity-70 shadow-[0px_0px_16px_rgba(255,255,255,0.25)] border-2 border-solid border-[rgba(255,255,255,0.35)] w-full h-full">
       {/* <div className="hover:shadow-[0px_0px_16px_rgba(255,0,0,0.45)] w-full h-full hover:animate-ping text-white"></div> */}
@@ -31,19 +26,13 @@ function DiedProfile({ nickname, icon }: IDiedProfileProps) {
         <button>
           <FontAwesomeIcon
             icon={robot}
-            className="text-[#cccccc] hover:text-white p-1 w-[1.25rem] h-[1.25rem] mb-2"
-          />
-        </button>
-        <button disabled className="disabled:opacity-0">
-          <FontAwesomeIcon
-            icon={checkToSlot}
-            className="text-[#cccccc] hover:text-white p-1 w-[1.25rem] h-[1.25rem] mx-3"
+            className="text-[#cccccc] hover:text-white p-1 w-[1.25rem] h-[1.25rem] mx-1"
           />
         </button>
         <button>
           <FontAwesomeIcon
             icon={noteSticky}
-            className="text-[#cccccc] hover:text-white p-1 w-[1.25rem] h-[1.25rem] mb-2"
+            className="text-[#cccccc] hover:text-white p-1 w-[1.25rem] h-[1.25rem] mx-1"
           />
         </button>
       </div>
