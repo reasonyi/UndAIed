@@ -1,7 +1,7 @@
 from fastapi import FastAPI, status
 from models import Gemini, ChatGPT, DeepSeek
 from pydantic import BaseModel
-from utils.parser import dialogue_parser, parse_nunchi_status
+from utils.parser import dialogue_parser, AI_response_parser
 import logging
 
 # 로깅 설정
@@ -24,18 +24,14 @@ app = FastAPI()
 async def create_message(request: Request):
     selected_AI = {ai["aiId"]: ai["number"] for ai in request.selectedAIs}
     parsed_dialogue = dialogue_parser(request.message)
-    response:list[dict] = []
+    response: list[dict] = []
 
-    ## 디버깅용 로깅
-    # logger.info(f"\n\n")
-    # logger.info(f"--------------------------------------------------------")
-    # logger.info(f"--------------------------------------------------------")
-    
     for ai_id, bot in AI_BOTS.items():
         if ai_id in selected_AI:
-            bot_response = bot.generate_response(request.selectedAIs, parsed_dialogue)
-            logger.info(bot_response)  
-            if parse_nunchi_status(bot_response):
-                response.append({"number": selected_AI[ai_id], "content": bot_response})
+            bot_response = AI_response_parser(bot.generate_response(selected_AI, parsed_dialogue))
+            logger.info(bot_response)  # 디버깅용 로그
+            logger.info("--------------")  # 디버깅용 로그
+            if bot_response["flexible"] == "O":
+                response.append({"number": selected_AI[ai_id], "content": bot_response["content"]})
 
     return response
