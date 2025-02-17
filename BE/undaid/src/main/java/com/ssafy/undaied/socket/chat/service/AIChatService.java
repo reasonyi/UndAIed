@@ -33,7 +33,7 @@ public class AIChatService {
     private static final long MIN_DELAY = 5000;  // 스케줄링 최소 지연 시간
     private static final long MAX_DELAY = 7000;  // 스케줄링 최대 지연 시간
     private static final int MIN_CHAT_DELAY = 1000;  // 채팅 응답 최소 지연 시간 (1초)
-    private static final int MAX_CHAT_DELAY = 3000;  // 채팅 응답 최대 지연 시간 (3초)
+    private static final int MAX_CHAT_DELAY = 7000;  // 채팅 응답 최대 지연 시간 (7초)
     private static final Random random = new Random();
 
     private final WebClient webClient;
@@ -88,6 +88,12 @@ public class AIChatService {
             return;
         }
 
+        // 토론 단계일 때만 처리하도록 명시적으로 체크
+        if (!"subject_debate".equals(currentStage) && !"free_debate".equals(currentStage)) {
+            log.debug("Current stage is {}, skipping AI message processing", currentStage);
+            return;
+        }
+
         switch (currentStage) {
             case "subject_debate":
                 sendAIRequest(gameId, currentStage);
@@ -127,7 +133,7 @@ public class AIChatService {
                     .build();
 
             webClient.post()
-                    .uri("/api/ai/{gameId}/chat", gameId)
+                    .uri("/api/ai/{gameId}/", gameId)
                     .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                     .bodyValue(sendData)
                     .retrieve()

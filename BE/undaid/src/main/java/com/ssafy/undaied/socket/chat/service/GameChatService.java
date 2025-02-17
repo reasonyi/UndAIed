@@ -31,6 +31,7 @@ public class GameChatService {
     private final RedisTemplate<String, Object> jsonRedisTemplate;
     private final Random random = new Random();
     private final SocketIONamespace namespace;
+    private final AIChatService aiChatService;
 
     public static final Map<Integer, String> SUBJECTS = new HashMap<>() {{
         put(1, "인공지능이 인간을 이길 수 있을까?");
@@ -57,39 +58,49 @@ public class GameChatService {
 
     public void sendSubject(int gameId) {
         String gameKey = "game:" + gameId;
-
-        // 현재 라운드 가져오기
         String roundKey = gameKey + ":round";
         String currentRound = redisTemplate.opsForValue().get(roundKey);
 
-        // 라운드별 사용된 주제 키
-        String usedSubjectsKey = String.format("%s:round:%s:used_subjects", gameKey, currentRound);
-
-        // 사용된 주제 가져오기 (String 값)
-        String usedSubject = redisTemplate.opsForValue().get(usedSubjectsKey);
+        // 해당 게임에서 지금까지 사용된 모든 주제 확인
+        Set<String> usedSubjects = new HashSet<>();
+        for (int round = 1; round <= Integer.parseInt(currentRound); round++) {
+            String roundSubjectKey = String.format("%s:round:%d:used_subjects", gameKey, round);
+            String usedSubject = redisTemplate.opsForValue().get(roundSubjectKey);
+            if (usedSubject != null) {
+                usedSubjects.add(usedSubject);
+            }
+        }
 
         // 사용 가능한 주제 리스트 생성
         List<Integer> availableSubjects = new ArrayList<>();
         for (int i = 1; i <= SUBJECTS.size(); i++) {
-            if (usedSubject == null || !usedSubject.equals(String.valueOf(i))) {
+            if (!usedSubjects.contains(String.valueOf(i))) {
                 availableSubjects.add(i);
             }
         }
 
+        if (availableSubjects.isEmpty()) {
+            log.error("No available subjects left for game: {}", gameId);
+            // 예외 처리 또는 적절한 대응 필요
+            return;
+        }
+
         // 주제 선택 (랜덤)
         int subjectId = availableSubjects.get(new Random().nextInt(availableSubjects.size()));
+        String usedSubjectsKey = String.format("%s:round:%s:used_subjects", gameKey, currentRound);
 
-        // 선택된 주제 ID를 String으로 저장
+        // 선택된 주제 ID 저장
         redisTemplate.opsForValue().set(usedSubjectsKey, String.valueOf(subjectId));
         redisTemplate.expire(usedSubjectsKey, EXPIRE_TIME, TimeUnit.SECONDS);
 
-        // 응답 전송
         SendSubjectResponseDto sendSubjectResponseDto = SendSubjectResponseDto.builder()
                 .number(0)
                 .content(SUBJECTS.get(subjectId))
                 .build();
 
+        log.info("Selected subject {} for game {} round {}", subjectId, gameId, currentRound);
         namespace.getRoomOperations("game:" + gameId).sendEvent("game:chat:send", sendSubjectResponseDto);
+        aiChatService.startGameMessageScheduling(gameId);
     }
 
     private boolean hasUserSpokenInSubjectDebate(Integer gameId, String round, int number) {

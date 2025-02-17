@@ -76,7 +76,6 @@ public class GameInitService {
         handleSocketConnections(gameId, roomId);
 
         // AI 요청 스케줄링 시작
-        aiChatService.startGameMessageScheduling(gameId);
         log.info("AI 요청 시작: {}", gameId);
 
         return gameId;

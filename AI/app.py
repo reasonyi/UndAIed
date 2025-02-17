@@ -8,19 +8,6 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-<<<<<<< HEAD
-# ai 봇 생성
-geminiBot = Gemini.GeminiBot()
-chatGPTBot = ChatGPT.ChatGPTBot()
-class AINumberDto(BaseModel):
-    aiId: int
-    number: int
-
-class AIInputDataDto(BaseModel):
-    selectedAIs: list[AINumberDto]
-    message: str
-
-=======
 
 class Request(BaseModel):
     selectedAIs: list[dict[str, int]]  # [{"aiId": 1, "number": 7}, ...]
@@ -29,15 +16,21 @@ class Request(BaseModel):
 
 # AI 봇 매핑
 AI_BOTS = {-1: DeepSeek.DeepSeek(), -2: Gemini.GeminiBot(), -3: ChatGPT.ChatGPTBot()}
-
->>>>>>> develop
 app = FastAPI()
 
 
 @app.post("/api/ai/{game_id}/", status_code=status.HTTP_201_CREATED)
 async def create_message(request: Request):
+
+    logger.info(f"[Request] Selected AIs: {request.selectedAIs}")
+    logger.info(f"[Request] Message: {request.message}")
+
+   
     selected_AI = {ai["aiId"]: ai["number"] for ai in request.selectedAIs}
+    logger.info(f"[Processing] Selected AI mapping: {selected_AI}")
     parsed_dialogue = dialogue_parser(request.message)
+    logger.info(f"[Processing] Parsed dialogue: {parsed_dialogue}")
+
     response:list[dict] = []
 
     ## 디버깅용 로깅
@@ -47,9 +40,16 @@ async def create_message(request: Request):
     
     for ai_id, bot in AI_BOTS.items():
         if ai_id in selected_AI:
+            logger.info(f"[AI Processing] Starting AI {ai_id}")
+
             bot_response = bot.generate_response(request.selectedAIs, parsed_dialogue)
+            logger.info(f"[AI Response] AI {ai_id} generated response: {bot_response}")
+
             logger.info(bot_response)  
-            if parse_nunchi_status(bot_response):
-                response.append({"number": selected_AI[ai_id], "content": bot_response})
+            # if parse_nunchi_status(bot_response):
+            
+            response.append({"number": selected_AI[ai_id], "content": bot_response})
+
+            logger.info(f"[Response] Final response list: {response}")
 
     return response
