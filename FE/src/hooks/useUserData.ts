@@ -26,7 +26,14 @@ export const useUpdateProfile = () => {
 
   return useMutation({
     mutationFn: updateProfile,
-    onSuccess: () => {
+    onSuccess: (data) => {
+      // 에러 객체가 반환된 경우
+      if (data.error) {
+        toast.error(data.message);
+        return;
+      }
+
+      // 성공한 경우
       queryClient.invalidateQueries({ queryKey: ["userProfile"] });
       toast.success("프로필이 성공적으로 업데이트 되었습니다.");
     },
