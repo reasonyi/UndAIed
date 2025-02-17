@@ -11,6 +11,8 @@ import org.springframework.http.MediaType;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -28,8 +30,11 @@ import static com.ssafy.undaied.socket.common.constant.SocketRoom.GAME_KEY_PREFI
 @RequiredArgsConstructor
 public class AIChatService {
     private static final long EXPIRE_TIME = 7200;
-    private static final long MIN_DELAY = 5000;  // AI 응답 최소 지연 시간 (5초)
-    private static final long MAX_DELAY = 4000;  // AI 응답 최대 지연 시간 (7초)
+    private static final long MIN_DELAY = 5000;  // 스케줄링 최소 지연 시간
+    private static final long MAX_DELAY = 7000;  // 스케줄링 최대 지연 시간
+    private static final int MIN_CHAT_DELAY = 1000;  // 채팅 응답 최소 지연 시간 (1초)
+    private static final int MAX_CHAT_DELAY = 3000;  // 채팅 응답 최대 지연 시간 (3초)
+    private static final Random random = new Random();
 
     private final WebClient webClient;
     private final RedisTemplate<String, String> redisTemplate;
@@ -37,9 +42,7 @@ public class AIChatService {
     private final SocketIONamespace namespace;
     private final TaskScheduler taskScheduler;
 
-    // 게임별 스케줄링된 작업 관리를 위한 맵
     private final Map<Integer, ScheduledFuture<?>> gameSchedulers = new ConcurrentHashMap<>();
-
     /**
      * 게임 시작 시 AI 메시지 스케줄링을 시작
      * MIN_DELAY ~ MAX_DELAY 사이의 간격으로 주기적으로 메시지 처리
@@ -86,12 +89,98 @@ public class AIChatService {
         }
 
         switch (currentStage) {
-            case "free_debate":
             case "subject_debate":
                 sendAIRequest(gameId, currentStage);
                 break;
+            case "free_debate":
+                handleFreeDebate(gameId);
+                break;
             default:
                 break;
+        }
+    }
+
+    private void handleFreeDebate(int gameId) {
+        try {
+            String currentRound = redisTemplate.opsForValue().get(GAME_KEY_PREFIX + gameId + ":round");
+            String chatKey = String.format("%s%d:round:%s:freechats",
+                    GAME_KEY_PREFIX, gameId, currentRound);
+
+            // 현재 저장된 채팅 내용 확인
+            String existingChats = redisTemplate.opsForValue().get(chatKey);
+            if (existingChats == null) {
+                log.info("No existing chats found for game: {} round: {}", gameId, currentRound);
+                return;
+            }
+
+            String combinedData = collectAllGameData(gameId);
+            List<AINumberDto> aiList = getGameAIs(gameId);
+
+            if (aiList.isEmpty()) {
+                log.error("No AI players found for game: {}", gameId);
+                return;
+            }
+
+            AIInputDataDto sendData = AIInputDataDto.builder()
+                    .selectedAIs(aiList.toArray(new AINumberDto[0]))
+                    .message(combinedData)
+                    .build();
+
+            webClient.post()
+                    .uri("/api/ai/{gameId}/chat", gameId)
+                    .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .bodyValue(sendData)
+                    .retrieve()
+                    .bodyToFlux(GameChatResponseDto.class)
+                    .collectList()
+                    .flatMapMany(responses -> {
+                        return Flux.fromIterable(responses)
+                                .concatMap(response -> {
+                                    // 각 응답에 대해 저장 및 전송 지연
+                                    int delay = MIN_CHAT_DELAY + random.nextInt(MAX_CHAT_DELAY - MIN_CHAT_DELAY);
+                                    return Mono.just(response)
+                                            .delayElement(Duration.ofMillis(delay));
+                                });
+                    })
+                    .subscribe(
+                            response -> {
+                                // 자유토론 메시지 저장 및 전송
+                                String mappingKey = GAME_KEY_PREFIX + gameId + ":number_mapping";
+                                String aiNumberStr = String.valueOf(response.getNumber());
+                                Integer aiId = null;
+
+                                for (Object key : redisTemplate.opsForHash().keys(mappingKey)) {
+                                    String mappedNumber = (String) redisTemplate.opsForHash().get(mappingKey, key.toString());
+                                    if (mappedNumber != null && mappedNumber.equals(aiNumberStr)) {
+                                        aiId = Integer.parseInt(key.toString());
+                                        break;
+                                    }
+                                }
+
+                                if (aiId != null) {
+                                    String message = String.format("{%d} [%s] <%d>(%s) %s|",
+                                            aiId,
+                                            "AI-" + response.getNumber(),
+                                            response.getNumber(),
+                                            response.getContent(),
+                                            LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+
+                                    redisTemplate.opsForValue().append(chatKey, message);
+                                    redisTemplate.expire(chatKey, EXPIRE_TIME, TimeUnit.SECONDS);
+
+                                    // 실시간 메시지 전송
+                                    namespace.getRoomOperations(GAME_KEY_PREFIX + gameId)
+                                            .sendEvent("game:chat:send", response);
+
+                                    log.info("Free debate message stored and sent - gameId: {}, number: {}, content: {}",
+                                            gameId, response.getNumber(), response.getContent());
+                                }
+                            },
+                            error -> log.error("AI 서버 통신 실패 - gameId: {}", gameId, error)
+                    );
+
+        } catch (Exception e) {
+            log.error("Error in free debate processing - gameId: {}", gameId, e);
         }
     }
 
@@ -103,10 +192,7 @@ public class AIChatService {
      */
     private void sendAIRequest(int gameId, String currentStage) {
         try {
-            // 모든 라운드의 누적 데이터 수집
             String combinedData = collectAllGameData(gameId);
-
-            // 게임에 참여 중인 AI 목록 조회
             List<AINumberDto> aiList = getGameAIs(gameId);
 
             if (aiList.isEmpty()) {
@@ -114,26 +200,49 @@ public class AIChatService {
                 return;
             }
 
-            // AI 서버로 전송할 데이터 준비
+            String currentRound = redisTemplate.opsForValue().get(GAME_KEY_PREFIX + gameId + ":round");
+            String spokenUsersKey = String.format("%s%d:round:%s:subject_speakers",
+                    GAME_KEY_PREFIX, gameId, currentRound);
+
+            // 아직 발언하지 않은 AI만 필터링
+            List<AINumberDto> unspokenAIs = aiList.stream()
+                    .filter(ai -> !Boolean.TRUE.equals(redisTemplate.opsForSet()
+                            .isMember(spokenUsersKey, String.valueOf(ai.getNumber()))))
+                    .toList();
+
+            if (unspokenAIs.isEmpty()) {
+                log.info("All AIs have already spoken in this round - gameId: {}, round: {}",
+                        gameId, currentRound);
+                return;
+            }
+
             AIInputDataDto sendData = AIInputDataDto.builder()
-                    .selectedAIs(aiList.toArray(new AINumberDto[0]))
+                    .selectedAIs(unspokenAIs.toArray(new AINumberDto[0]))
                     .message(combinedData)
                     .build();
 
-            // AI 서버로 요청 전송
             webClient.post()
                     .uri("/api/ai/{gameId}/", gameId)
                     .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                     .bodyValue(sendData)
                     .retrieve()
-                    .bodyToMono(GameChatResponseDto.class)
+                    .bodyToFlux(GameChatResponseDto.class)
+                    .collectList()
+                    .flatMapMany(responses -> {
+                        return Flux.fromIterable(responses)
+                                .concatMap(response -> {
+                                    int delay = MIN_CHAT_DELAY + random.nextInt(MAX_CHAT_DELAY - MIN_CHAT_DELAY);
+                                    return Mono.just(response)
+                                            .delayElement(Duration.ofMillis(delay));
+                                });
+                    })
                     .subscribe(
                             response -> handleAIResponse(gameId, response, currentStage),
                             error -> log.error("AI 서버 통신 실패 - gameId: {}", gameId, error)
                     );
 
         } catch (Exception e) {
-            log.error("Error processing game data for AI - gameId: {}", gameId, e);
+            log.error("Error in subject debate processing - gameId: {}", gameId, e);
         }
     }
 
@@ -253,15 +362,39 @@ public class AIChatService {
      */
     private void handleAIResponse(int gameId, GameChatResponseDto response, String originalStage) {
         String currentStage = redisTemplate.opsForValue().get(GAME_KEY_PREFIX + gameId + ":stage");
+        String currentRound = redisTemplate.opsForValue().get(GAME_KEY_PREFIX + gameId + ":round");
 
         if (!originalStage.equals(currentStage)) {
             log.info("Stage changed during AI processing, ignoring response");
             return;
         }
 
+        // 주제토론에서 AI가 이미 발언했는지 확인
+        if ("subject_debate".equals(currentStage)) {
+            String spokenUsersKey = String.format("%s%d:round:%s:subject_speakers",
+                    GAME_KEY_PREFIX, gameId, currentRound);
+
+            if (Boolean.TRUE.equals(redisTemplate.opsForSet().isMember(spokenUsersKey,
+                    String.valueOf(response.getNumber())))) {
+                log.info("AI {} has already spoken in subject debate round {}",
+                        response.getNumber(), currentRound);
+                return;
+            }
+
+            // AI 발언 기록
+            redisTemplate.opsForSet().add(spokenUsersKey, String.valueOf(response.getNumber()));
+            redisTemplate.expire(spokenUsersKey, EXPIRE_TIME, TimeUnit.SECONDS);
+        }
+
         storeAIMessage(gameId, response);
-        namespace.getRoomOperations(GAME_KEY_PREFIX + gameId)
-                .sendEvent("game:chat:send", response);
+
+        // 자유토론에서만 실시간 전송
+        if ("free_debate".equals(currentStage)) {
+            namespace.getRoomOperations(GAME_KEY_PREFIX + gameId)
+                    .sendEvent("game:chat:send", response);
+            log.info("Sent AI message in free debate - gameId: {}, number: {}, content: {}",
+                    gameId, response.getNumber(), response.getContent());
+        }
     }
 
     /**
@@ -281,26 +414,34 @@ public class AIChatService {
                 stage.equals("subject_debate") ? "subjectchats" : "freechats"
         );
 
-        // number_mapping에서 해당 번호에 매핑된 AI ID(음수값) 찾기
         String mappingKey = GAME_KEY_PREFIX + gameId + ":number_mapping";
-        int aiId = 0;  // 기본값
+        String aiNumberStr = String.valueOf(response.getNumber());
+        Integer aiId = null;
+
         for (Object key : redisTemplate.opsForHash().keys(mappingKey)) {
-            String mappedNumber = (String) redisTemplate.opsForHash().get(mappingKey, key);
-            if (mappedNumber != null && mappedNumber.equals(String.valueOf(response.getNumber()))) {
-                aiId = Integer.parseInt(key.toString());  // 음수값 그대로 사용
+            String mappedNumber = (String) redisTemplate.opsForHash().get(mappingKey, key.toString());
+            if (mappedNumber != null && mappedNumber.equals(aiNumberStr)) {
+                aiId = Integer.parseInt(key.toString());
                 break;
             }
         }
 
-        // {aiId} [AI-number] <number>(content) timestamp|
-        String message = String.format("{%d} [AI%d] <%d>(%s) %s|",
-                aiId,                    // AI ID (음수값)
-                response.getNumber(),    // AI 닉네임용 번호
-                response.getNumber(),    // 표시용 번호
+        if (aiId == null) {
+            log.error("AI ID not found for number: {}", response.getNumber());
+            return;
+        }
+
+        String message = String.format("{%d} [%s] <%d>(%s) %s|",
+                aiId,
+                "AI-" + response.getNumber(),
+                response.getNumber(),
                 response.getContent(),
                 LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
 
         redisTemplate.opsForValue().append(chatKey, message);
         redisTemplate.expire(chatKey, EXPIRE_TIME, TimeUnit.SECONDS);
+
+        log.info("AI message stored - gameId: {}, number: {}, stage: {}, content: {}",
+                gameId, response.getNumber(), stage, response.getContent());
     }
 }

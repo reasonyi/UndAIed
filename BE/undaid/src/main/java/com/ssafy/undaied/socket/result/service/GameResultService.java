@@ -125,9 +125,11 @@ public class GameResultService {
             GameResultResponseDto responseDto = createGameResultResponse(gameId, winner);
             namespace.getRoomOperations(GAME_KEY_PREFIX + gameId)
                     .sendEvent("game:result:send", responseDto);
+
             // 플레이어 로비로 이동
             movePlayersToLobby(gameId);
             // Redis 게임 결과 저장
+
             saveGameResult(gameId);
 
             log.info("게임 종료가 성공적으로 진행됐습니다.: {}", gameId);
