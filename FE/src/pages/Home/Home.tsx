@@ -17,9 +17,14 @@ import { userState } from "../../store/userState";
 import LoginContainer from "./components/LoginContainer";
 import LogoutContainer from "./components/LogoutContainer";
 
-interface OuletContextType {
-  isLoggedIn: boolean;
-}
+import { preloadAudio } from "../../util/AudioCache";
+import lobbyBgm from "../../assets/bgm/lobby.mp3";
+import gameRoomBgm from "../../assets/bgm/game-room.mp3";
+import clickSound from "../../assets/bgm/click.mp3";
+import myPageBgm from "../../assets/bgm/my-page.mp3";
+import introBgm from "../../assets/bgm/intro.mp3";
+import slideSound from "../../assets/bgm/slide.mp3";
+
 interface IBoard {
   id: number;
   tag: string;
@@ -50,6 +55,18 @@ function Home() {
     { id: 6, tag: "공지", title: "일곱번째 공지", date: "2025-02-03" },
   ]);
 
+  useEffect(() => {
+    const audioFiles = [
+      lobbyBgm,
+      gameRoomBgm,
+      clickSound,
+      slideSound,
+      myPageBgm,
+      introBgm,
+    ];
+
+    audioFiles.forEach((src) => preloadAudio(src));
+  }, []);
   // 스크롤 감지 핸들러
   useEffect(() => {
     const onScroll = () => {
@@ -76,9 +93,43 @@ function Home() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  useEffect(() => {
+    const ONE_HOUR = 3600000; // 1시간
+    const visitedTime = localStorage.getItem("visitedTime");
+    const now = Date.now();
+
+    // 방문 기록이 없는 경우 => 현재 시간 저장, tutorial 시작 (top: 0)
+    if (!visitedTime) {
+      localStorage.setItem("visitedTime", now.toString());
+      return;
+    }
+
+    // 방문 기록이 존재하는 경우
+    const diff = now - parseInt(visitedTime, 10);
+
+    if (diff < ONE_HOUR) {
+      // 1시간 이내 재방문 => 튜토리얼 스킵
+      window.scrollTo({
+        top: window.innerHeight * 3,
+        behavior: "instant", // 'smooth'로 변경 가능
+      });
+    } else {
+      // 1시간 이상 지남 => visitedTime 갱신, 다시 튜토리얼 보여주기
+      localStorage.setItem("visitedTime", now.toString());
+      // 굳이 따로 scrollTo(0) 할 필요 없이, 기본이 0 위치이므로 생략 가능
+    }
+  }, []);
+
   const onChervonClick = () => {
     window.scrollTo({
-      top: window.innerHeight * 4,
+      top: window.innerHeight * 3,
+      behavior: "smooth",
+    });
+  };
+
+  const toTutorialClick = () => {
+    window.scrollTo({
+      top: 0,
       behavior: "smooth",
     });
   };

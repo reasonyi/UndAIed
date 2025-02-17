@@ -8,6 +8,7 @@ import com.ssafy.undaied.socket.common.exception.SocketException;
 import com.ssafy.undaied.socket.common.util.GameTimer;
 import com.ssafy.undaied.socket.common.util.GameTimerConstants;
 import com.ssafy.undaied.socket.infect.service.InfectService;
+import com.ssafy.undaied.socket.init.service.GameInitService;
 import com.ssafy.undaied.socket.result.service.GameResultService;
 import com.ssafy.undaied.socket.stage.constant.StageType;
 import com.ssafy.undaied.socket.stage.dto.response.RoundNotifyDto;
@@ -35,19 +36,20 @@ public class StageService {
     private final InfectService infectService;
     private final GameChatService gameChatService;
     private final GameResultService gameResultService;
+    private final GameInitService gameInitService;
 
     private static final Map<String, Integer> STAGE_DURATIONS = Map.of(
             "notify", 1,
             "result", 2,
-            StageType.SUBJECT_DEBATE.getRedisValue(), 5,  // 2분
-            StageType.FREE_DEBATE.getRedisValue(), 3000,     // 3분
+            StageType.SUBJECT_DEBATE.getRedisValue(), 15,  // 2분
+            StageType.FREE_DEBATE.getRedisValue(), 10,     // 3분
             StageType.VOTE.getRedisValue(), 10             // 30초
     );
 
     public void handleGameStart(Integer gameId) {
         String roundKey = "game:" + gameId + ":round";
         redisTemplate.opsForValue().set(roundKey, "0");
-
+        
         handleNotifyStartStage(gameId, StageType.START);
         gameTimer.setTimer(gameId, GameTimerConstants.STAGE_START_NOTIFY, STAGE_DURATIONS.get("notify"), () -> {
             try {
@@ -56,6 +58,7 @@ public class StageService {
                 handleGameError(gameId, e);
             }
         });
+        gameInitService.sendGameInfo(gameId);
     }
 
     private void startStage(Integer gameId, StageType currentStage) throws SocketException {
@@ -90,6 +93,7 @@ public class StageService {
 
                 // 스테이지별 메인 로직 실행
                 handleStageUpdate(gameId, currentStage);
+
             });
         } catch (Exception e) {
             log.error("Error in startStage: {}", e.getMessage());
@@ -110,7 +114,6 @@ public class StageService {
 
     private void handleStageUpdate(Integer gameId, StageType currentStage) {
         switch (currentStage) {
-            case START -> handleGameStart(gameId);
             case DAY -> handleDayStage(gameId);
             case SUBJECT_DEBATE -> handleSubjectDebate(gameId);
             case FREE_DEBATE -> handleFreeDebate(gameId);
@@ -125,14 +128,16 @@ public class StageService {
         if (Integer.parseInt(getCurrentRound(gameId)) > 1) {
             handleInfection(gameId);
         }
-
-        gameTimer.setTimer(gameId, GameTimerConstants.STAGE_END_NOTIFY, STAGE_DURATIONS.get("notify"), () -> {
+        // 시작 시 5초
+        gameTimer.setTimer(gameId, GameTimerConstants.STAGE_END_NOTIFY, 5, () -> {
             try {
                 startStage(gameId, StageType.SUBJECT_DEBATE);
             } catch (Exception e) {
                 handleGameError(gameId, e);
             }
         });
+        gameInitService.sendGameInfo(gameId);
+
     }
 
     private void handleInfection(Integer gameId) {
@@ -141,8 +146,7 @@ public class StageService {
             log.info("InfectedPlayerNumber: {}", infectedPlayerNumber);
             namespace.getRoomOperations("game:" + gameId).sendEvent(
                     EventType.GAME_CHAT_SEND.getValue(),
-                    Map.of("number", 0,
-                            "content", "밤 사이에 인간 플레이어가 AI에게 감염되었습니다.")
+                    Map.of("number", 0, "content", "밤 사이에 인간 플레이어가 AI에게 감염되었습니다.")
             );
         } catch (Exception e) {
             log.error("Infection stage error: {}", e.getMessage());
@@ -170,11 +174,13 @@ public class StageService {
                     }
                 });
             });
+            gameInitService.sendGameInfo(gameId);
         });
     }
 
     private void handleFreeDebate(Integer gameId) {
         gameTimer.setTimer(gameId, GameTimerConstants.STAGE_START_NOTIFY, STAGE_DURATIONS.get("notify"), () -> {
+
             gameTimer.setTimer(gameId, GameTimerConstants.STAGE_MAIN, STAGE_DURATIONS.get(StageType.FREE_DEBATE.getRedisValue()), () -> {
                 handleNotifyEndStage(gameId, StageType.FREE_DEBATE);
 
@@ -186,11 +192,13 @@ public class StageService {
                     }
                 });
             });
+            gameInitService.sendGameInfo(gameId);
         });
     }
 
     private void handleVote(Integer gameId) {
         gameTimer.setTimer(gameId, GameTimerConstants.STAGE_START_NOTIFY, STAGE_DURATIONS.get("notify"), () -> {
+
             gameTimer.setTimer(gameId, GameTimerConstants.STAGE_MAIN, STAGE_DURATIONS.get(StageType.VOTE.getRedisValue()), () -> {
                 handleNotifyEndStage(gameId, StageType.VOTE);
 
@@ -206,6 +214,7 @@ public class StageService {
                     }
                 });
             });
+            gameInitService.sendGameInfo(gameId);
         });
     }
 
@@ -214,20 +223,22 @@ public class StageService {
             gameOver(gameId);
             return;
         }
-
-        gameTimer.setTimer(gameId, GameTimerConstants.STAGE_START_NOTIFY, STAGE_DURATIONS.get("notify"), () -> {
+        // 밤 진행 시간 5초
+        gameTimer.setTimer(gameId, GameTimerConstants.STAGE_START_NOTIFY, 5, () -> {
             try {
                 startStage(gameId, StageType.DAY);
             } catch (Exception e) {
                 handleGameError(gameId, e);
             }
         });
+        gameInitService.sendGameInfo(gameId);
     }
 
     private void handleGameEnd(Integer gameId) {
         gameTimer.setTimer(gameId, GameTimerConstants.GAME_END, STAGE_DURATIONS.get("notify"), () -> {
             gameOver(gameId);
         });
+        gameInitService.sendGameInfo(gameId);
     }
 
     private void saveCurrentStage(Integer gameId, StageType currentStage) {

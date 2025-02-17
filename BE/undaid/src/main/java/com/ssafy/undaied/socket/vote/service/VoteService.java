@@ -205,6 +205,12 @@ public class VoteService {
 
             log.debug("Eliminated player status - AI: {}, Infected: {}", isAI, isInfected);
 
+            // player_status 변경
+            Map<Object, Object> playerStatus = redisTemplate.opsForHash().entries(statusKey);
+
+            String newStatus = playerStatus.get(eliminatedNumber).toString().replace("isDied=false", "isDied=true");
+            redisTemplate.opsForHash().put(statusKey, eliminatedNumber, newStatus);
+
             // 투표 이벤트 저장
             String userNameKey = "game:" + gameId + ":number_nicknames";
             String eliminatedName = redisTemplate.opsForHash().get(userNameKey, eliminatedNumber).toString();

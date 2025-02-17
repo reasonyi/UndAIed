@@ -12,13 +12,14 @@ import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Socket } from "socket.io-client";
 import SecondCounter from "./SecondCounter";
+import { STAGE_INFO } from "../GamePlay";
 
 interface ILeftGameSideBarProps {
   nickname: string;
   icon: string;
   title: string;
   timer?: number;
-  stage?: string;
+  stage?: keyof typeof STAGE_INFO;
   round?: number;
   socket: Socket | null;
   // onLeaveRoom: () => void;
@@ -83,9 +84,12 @@ ILeftGameSideBarProps) {
           <h1 className="text-base font-medium">{round}라운드</h1>
           <div className="flex items-center text-lg ">
             <h2 className="mr-3 text-xl font-semibold mb-[0.375rem]">
-              {stage ?? "종료"}
+              {stage ? STAGE_INFO[stage][0] : "Disconnected"}
             </h2>
-            <SecondCounter initialSeconds={timer ? timer : 10} />
+            <SecondCounter
+              initialSeconds={timer ? timer : 0}
+              maxSeconds={stage ? STAGE_INFO[stage][1] : 0}
+            />
           </div>
         </div>
         <div className="flex flex-col items-center justify-center profile w-52 h-52 border-2 border-solid border-[rgba(255,255,255,0.35)] bg-[#07070a4d]">

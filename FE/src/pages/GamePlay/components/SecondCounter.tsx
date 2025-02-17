@@ -2,13 +2,20 @@ import { useState, useEffect, useRef } from "react";
 
 interface ISecondsProps {
   initialSeconds: number;
+  maxSeconds: number | string;
 }
 
-function SecondCounter({ initialSeconds }: ISecondsProps) {
+function SecondCounter({ initialSeconds, maxSeconds }: ISecondsProps) {
   const [seconds, setSeconds] = useState(initialSeconds);
   const circleRef = useRef<SVGCircleElement | null>(null);
+  console.log("타이머 관련 정보: ", initialSeconds, maxSeconds, seconds);
 
   useEffect(() => {
+    if (maxSeconds === 0) {
+      setSeconds(0);
+    } else {
+      setSeconds(initialSeconds);
+    }
     // 1초에 한 번씩 seconds를 1씩 줄인다.
     const intervalId = setInterval(() => {
       setSeconds((prev) => {
@@ -23,17 +30,18 @@ function SecondCounter({ initialSeconds }: ISecondsProps) {
 
     // 컴포넌트 언마운트 시 인터벌 정리
     return () => clearInterval(intervalId);
-  }, []);
+  }, [initialSeconds, maxSeconds]);
 
   useEffect(() => {
     // 원형 진행도 업데이트
     if (circleRef.current) {
       const circumference = 151; // circle에 설정한 strokeDasharray
-      const progress = seconds / initialSeconds; // 남은 비율(0~1)
+      const maxVal = Number(maxSeconds);
+      const progress = maxVal > 0 ? seconds / maxVal : 0;
       const offset = circumference - progress * circumference;
       circleRef.current.style.strokeDashoffset = String(offset);
     }
-  }, [seconds, initialSeconds]);
+  }, [seconds, maxSeconds]);
 
   return (
     <div className="flex flex-col items-center justify-center">

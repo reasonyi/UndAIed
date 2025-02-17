@@ -5,7 +5,7 @@ import { GameUserInfoProps } from "../../../types/User";
 
 // 8개의 아바타 이미지 import
 import { useUpdateProfile } from "../../../hooks/useUserData";
-import { PlayerIcons } from "../../Util/PlayerIcon";
+import { PlayerIcons } from "../../../util/PlayerIcon";
 
 interface GameProfileEditorProps {
   isOpen: boolean;
