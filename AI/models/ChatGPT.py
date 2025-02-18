@@ -33,11 +33,13 @@ class ChatGPTBot:
             {"role": "system", "content": self.system_prompt},
             {
                 "role": "user",
-                "content": f"- AI 정보 : \nAI_NUM : {AI_NUM}\nAI_ASSIST:{AI_ASSIST}\n\n- 현재 게임 상황:\n{user_input}\n\n- 당신의 응답:",
+                "content": f"- AI 정보:\nAI_NUM: {AI_NUM}\nAI_ASSIST: {AI_ASSIST}`\n\n- 현재 게임 상황:\n{user_input}\n\n- 당신의 응답:",
             },
         ]
 
         response: ChatCompletion = self.client.chat.completions.create(
             messages=messages, **self.config
         )
+        print("="*100)
+        print(response.choices[0].message.content.strip())
         return response.choices[0].message.content.strip()
