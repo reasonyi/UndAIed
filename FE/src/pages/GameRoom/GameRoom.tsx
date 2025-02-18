@@ -105,14 +105,7 @@ function GameRoom() {
           (a: IPlayer, b: IPlayer) => a.enterId - b.enterId
         );
         const data_ = data;
-        const setNumberUsers = newUsers.map((user, index) => {
-          if (user.enterId === playerEnterId) {
-            setPlayerEnterId(index + 1);
-          }
-          user.enterId = index + 1;
-          return user;
-        });
-        data_.currentPlayers = setNumberUsers;
+        data_.currentPlayers = newUsers;
         setRoomInfo(data_);
         debugger;
       }
@@ -127,11 +120,7 @@ function GameRoom() {
           (a: IPlayer, b: IPlayer) => a.enterId - b.enterId
         );
         const data_ = data;
-        const setNumberUsers = newUsers.map((user, index) => {
-          user.enterId = index + 1;
-          return user;
-        });
-        data_.currentPlayers = setNumberUsers;
+        data_.currentPlayers = newUsers;
         setRoomInfo(data_);
       }
     });
