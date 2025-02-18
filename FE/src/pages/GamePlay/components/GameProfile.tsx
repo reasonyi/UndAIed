@@ -5,6 +5,8 @@ import {
   faNoteSticky,
   faCheckToSlot,
 } from "@fortawesome/free-solid-svg-icons";
+import { useRecoilState } from "recoil";
+import { isUserDiedState } from "../../../store/gamePlayState";
 
 interface IGameProfileProps {
   nickname: string;
@@ -26,6 +28,8 @@ function GameProfile({
   const robot: IconDefinition = faRobot;
   const noteSticky: IconDefinition = faNoteSticky;
   const checkToSlot: IconDefinition = faCheckToSlot;
+
+  const [isUserDead, setIsUserDead] = useRecoilState<boolean>(isUserDiedState);
 
   return (
     <div
@@ -53,7 +57,7 @@ function GameProfile({
             className="text-[#cccccc] hover:text-white p-1 w-[1.25rem] h-[1.25rem] mx-1"
           />
         </button>
-        {stage === "vote" ? (
+        {stage === "vote" && isUserDead === false ? (
           <button
             onClick={() => {
               onVoteSubmit(playerNum);
