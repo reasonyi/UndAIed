@@ -6,12 +6,12 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class AIChatAIListResponseDto {
+public class AINumberDto {
     private Integer aiId;
     private Integer number;
 
     @Builder
-    public AIChatAIListResponseDto(Integer aiId, Integer number) {
+    public AINumberDto(Integer aiId, Integer number) {
         this.aiId = aiId;
         this.number = number;
     }

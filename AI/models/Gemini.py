@@ -1,7 +1,6 @@
 import google.generativeai as genai
 from environs import Env
-from .history import history
-from .GeminiNoHistoryChatSession import NoHistoryChatSession
+from .prompt import prompt
 
 
 class GeminiBot:
@@ -20,18 +19,17 @@ class GeminiBot:
                 "max_output_tokens": 8192,
                 "response_mime_type": "text/plain",
             },
+            system_instruction=prompt,
         )
 
-        # 커스텀 ChatSession으로 초기화
-        self.chat = NoHistoryChatSession(
-            model=self.model,
-            history=history,  # 시스템 프롬프트만 담김, 이전 대화 기억하지 않음음
-            enable_automatic_function_calling=False,
+    def generate_response(self, AI_INFO: dict, user_input: dict) -> str:
+        """단일 턴 채팅에서 새로운 입력에 대한 응답을 생성합니다."""
+        AI_NUM = AI_INFO[-2]
+        AI_ASSIST = 99 if len(AI_INFO) == 1 else AI_INFO[-3]
+        print(user_input)
+        response = self.model.generate_content(
+            f"- AI 정보:\nAI_NUM: {AI_NUM}\nAI_ASSIST: {AI_ASSIST}\n\n- 현재 게임 상황:\n{user_input}\n\n- 당신의 응답:"
         )
-
-    def generate_response(self, user_input: dict) -> str:
-        """채팅 세션 내에서 새로운 입력에 대한 응답을 생성합니다."""
-        response = self.chat.send_message(
-            f"현재 게임 상황:\n{user_input}\n\n당신의 응답:"
-        )
+        print("="*100)
+        print(response.text)
         return response.text

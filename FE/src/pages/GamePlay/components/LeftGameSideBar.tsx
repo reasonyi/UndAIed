@@ -12,7 +12,7 @@ import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Socket } from "socket.io-client";
 import SecondCounter from "./SecondCounter";
-import { STAGE_INFO } from "../GamePlay";
+import { STAGE_INFO } from "./info";
 
 interface ILeftGameSideBarProps {
   nickname: string;
@@ -89,6 +89,7 @@ ILeftGameSideBarProps) {
             <SecondCounter
               initialSeconds={timer ? timer : 0}
               maxSeconds={stage ? STAGE_INFO[stage][1] : 0}
+              stage={stage ? STAGE_INFO[stage][0] : "Disconnected"}
             />
           </div>
         </div>
