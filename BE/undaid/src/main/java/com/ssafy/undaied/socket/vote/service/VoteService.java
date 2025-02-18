@@ -20,11 +20,14 @@ import java.util.*;
 public class VoteService {
 
     private final RedisTemplate<String, String> redisTemplate;
+    private final int PLAYER = 8;
 
     // 투표 제출
     public VoteSubmitResponseDto submitVote(Integer voterUserId, Integer gameId, VoteSubmitRequestDto voteSubmitRequestDto)
             throws SocketException {
         String userNumberKey = "game:" + gameId + ":number_mapping";
+        String roundKey = String.format("game:%d:round", gameId);
+        String currentRound = redisTemplate.opsForValue().get(roundKey);
 
         try {
             String gameKey = "game:" + gameId;
@@ -40,24 +43,36 @@ public class VoteService {
 
             String voterNumber = voterNumberObj.toString();
             String targetNumber = voteSubmitRequestDto.getTarget().toString();
-            log.debug("voterNumber: " + voterNumber + ", targetNumber: " + targetNumber);
+            log.debug("Round: " + currentRound +", voterNumber: " + voterNumber + ", targetNumber: " + targetNumber);
 
+            String statusKey = "game:" + gameId + ":player_status";
+            String statusStr = redisTemplate.opsForHash().get(statusKey, voterNumber).toString();
+
+            // 죽은 사람에게 투표했을 때
             if (!isValidTarget(gameId, targetNumber))
                 throw new SocketException(SocketErrorCode.VOTE_INVALID_TARGET);
+            // 죽은 플레이어가 투표에 참여했을 때
+            if (isVoterDied(statusStr))
+                throw new SocketException(SocketErrorCode.VOTE_DIED_PLAYER);
+            // 플레이어가 참여 중이 아닐 때
+            if (!isVoterInGame(statusStr))
+                throw new SocketException(SocketErrorCode.PLAYER_NOT_IN_GAME);
+            // 본인에게 투표했을 때
+            if (voterNumber.equals(targetNumber))
+                throw new SocketException(SocketErrorCode.VOTE_SELF_TARGET);
 
-            if (!isValidVote(gameId, voterNumber))
-                throw new SocketException(SocketErrorCode.VOTE_INVALID_PLAYER);
 
+            // 현재 투표 시간이 아닌 경우
             String stageKey = "game:" + gameId + ":stage";
             String currentStage = redisTemplate.opsForValue().get(stageKey);
+            log.debug("🍳currentRound: "+ currentRound+ ", currentStage: " + currentStage + ", VOTE in redis: " + StageType.VOTE.getRedisValue());
 
             if (!currentStage.equals(StageType.VOTE.getRedisValue()))
                 throw new SocketException(SocketErrorCode.VOTE_STAGE_INVALID);
 
-            String roundKey = "game:" + gameId + ":round";
-            String currentRound = redisTemplate.opsForValue().get(roundKey);
             String eventKey = "game:" + gameId + ":round:" + currentRound + ":events";
 
+            // 이미 투표한 경우
             if (hasVoted(eventKey, voterNumber))
                 throw new SocketException(SocketErrorCode.VOTE_ALREADY_SUBMITTED);
 
@@ -75,29 +90,26 @@ public class VoteService {
             VoteSubmitResponseDto responseDto = VoteSubmitResponseDto.builder()
                     .number(Integer.parseInt(targetNumber))
                     .build();
-
             return responseDto;
+
         } catch (SocketException e) {
             log.error("Error in submitVote: ", e);
             throw e;
         } catch (Exception e) {
-            log.error("Unexpected error while creating room: {}", e.getMessage());
+            log.error("Unexpected error while voting : {}", e.getMessage());
             throw new SocketException(SocketErrorCode.VOTE_SUBMIT_FAILED);
         }
     }
 
 
-    public boolean isValidVote(Integer gameId, String voterNumber) {
-        String statusKey = "game:" + gameId + ":player_status";
-        String aiKey = "game:" + gameId + ":ai_numbers";
-
-        String statusStr = redisTemplate.opsForHash().get(statusKey, voterNumber).toString();
+    public boolean isVoterDied(String statusStr) {
         boolean isDied = statusStr.contains("isDied=true");
-        boolean isInfected = statusStr.contains("isDied=true");
-        boolean isInGame = statusStr.contains("isInGame=true");
-        boolean isAI = redisTemplate.opsForSet().isMember(aiKey, voterNumber);
+        return isDied;
+    }
 
-        return !isDied && !isInfected && isInGame && !isAI;
+    public boolean isVoterInGame(String statusKey) {
+        boolean isVoterInGame = statusKey.contains("isInGame=true");
+        return isVoterInGame;
     }
 
     public boolean isValidTarget(Integer gameId, String targetNumber) {
@@ -109,8 +121,10 @@ public class VoteService {
     }
 
     public boolean hasVoted(String eventKey, String voterNumber) {
+        log.debug("🍳Check voter has Voted ...");
+
         String events = redisTemplate.opsForValue().get(eventKey);
-        if (events == null) return false;
+        if (events == null || events.trim().isEmpty()) return false;
 
         return Arrays.stream(events.split("\\|"))
                 .anyMatch(event -> event.trim().contains("{vote}")
@@ -127,12 +141,15 @@ public class VoteService {
         String currentRound = redisTemplate.opsForValue().get(roundKey);
         log.debug("Current round: {}", currentRound);
 
-        // 유효 플레이어 수 계산
-        int playerCount = countValidPlayers(gameId);
-        log.debug("Valid player count: {}", playerCount);
+        String statusKey = "game:" + gameId + ":player_status";
+        String aiKey = "game:" + gameId + ":ai_numbers";
+
+//        // 유효 플레이어 수 계산
+//        int playerCount = countValidPlayers(gameId, statusKey);
+//        log.debug("Valid player count: {}", playerCount);
 
         // 투표를 카운트할 배열 : 인덱스가 익명 number, 값은 익명 number가 받은 투표 수
-        int[] voteCounts = new int[playerCount + 1];
+        int[] voteCounts = new int[PLAYER + 1];
 
         // 투표 이벤트 조회
         String eventKey = "game:" + gameId + ":round:" + currentRound + ":events";
@@ -153,28 +170,54 @@ public class VoteService {
                     voteCounts[targetNumber]++;
                 }
             }
-            log.debug("VoteCounts: {}", Arrays.stream(voteCounts).toArray());
-            log.debug("Vote counting completed");
+            log.debug("🍳Round: {}, VoteCounts: {}", currentRound, Arrays.stream(voteCounts).toArray());
+            log.debug("🍳Round: {}, Vote counting completed", currentRound);
         }
+
+         // AI가 아닌 최다 득표수 찾기
+        log.debug("🍳Start find maxVotes excepting AI");
+        Set<String> aiSet = redisTemplate.opsForSet().members(aiKey);
+        log.debug("🍳AI set : {}", aiSet.stream().toArray());
+
+        int maxVotes = 0;
+        for (int i=1; i< voteCounts.length; i++) {
+            if (!aiSet.contains(String.valueOf(i)) && maxVotes < voteCounts[i]){
+                maxVotes = voteCounts[i];
+            }
+        }
+        log.debug("🍳Max Vote Counts: {}", maxVotes);
+
+        // AI가 아니면서 최다 득표수와 같은 플레이어 찾기
+        List<Integer> randomTargetCandidates = new ArrayList<>();
+
+        for (int i = 1; i < voteCounts.length; i++) {
+            if (!aiSet.contains(String.valueOf(i)) && voteCounts[i] == maxVotes) {
+                String statusStr = redisTemplate.opsForHash().get(statusKey, String.valueOf(i)).toString();
+                if (!statusStr.contains("isDied=true"))
+                    randomTargetCandidates.add(i);
+                log.debug("Player {} has maximum votes", i);
+            }
+        }
+        log.debug("Found {} players with maximum votes", randomTargetCandidates.size());
 
         // AI 투표 처리
         // 가장 많은 표를 받은 사람 중 랜덤으로 타켓 선정
-        int randomTarget = randomVoteTargetAI(voteCounts);
+        int randomTarget = randomVoteTargetAI(randomTargetCandidates, statusKey, aiKey);
         log.debug("--------RandomTarget: {}", randomTarget);
 
-        int AICount = countValidAIs(gameId);
+        int AICount = countValidAIs(gameId, statusKey, aiKey);
         voteCounts[randomTarget] += AICount;
         log.debug("AI votes ({} votes) added to player {}", AICount, randomTarget);
 
-        // 최다 득표자 찾기
+        // AI 투표까지 종료 후 최다 득표자 찾기 => 최다 득표자가 여러 명일 경우 비김
         List<Integer> maxVotedCandidates = new ArrayList<>();
-        int maxVotes = Arrays.stream(voteCounts).max().orElse(0);
-        log.debug("Maximum votes: {}", maxVotes);
-
+        int finalMaxVotes = Arrays.stream(voteCounts)
+                .max()
+                .orElse(0);
+        log.debug("🍳Final maximum votes {}", finalMaxVotes);
         for (int i = 1; i < voteCounts.length; i++) {
-            if (voteCounts[i] == maxVotes) {
+            if (voteCounts[i] == finalMaxVotes) {
                 maxVotedCandidates.add(i);
-                log.debug("Player {} has maximum votes", i);
             }
         }
         log.debug("Found {} players with maximum votes", maxVotedCandidates.size());
@@ -188,13 +231,10 @@ public class VoteService {
                     LocalDateTime.now());
 
             redisTemplate.opsForValue().append(eventKey, voteEvent);
-            return VoteResultResponseDto.notifyDraw(maxVotedCandidates, maxVotes);
+            return VoteResultResponseDto.notifyDraw(maxVotedCandidates, finalMaxVotes);
         } else {
             String eliminatedNumber = String.valueOf(maxVotedCandidates.get(0));
-            log.info("Player {} eliminated with {} votes", eliminatedNumber, maxVotes);
-
-            String statusKey = "game:" + gameId + ":player_status";
-            String aiKey = "game:" + gameId + ":ai_numbers";
+            log.info("Player {} eliminated with {} votes", eliminatedNumber, finalMaxVotes);
 
             String statusStr = redisTemplate.opsForHash().get(statusKey, eliminatedNumber).toString();
             log.debug("statusStr: {}", statusStr);
@@ -228,7 +268,7 @@ public class VoteService {
                     eliminatedName, eliminatedNumber, LocalDateTime.now());
             redisTemplate.opsForValue().append(eventKey, voteEvent);
             log.debug("🍳Store vote event data in Redis");
-            return VoteResultResponseDto.notifyVoteResult(eliminatedNumber, maxVotes, isAI, isInfected);
+            return VoteResultResponseDto.notifyVoteResult(eliminatedNumber, finalMaxVotes, isAI, isInfected);
         }
     }
 
@@ -236,15 +276,14 @@ public class VoteService {
     /**
      * 유효 투표자 수 구하기
      **/
-    public int countValidPlayers(Integer gameId) {
+    public int countValidPlayers(Integer gameId, String statusKey) {
         log.debug("Counting valid players for game {}", gameId);
-        String statusKey = "game:" + gameId + ":player_status";
 
         Map<Object, Object> playerStatuses = redisTemplate.opsForHash().entries(statusKey);
         int count = 0;
         for (Map.Entry<Object, Object> entry : playerStatuses.entrySet()) {
             String status = entry.getValue().toString();
-            if (!status.contains("isDied=true") && !status.contains("isInfected=true")) count++;
+            if (!status.contains("isDied=true")) count++;
         }
 
         log.debug("Valid players count: {}", count);
@@ -254,18 +293,15 @@ public class VoteService {
     /**
      * 유효 AI 수 구하기
      **/
-    public int countValidAIs(Integer gameId) {
-        String statusKey = "game:" + gameId + ":player_status";
-        String aiKey = "game:" + gameId + ":ai_numbers";
-
+    public int countValidAIs(Integer gameId, String statusKey, String aiKey) {
         Map<Object, Object> playerStatuses = redisTemplate.opsForHash().entries(statusKey);
         Set<String> aiSet = redisTemplate.opsForSet().members(aiKey);
 
         int count = 0;
         for (Map.Entry<Object, Object> entry : playerStatuses.entrySet()) {
             String status = entry.getValue().toString();
-            if (!status.contains("isDied=true") && !status.contains("isInfected=true")
-                    && aiSet.contains(entry.getKey())) count++;
+            if (!status.contains("isDied=true")
+                    && aiSet.contains(entry.getKey().toString())) count++;
         }
 
         log.debug("Valid AIs count: {}", count);
@@ -275,19 +311,11 @@ public class VoteService {
     /**
      * 유효 AI 수만큼 최다 득표자에게(여러 명일 경우 랜덤) 투표 하기
      **/
-    public Integer randomVoteTargetAI(int[] voteCounts) {
-        log.debug("Start randomVoteTargetAI method");
-        List<Integer> randomVoteList = new ArrayList<>();
-        int maxVotes = Arrays.stream(voteCounts).max().orElse(0);   // 최다 득표수
-        log.debug("maxVotes: {}", maxVotes);
-        for (int i = 1; i < voteCounts.length; i++) {
-            if (voteCounts[i] == maxVotes) {
-                randomVoteList.add(i);
-            }
-        }
+    public Integer randomVoteTargetAI(List<Integer> randomTargetCandidates, String statusKey, String aiKey) {
+        log.debug("Start randomVoteTargetAI method : Candidates : {}", randomTargetCandidates.size());
 
-        int randomIndex = (int) (Math.random() * randomVoteList.size());
-        Integer randomTarget = randomVoteList.get(randomIndex);
+        int randomIndex = (int) (Math.random() * randomTargetCandidates.size());
+        Integer randomTarget = randomTargetCandidates.get(randomIndex);
         log.debug("RandomTarget: {}", randomTarget);
         return randomTarget;
     }
@@ -295,7 +323,7 @@ public class VoteService {
     // AI 익명 number로 AI Id 찾기
     public String findAIIdByNumber(Integer gameId, String eliminatedNumber) {
         log.debug("🍳Starting find AI Id by eliminatedNumber");
-        String userNumberKey = String.format("game:%d:number_mapping");
+        String userNumberKey = String.format("game:%d:number_mapping", gameId);
 
         Map<Object, Object> userMapping = redisTemplate.opsForHash().entries(userNumberKey);
         // userMapping 에서 키를 찾아야 함

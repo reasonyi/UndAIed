@@ -30,7 +30,7 @@ public class InfectService {
             for (Map.Entry<Object, Object> entry : playerStatus.entrySet()) {
                 String playerNumber = entry.getKey().toString();
                 String status = entry.getValue().toString();
-                if (!aiPlayers.contains(playerNumber) && !status.contains("isDied=true") && !status.contains("isInfected=true")) {
+                if (!aiPlayers.contains(playerNumber) && !status.contains("isDied=true")) {
                     eligiblePlayers.add(playerNumber);
                 }
             }

@@ -95,7 +95,7 @@ public class GameResultService {
                     .filter(number ->  {
                         String status = playerStatus.get(number).toString();
                         boolean isAlive = !status.contains("isDied=true") && status.contains("isInGame=true");
-                        log.debug("Player {} status: {}, isAlive: {}", number, status, isAlive);
+                        log.debug("Player {} status: {}", number, status);
                         return  isAlive;
                     }).count();
 
@@ -113,7 +113,7 @@ public class GameResultService {
                     .filter(number -> {
                         String status = playerStatus.get(number).toString();
                         boolean isAlive = !status.contains("isDied=true") && status.contains("isInGame=true");
-                        log.debug("AI {} status: {}, isAlive: {}", number, status, isAlive);
+                        log.debug("AI {} status: {}", number, status);
                         return isAlive;
                     }).count();
 
