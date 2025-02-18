@@ -6,12 +6,12 @@ import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IMessage, IPlayer } from "../../../types/gameroom";
 import SystemBubble from "../../GamePlay/components/SystemBubble";
+import { getPlayerIcon } from "../../../util/PlayerIcon";
 
 interface RightSideBarProps {
   /** 현재 게임 방의 유저 목록 */
   players?: IPlayer[];
   /** 플레이어 아이콘 배열 */
-  iconArr: string[];
   messages: IMessage[];
 }
 const peopleGroup: IconDefinition = faPeopleGroup;
@@ -21,7 +21,7 @@ const peopleGroup: IconDefinition = faPeopleGroup;
  * playerNum(1~6)에 해당하는 유저를 찾아서
  * ReadyProfile / EmptyProfile을 렌더링
  */
-function RightSideBar({ players, iconArr, messages }: RightSideBarProps) {
+function RightSideBar({ players, messages }: RightSideBarProps) {
   const [isRightOpen, setIsRightOpen] = useState(true);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const scrollSystemBottom = () => {
@@ -50,7 +50,7 @@ function RightSideBar({ players, iconArr, messages }: RightSideBarProps) {
                 <ReadyProfile
                   nickname={players[0].nickname}
                   playerNum={players[0].enterId}
-                  icon={iconArr[players[0].profileImage]}
+                  icon={getPlayerIcon(players[0].profileImage)}
                 />
               ) : (
                 <EmptyProfile />
@@ -61,7 +61,7 @@ function RightSideBar({ players, iconArr, messages }: RightSideBarProps) {
                 <ReadyProfile
                   nickname={players[1].nickname}
                   playerNum={players[1].enterId}
-                  icon={iconArr[players[1].profileImage]}
+                  icon={getPlayerIcon(players[1].profileImage)}
                 />
               ) : (
                 <EmptyProfile />
@@ -72,7 +72,7 @@ function RightSideBar({ players, iconArr, messages }: RightSideBarProps) {
                 <ReadyProfile
                   nickname={players[2].nickname}
                   playerNum={players[2].enterId}
-                  icon={iconArr[players[2].profileImage]}
+                  icon={getPlayerIcon(players[2].profileImage)}
                 />
               ) : (
                 <EmptyProfile />
@@ -83,7 +83,7 @@ function RightSideBar({ players, iconArr, messages }: RightSideBarProps) {
                 <ReadyProfile
                   nickname={players[3].nickname}
                   playerNum={players[3].enterId}
-                  icon={iconArr[players[3].profileImage]}
+                  icon={getPlayerIcon(players[3].profileImage)}
                 />
               ) : (
                 <EmptyProfile />
@@ -94,7 +94,7 @@ function RightSideBar({ players, iconArr, messages }: RightSideBarProps) {
                 <ReadyProfile
                   nickname={players[4].nickname}
                   playerNum={players[4].enterId}
-                  icon={iconArr[players[4].profileImage]}
+                  icon={getPlayerIcon(players[4].profileImage)}
                 />
               ) : (
                 <EmptyProfile />
@@ -105,7 +105,7 @@ function RightSideBar({ players, iconArr, messages }: RightSideBarProps) {
                 <ReadyProfile
                   nickname={players[5].nickname}
                   playerNum={players[5].enterId}
-                  icon={iconArr[players[5].profileImage]}
+                  icon={getPlayerIcon(players[5].profileImage)}
                 />
               ) : (
                 <EmptyProfile />

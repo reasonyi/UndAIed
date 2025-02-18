@@ -1,13 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import PlayerIcon1 from "../../assets/player-icon/player-icon-1.svg";
-import PlayerIcon2 from "../../assets/player-icon/player-icon-2.svg";
-import PlayerIcon3 from "../../assets/player-icon/player-icon-3.svg";
-import PlayerIcon4 from "../../assets/player-icon/player-icon-4.svg";
-import PlayerIcon5 from "../../assets/player-icon/player-icon-5.svg";
-import PlayerIcon6 from "../../assets/player-icon/player-icon-1.svg";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import { toast } from "sonner";
 import ChatBubble from "../GamePlay/components/ChatBuble";
 import SystemBubble from "../GamePlay/components/SystemBubble";
@@ -18,6 +10,7 @@ import RightSideBar from "./components/RightSideBar";
 import { IMessage, IPlayer } from "../../types/gameroom";
 import AudioPlayer from "../../util/AudioPlayer";
 import gameRoomBgm from "../../assets/bgm/game-room.mp3";
+import { getPlayerIcon } from "../../util/PlayerIcon";
 
 interface IRoomInfo {
   roomId: number;
@@ -61,15 +54,6 @@ function GameRoom() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const password = searchParams.get("pwd");
-
-  const iconArr = [
-    PlayerIcon1,
-    PlayerIcon2,
-    PlayerIcon3,
-    PlayerIcon4,
-    PlayerIcon5,
-    PlayerIcon6,
-  ];
 
   //socket 훅 사용
   const socket = useSocket();
@@ -347,7 +331,7 @@ function GameRoom() {
             roomId={roomInfo?.roomId}
             roomTitle={roomInfo?.roomTitle}
             nickname={playerInfo ? playerInfo.nickname : "연결이 끊어졌습니다."}
-            icon={iconArr[playerInfo ? playerInfo.enterId : 1]}
+            icon={getPlayerIcon(playerInfo ? playerInfo.profileImage : 0)}
             socket={socket}
             onLeaveRoom={handleLeaveRoom}
             onGameStart={handleGameStart}
@@ -392,7 +376,6 @@ function GameRoom() {
                 </div>
                 <RightSideBar
                   players={roomInfo?.currentPlayers}
-                  iconArr={iconArr}
                   messages={messages}
                 />
               </div>
