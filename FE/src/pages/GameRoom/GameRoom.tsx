@@ -101,19 +101,11 @@ function GameRoom() {
       console.log("send 발생! data 수신:", data);
       debugger;
       if (data.currentPlayers) {
-        debugger;
         const newUsers: IPlayer[] = data.currentPlayers.sort(
           (a: IPlayer, b: IPlayer) => a.enterId - b.enterId
         );
         const data_ = data;
-        const setNumberUsers = newUsers.map((user, index) => {
-          if (user.enterId === playerEnterId) {
-            setPlayerEnterId(index + 1);
-          }
-          user.enterId = index + 1;
-          return user;
-        });
-        data_.currentPlayers = setNumberUsers;
+        data_.currentPlayers = newUsers;
         setRoomInfo(data_);
         debugger;
       }
@@ -128,11 +120,7 @@ function GameRoom() {
           (a: IPlayer, b: IPlayer) => a.enterId - b.enterId
         );
         const data_ = data;
-        const setNumberUsers = newUsers.map((user, index) => {
-          user.enterId = index + 1;
-          return user;
-        });
-        data_.currentPlayers = setNumberUsers;
+        data_.currentPlayers = newUsers;
         setRoomInfo(data_);
       }
     });
@@ -141,19 +129,30 @@ function GameRoom() {
       console.log("chat:send 발생! data 수신:", data);
       debugger;
       if (data.message && data.nickname && roomInfo) {
-        const player = roomInfo.currentPlayers.find(
-          (player) => player.nickname === data.nickname
-        );
-
-        if (player) {
+        if (data.nickname === "system") {
           const newMessage: IMessage = {
-            player: player.enterId,
+            player: -1,
             nickname: data.nickname,
             text: data.message,
-            isMine: Boolean(player.enterId === playerEnterId),
+            isMine: false,
           };
-          setMessages((prevMessages) => [...prevMessages, newMessage]);
           debugger;
+          setMessages((prevMessages) => [...prevMessages, newMessage]);
+        } else {
+          const player = roomInfo.currentPlayers.find(
+            (player) => player.nickname === data.nickname
+          );
+
+          if (player) {
+            const newMessage: IMessage = {
+              player: player.enterId,
+              nickname: data.nickname,
+              text: data.message,
+              isMine: Boolean(player.enterId === playerEnterId),
+            };
+            debugger;
+            setMessages((prevMessages) => [...prevMessages, newMessage]);
+          }
         }
       }
     });
@@ -360,7 +359,7 @@ function GameRoom() {
                 {/* 메시지 리스트 영역 */}
                 <div className="flex-1 px-5 pt-4">
                   {messages.map((msg: IMessage, index) => {
-                    if (msg.player === 0) {
+                    if (msg.player === -1) {
                       return <SystemBubble key={index} message={msg} />;
                     } else {
                       return (
@@ -394,6 +393,7 @@ function GameRoom() {
                 <RightSideBar
                   players={roomInfo?.currentPlayers}
                   iconArr={iconArr}
+                  messages={messages}
                 />
               </div>
             </div>

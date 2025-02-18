@@ -59,9 +59,14 @@ public class BoardService {
     }
 
     // 게시글 리스트 조회
-    public Page<BoardListResponseDto> getAllBoards(Pageable pageable) {
-        return boardRepository.findAll(pageable)
-                .map(this::toDto);
+    public Page<BoardListResponseDto> getAllBoards(Byte category, Pageable pageable) {
+        if (category == null) {
+            return boardRepository.findAll(pageable)
+                    .map(this::toDto);
+        } else {
+            return boardRepository.findByCategory(category, pageable)
+                    .map(this::toDto);
+        }
     }
 
     // 게시글 상세 조회
