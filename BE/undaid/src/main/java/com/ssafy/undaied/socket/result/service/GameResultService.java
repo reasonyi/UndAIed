@@ -95,7 +95,7 @@ public class GameResultService {
                     .filter(number ->  {
                         String status = playerStatus.get(number).toString();
                         boolean isAlive = !status.contains("isDied=true") && status.contains("isInGame=true");
-                        log.debug("Player {} status: {}, isAlive: {}", number, status, isAlive);
+                        log.debug("Player {} status: {}", number, status);
                         return  isAlive;
                     }).count();
 
@@ -113,7 +113,7 @@ public class GameResultService {
                     .filter(number -> {
                         String status = playerStatus.get(number).toString();
                         boolean isAlive = !status.contains("isDied=true") && status.contains("isInGame=true");
-                        log.debug("AI {} status: {}, isAlive: {}", number, status, isAlive);
+                        log.debug("AI {} status: {}", number, status);
                         return isAlive;
                     }).count();
 
@@ -293,7 +293,7 @@ public class GameResultService {
             String aiDeadKey = GAME_KEY_PREFIX + gameId + ":ai_died";
             Object aiDeadObj = jsonRedisTemplate.opsForValue().get(aiDeadKey);
             if(aiDeadObj == null) {
-                log.error("redis에서 AI 탈락 데이터를 찾을 수 없어 저장에 실패 - roomId: {}", roomId);
+                log.info("AI가 제거되지 않고 진행된 게임. (벤치마크 테이블에 데이터 저장 X) - roomId: {}", roomId);
                 return;
             }
 
