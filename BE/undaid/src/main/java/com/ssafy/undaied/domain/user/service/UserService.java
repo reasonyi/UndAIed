@@ -167,11 +167,13 @@ public class UserService{
                 .orElseThrow(() -> new BaseException(USER_NOT_FOUND));
 
         if(requestDto.getNickname() != null) {
-            if(userRepository.existsByNickname(requestDto.getNickname())) {
-                log.error("중복되는 닉네임으로 변경 요청");
-                throw new BaseException(ALREADY_NICKNAME_EXISTS);
+            if(!requestDto.getNickname().equals(user.getNickname())) {
+                if(userRepository.existsByNickname(requestDto.getNickname())) {
+                    log.error("중복되는 닉네임으로 변경 요청");
+                    throw new BaseException(ALREADY_NICKNAME_EXISTS);
+                }
+                nicknameValidation(requestDto.getNickname());
             }
-            nicknameValidation(requestDto.getNickname());
         }
 
         System.out.println("현재 유저 데이터: " +
