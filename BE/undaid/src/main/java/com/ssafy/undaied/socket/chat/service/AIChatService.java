@@ -351,15 +351,17 @@ public class AIChatService {
                     GAME_KEY_PREFIX, gameId, round);
             String subject = redisTemplate.opsForValue().get(subjectKey);
 
-            allRoundsData.append("[topic]");
-            allRoundsData.append(subject);
-            allRoundsData.append("[topic_debate]");
-            allRoundsData.append(roundData.getOrDefault("subject_debate", "")).append("\n");
-            allRoundsData.append("[free_debate]");
-            allRoundsData.append(roundData.getOrDefault("free_debate", "")).append("\n");
-            allRoundsData.append("[events]");
-            allRoundsData.append(roundData.getOrDefault("events", "")).append("\n");
-        }
+            // [topic] (subject) 형식 유지
+            allRoundsData.append("[topic] (").append(subject).append(") ");
+
+            allRoundsData.append("[topic_debate] ");
+            allRoundsData.append(roundData.getOrDefault("subject_debate", "")).append(" ");
+
+            allRoundsData.append("[free_debate] ");
+            allRoundsData.append(roundData.getOrDefault("free_debate", "")).append(" ");
+
+            allRoundsData.append("[events] ");
+            allRoundsData.append(roundData.getOrDefault("events", "")); }
 
         return allRoundsData.toString();
     }
