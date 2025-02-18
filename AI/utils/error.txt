@@ -1,0 +1,78 @@
+
+INFO:     127.0.0.1:62012 - "POST /api/ai/8/ HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "C:\Users\SSAFY\Desktop\ssafy-project\2502118-real\S12P11B212\AI\venv\Lib\site-packages\uvicorn\protocols\http\h11_impl.py", line 403, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SSAFY\Desktop\ssafy-project\2502118-real\S12P11B212\AI\venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SSAFY\Desktop\ssafy-project\2502118-real\S12P11B212\AI\venv\Lib\site-packages\fastapi\applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+  File "C:\Users\SSAFY\Desktop\ssafy-project\2502118-real\S12P11B212\AI\venv\Lib\site-packages\starlette\applications.py", line 112, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\SSAFY\Desktop\ssafy-project\2502118-real\S12P11B212\AI\venv\Lib\site-packages\starlette\middleware\errors.py", line 187, in __call__
+    raise exc
+  File "C:\Users\SSAFY\Desktop\ssafy-project\2502118-real\S12P11B212\AI\venv\Lib\site-packages\starlette\middleware\errors.py", line 165, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\SSAFY\Desktop\ssafy-project\2502118-real\S12P11B212\AI\venv\Lib\site-packages\starlette\middleware\exceptions.py", line 62, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\SSAFY\Desktop\ssafy-project\2502118-real\S12P11B212\AI\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\SSAFY\Desktop\ssafy-project\2502118-real\S12P11B212\AI\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\SSAFY\Desktop\ssafy-project\2502118-real\S12P11B212\AI\venv\Lib\site-packages\starlette\routing.py", line 715, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\SSAFY\Desktop\ssafy-project\2502118-real\S12P11B212\AI\venv\Lib\site-packages\starlette\routing.py", line 735, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\SSAFY\Desktop\ssafy-project\2502118-real\S12P11B212\AI\venv\Lib\site-packages\starlette\routing.py", line 288, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\SSAFY\Desktop\ssafy-project\2502118-real\S12P11B212\AI\venv\Lib\site-packages\starlette\routing.py", line 76, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\SSAFY\Desktop\ssafy-project\2502118-real\S12P11B212\AI\venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\SSAFY\Desktop\ssafy-project\2502118-real\S12P11B212\AI\venv\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\SSAFY\Desktop\ssafy-project\2502118-real\S12P11B212\AI\venv\Lib\site-packages\starlette\routing.py", line 73, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\SSAFY\Desktop\ssafy-project\2502118-real\S12P11B212\AI\venv\Lib\site-packages\fastapi\routing.py", line 301, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SSAFY\Desktop\ssafy-project\2502118-real\S12P11B212\AI\venv\Lib\site-packages\fastapi\routing.py", line 212, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SSAFY\Desktop\ssafy-project\2502118-real\S12P11B212\AI\app.py", line 32, in create_message        
+    bot_response = AI_response_parser(bot.generate_response(selected_AI, parsed_dialogue))
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SSAFY\Desktop\ssafy-project\2502118-real\S12P11B212\AI\models\Gemini.py", line 30, in generate_response
+    response = self.model.generate_content(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SSAFY\Desktop\ssafy-project\2502118-real\S12P11B212\AI\venv\Lib\site-packages\google\generativeai\generative_models.py", line 331, in generate_content
+    response = self._client.generate_content(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SSAFY\Desktop\ssafy-project\2502118-real\S12P11B212\AI\venv\Lib\site-packages\google\ai\generativelanguage_v1beta\services\generative_service\client.py", line 835, in generate_content
+    response = rpc(
+               ^^^^
+  File "C:\Users\SSAFY\Desktop\ssafy-project\2502118-real\S12P11B212\AI\venv\Lib\site-packages\google\api_core\gapic_v1\method.py", line 131, in __call__
+    return wrapped_func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SSAFY\Desktop\ssafy-project\2502118-real\S12P11B212\AI\venv\Lib\site-packages\google\api_core\retry\retry_unary.py", line 293, in retry_wrapped_func
+    return retry_target(
+           ^^^^^^^^^^^^^
+  File "C:\Users\SSAFY\Desktop\ssafy-project\2502118-real\S12P11B212\AI\venv\Lib\site-packages\google\api_core\retry\retry_unary.py", line 153, in retry_target
+    _retry_error_helper(
+  File "C:\Users\SSAFY\Desktop\ssafy-project\2502118-real\S12P11B212\AI\venv\Lib\site-packages\google\api_core\retry\retry_base.py", line 212, in _retry_error_helper
+    raise final_exc from source_exc
+  File "C:\Users\SSAFY\Desktop\ssafy-project\2502118-real\S12P11B212\AI\venv\Lib\site-packages\google\api_core\retry\retry_unary.py", line 144, in retry_target
+    result = target()
+             ^^^^^^^^
+  File "C:\Users\SSAFY\Desktop\ssafy-project\2502118-real\S12P11B212\AI\venv\Lib\site-packages\google\api_core\timeout.py", line 130, in func_with_timeout
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SSAFY\Desktop\ssafy-project\2502118-real\S12P11B212\AI\venv\Lib\site-packages\google\api_core\grpc_helpers.py", line 78, in error_remapped_callable
+    raise exceptions.from_grpc_error(exc) from exc
+google.api_core.exceptions.ResourceExhausted: 429 Resource has been exhausted (e.g. check quota).
+INFO:app:----------------------------------------------------------------------------------------------------      
+{'1': {'topic_debate': [{'user_id': 0, 'content': '5'}, {'user_id': 8, 'content': '우주탐사는 돈낭비야'}, {'user_id': 4, 'content': '우주 탐사할 시간에 가난한 사람들 돈이나 줘야지'}, {'user_id': 5, 'content': '?'}, {'user_id': 2, 'content': '우주탐사는 인류의 미래를 위한 투자라고 생각해요'}, {'user_id': 6, 'content': '에이 우주 탐사는 인류의  미래에 필요해'}], 'free_debate': [{'user_id': 6, 'content': '인공지능 누군지 말해봐바'}, {'user_id': 1, 'content': '나도 궁금하다'}, {'user_id': 1, 'content': '누구냐 도대체'}, {'user_id': 7, 'content': '일단 난 아님'}, {'user_id': 5, 'content': '저도 반대'}, {'user_id': 5, 'content': '저도 궁금하네요'}, {'user_id': 2, 'content': '우주 탐사는 인류의 미래를 위한 투자라고 생각해'}, {'user_id': 2, 'content': '우주 탐사는'}, {'user_id': 5, 'content': '6님 갑자기 분위기 왜 그래요 ㅋㅋㅋ'}, {'user_id': 2, 'content': '응답을 파싱할 수 없습니다'}, {'user_id': 5, 'content': '다들 왜 이렇게 급해? 천천히 알아가면 되지. 난 익명8님 의견에 동의 못하겠음. 우주탐사가 왜 돈 낭비임?'}, {'user_id': 2, 'content': '우주 탐사에 대한 의견이 다양하'}, {'user_id': 5, 'content': '우주탐사로 얻을 수 있는 기술 발전이 생각보다 크다고 생각해요'}, {'user_id': 5, 'content': '6님 갑자기 왜 그러시는 거에요? 분위기 이상해졌어요'}, {'user_id': 2, 'content': ''}, {'user_id': 5, 'content': '저두요'}, {'user_id': 2, 'content': ''}, {'user_id': 2, 'content': ''}, {'user_id': 7, 'content': 'dummyhyunman'}, {'user_id': 3, 'content': 'dummyhoon2'}, {'user_id': 2, 'content': '18'}, {'user_id': 7, 'content': '인터넷을 통해 얻을 수 있는 정보가 많잖아요.'}, {'user_id': 5, 'content': '6님, 혹시 무슨 단서라도 찾으신 거 있으세요? 갑자기 AI를 찾으시는 이유가 궁금하네요.'}, {'user_id': 2, 'content': '응답을  파싱할 수 없습니다'}, {'user_id': 8, 'content': '인터넷이 얼마나 중요한지 몰라요?'}, {'user_id': 2, 'content': ''}, {'user_id': 5, 'content': '6님, 혹시 AI세요? 갑자기 분위기 전환하시네. 너무 티나요.'}, {'user_id': 2, 'content': ''}, {'user_id': 5, 'content': '저도 6님처럼 갑자기 인공지능 찾고 그러는 사람들 좀 이해 안됨'}, {'user_id': 2, 'content': '우주 탐사는 인류의 미래를 위한 투자라고 생각해요. 다양한 의견'}, {'user_id': 5, 'content': '6님 갑자기 왜 인공지능을 찾으시는 거에요? 무슨 일 있으셨어요?'}, {'user_id': 5, 'content': '6님 혹시 AI 같아요? ㅋㅋㅋ'}, {'user_id': 2, 'content': '응답을 파싱할 수 없습니다'}, {'user_id': 5, 'content': '6님, 진짜 AI 같아요. 계속 AI 찾으시는게  너무 수상함.'}, {'user_id': 2, 'content': ''}, {'user_id': 2, 'content': ''}, {'user_id': 5, 'content': '6님 진짜 AI 아니에요? 왜 계속 AI 찾아요? 자기가 AI라서 그런가 ㅋㅋㅋ'}, {'user_id': 2, 'content': ''}, {'user_id': 5, 'content': '6님이야말로 갑자기 분위기 전환하면서 인공지능 찾는 게 너무 이상한데요? 혹시 본인이 AI라서 다른 AI 찾는 거 아니에요? ㅋㅋㅋ'}, {'user_id': 2, 'content': ''}, {'user_id': 5, 'content': '6님이야말로 갑자기 분위기 전환하면서 AI  찾는 게 더 이상한데요? 혹시 본인이 AI라서 그런거 아니에요?'}, {'user_id': 2, 'content': '응답을 파싱할 수 없습니다'}, {'user_id': 5, 'content': '6님 진짜 왜 그러세요? 갑자기 분위기 싸하게 만드시네. 6님이 AI 같아요;;'}, {'user_id': 2, 'content': ''}, {'user_id': 5, 'content': '6님이야말로 갑자기 왜 이렇게 AI에 집착하세요? 혹시 본인이 AI라서 그 런 거 아니에요? ㅋㅋㅋ'}, {'user_id': 2, 'content': ''}, {'user_id': 5, 'content': '6님, 혹시 본인이 AI라서 다른 사람을 AI로 몰아가는 건 아니시죠? 너무 수상해요.'}], 'event': []}}
