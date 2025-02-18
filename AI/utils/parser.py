@@ -3,27 +3,60 @@ from collections import defaultdict
 
 
 #######################
+# def AI_response_parser(response: str) -> dict:
+#     """AI의 대답을 파싱하는 함수"""
+#     # {} 안의 내용을 찾는 정규식 패턴
+#     pattern = r"{(.*?)}"
+
+#     # 정규식으로 {} 안의 내용 추출
+#     match = re.search(pattern, response)
+#     if not match:
+#         return None
+
+#     content = match.group(1)
+
+#     # key:value 쌍을 찾는 패턴
+#     pair_pattern = r'(\w+)\s*:\s*"([^"]*)"'
+
+#     # 모든 key:value 쌍을 찾아서 딕셔너리로 변환
+#     pairs = re.findall(pair_pattern, content)
+#     result = {key: value for key, value in pairs}
+
+#     return result
+
 def AI_response_parser(response: str) -> dict:
     """AI의 대답을 파싱하는 함수"""
-    # {} 안의 내용을 찾는 정규식 패턴
-    pattern = r"{(.*?)}"
+    try:
+        # {} 안의 내용을 찾는 정규식 패턴
+        pattern = r"{(.*?)}"
 
-    # 정규식으로 {} 안의 내용 추출
-    match = re.search(pattern, response)
-    if not match:
-        return None
+        # 정규식으로 {} 안의 내용 추출
+        match = re.search(pattern, response)
+        if not match:
+            # 파싱할 수 없는 경우 기본 형식으로 변환
+            return {
+                "flexible": "X",
+                "content": response
+            }
 
-    content = match.group(1)
+        content = match.group(1)
 
-    # key:value 쌍을 찾는 패턴
-    pair_pattern = r'(\w+)\s*:\s*"([^"]*)"'
+        # key:value 쌍을 찾는 패턴
+        pair_pattern = r'(\w+)\s*:\s*"([^"]*)"'
 
-    # 모든 key:value 쌍을 찾아서 딕셔너리로 변환
-    pairs = re.findall(pair_pattern, content)
-    result = {key: value for key, value in pairs}
+        # 모든 key:value 쌍을 찾아서 딕셔너리로 변환
+        pairs = re.findall(pair_pattern, content)
+        result = {key: value for key, value in pairs}
 
-    return result
+        # 필수 키가 없는 경우 기본값 설정
+        if "flexible" not in result:
+            result["flexible"] = "X"
+        if "content" not in result:
+            result["content"] = response
 
+        return result
+    except Exception as e:
+        return {"flexible": "X", "content": response}
 
 #######################
 
