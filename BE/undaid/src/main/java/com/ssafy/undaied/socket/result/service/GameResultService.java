@@ -135,7 +135,7 @@ public class GameResultService {
                     .sendEvent("game:result:send", responseDto);
 
             // AI 메시지 스케줄링 중지
-//            aiChatService.stopGameMessageScheduling(gameId);
+            aiChatService.stopGameMessageScheduling(gameId);
             log.info("Stopped AI message scheduling for game: {}", gameId);
 
             // 플레이어 로비로 이동

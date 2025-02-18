@@ -200,6 +200,8 @@ public class AIChatService {
                     .bodyValue(sendData)
                     .retrieve()
                     .bodyToFlux(GameChatResponseDto.class)
+                    .doOnNext(response -> log.info("✅ AI 응답: {}", response))
+                    .doOnError(error -> log.error("❌ AI 응답 오류", error))
                     .collectList()
                     .flatMapMany(responses -> {
                         return Flux.fromIterable(responses)

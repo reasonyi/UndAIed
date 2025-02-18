@@ -100,7 +100,7 @@ public class GameChatService {
 
         log.info("Selected subject {} for game {} round {}", subjectId, gameId, currentRound);
         namespace.getRoomOperations("game:" + gameId).sendEvent("game:chat:send", sendSubjectResponseDto);
-//        aiChatService.startGameMessageScheduling(gameId);
+        aiChatService.startGameMessageScheduling(gameId);
     }
 
     private boolean hasUserSpokenInSubjectDebate(Integer gameId, String round, int number) {
