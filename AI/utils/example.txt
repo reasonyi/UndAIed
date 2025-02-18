@@ -70,7 +70,7 @@ input_string = """
 
 ```
 {
-        1 : {
+    1 : {
             "topic_debate" : [
                 {
                     "user_id": 0,
