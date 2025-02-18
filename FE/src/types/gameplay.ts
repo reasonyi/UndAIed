@@ -3,3 +3,14 @@ export interface IAnonimus {
   died: boolean;
   inGame: boolean;
 }
+
+export interface IGameResultSend {
+  winner: string;
+  message: string;
+  players: {
+    number: number;
+    nickname: string;
+    died: boolean;
+    infected: boolean;
+  }[];
+}

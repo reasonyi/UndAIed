@@ -3,6 +3,7 @@ import { atom, useRecoilState } from "recoil";
 import { useSocket } from "../../../hooks/useSocket";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
+import { useClickSound } from "../../../hooks/useClickSound";
 
 // Recoil atoms
 export const createRoomModalState = atom<boolean>({
@@ -25,6 +26,7 @@ interface CreateResponse {
 
 function CreateRoomButton() {
   const socket = useSocket();
+  const clickSound = useClickSound();
   const [isOpen, setIsOpen] = useRecoilState(createRoomModalState);
   const [roomInfo, setRoomInfo] = useState<CreateRoomForm>({
     roomTitle: "",
@@ -69,6 +71,7 @@ function CreateRoomButton() {
     <>
       <button
         onClick={() => setIsOpen(true)}
+        onMouseDown={clickSound}
         className="w-32 justify-start px-6 py-2 bg-black border-2 border-[#bf8f5b] text-white rounded hover:bg-[#211b05] hover:border-[#dea569] hover:shadow-[0_0_10px_0] hover:shadow-[#f99f3e] active:border-[#906639] active:bg-black active:shadow-none duration-100 "
       >
         방 만들기
@@ -143,7 +146,7 @@ function CreateRoomButton() {
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-[#ff4141] text-white rounded hover:bg-[#ff0303] active:bg-[#d73737] transition-colors"
+                    className="px-4 py-2 bg-[#ffaf02] text-white rounded hover:bg-[#ffc653] active:bg-[#ffb413d3] transition-colors"
                   >
                     방 생성
                   </button>

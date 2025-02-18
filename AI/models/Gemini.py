@@ -28,6 +28,8 @@ class GeminiBot:
         AI_ASSIST = 99 if len(AI_INFO) == 1 else AI_INFO[-3]
         print(user_input)
         response = self.model.generate_content(
-            f"- AI 정보 : \nAI_NUM : {AI_NUM}\nAI_ASSIST:{AI_ASSIST}\n\n- 현재 게임 상황:\n{user_input}\n\n- 당신의 응답:"
+            f"- AI 정보:\nAI_NUM: {AI_NUM}\nAI_ASSIST: {AI_ASSIST}\n\n- 현재 게임 상황:\n{user_input}\n\n- 당신의 응답:"
         )
+        print("="*100)
+        print(response.text)
         return response.text

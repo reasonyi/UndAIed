@@ -21,6 +21,9 @@ public enum ErrorCode {
     // 회원 관리 예외
     USER_NOT_FOUND(HttpStatusCode.BAD_REQUEST.getStatus(), "유저를 찾을 수 없습니다."),
     DELETED_USER(HttpStatusCode.FORBIDDEN.getStatus(), "탈퇴한 회원입니다."),
+    ALREADY_NICKNAME_EXISTS(HttpStatusCode.BAD_REQUEST.getStatus(), "이미 존재하는 닉네임입니다."),
+    NOT_ALLOW_NICKNAME(HttpStatusCode.BAD_REQUEST.getStatus(), "사용할 수 없는 닉네임입니다."),
+    NOT_ALLOW_SPECIAL_CHARACTERS(HttpStatusCode.BAD_REQUEST.getStatus(), "닉네임에 특수문자는 사용할 수 없습니다."),
 
     // 토큰 예외
     JWT_CREATION_FAILED(HttpStatusCode.INTERNAL_SERVER_ERROR.getStatus(), "JWT 토큰 생성에 실패했습니다."),

@@ -11,10 +11,16 @@ import {
 import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Socket } from "socket.io-client";
+import SecondCounter from "./SecondCounter";
+import { STAGE_INFO } from "./info";
 
 interface ILeftGameSideBarProps {
   nickname: string;
   icon: string;
+  title: string;
+  timer?: number;
+  stage?: keyof typeof STAGE_INFO;
+  round?: number;
   socket: Socket | null;
   // onLeaveRoom: () => void;
 }
@@ -31,6 +37,10 @@ const leftChervon: IconDefinition = faChevronLeft;
 function LeftGameSideBar({
   nickname,
   icon,
+  title,
+  timer,
+  stage,
+  round,
   socket,
 }: // onLeaveRoom,
 ILeftGameSideBarProps) {
@@ -69,8 +79,19 @@ ILeftGameSideBarProps) {
           ${isOpen ? "translate-x-0" : "-translate-x-full"}
         `}
       >
-        <div className="w-full text-base flex justify-center items-center text-[white] bg-[rgb(7,7,10)] px-1.5 py-1 border-2 border-solid border-[rgba(255,255,255,0.35)] rounded-md">
-          No. 001 게임임
+        <div className="w-full flex flex-col items-center text-[white] bg-[rgb(7,7,10)] px-1.5 py-1 border-2 border-solid border-[rgba(255,255,255,0.35)] rounded-md">
+          <div className="text-sm">{title}</div>
+          <h1 className="text-base font-medium">{round}라운드</h1>
+          <div className="flex items-center text-lg ">
+            <h2 className="mr-3 text-xl font-semibold mb-[0.375rem]">
+              {stage ? STAGE_INFO[stage][0] : "Disconnected"}
+            </h2>
+            <SecondCounter
+              initialSeconds={timer ? timer : 0}
+              maxSeconds={stage ? STAGE_INFO[stage][1] : 0}
+              stage={stage ? STAGE_INFO[stage][0] : "Disconnected"}
+            />
+          </div>
         </div>
         <div className="flex flex-col items-center justify-center profile w-52 h-52 border-2 border-solid border-[rgba(255,255,255,0.35)] bg-[#07070a4d]">
           <img className="filter brightness-75 w-28 h-28 mb-3" src={icon} />
