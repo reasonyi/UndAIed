@@ -14,6 +14,7 @@ import com.ssafy.undaied.domain.game.entity.Subjects;
 import com.ssafy.undaied.domain.game.entity.respository.GameRecordsRepository;
 import com.ssafy.undaied.domain.game.entity.respository.GamesRepository;
 import com.ssafy.undaied.domain.game.entity.respository.SubjectsRepository;
+import com.ssafy.undaied.socket.chat.service.AIChatService;
 import com.ssafy.undaied.socket.common.exception.SocketErrorCode;
 import com.ssafy.undaied.socket.common.exception.SocketException;
 import com.ssafy.undaied.socket.result.dto.response.GameResultResponseDto;
@@ -48,6 +49,7 @@ public class GameResultService {
     private final AIBenchmarksRepository aiBenchmarksRepository;
     private final AIRepository aiRepository;
     private final SocketIONamespace namespace;
+    private final AIChatService aiChatService;
 
     public String checkGameResult(int gameId) throws SocketException {
         try {
@@ -131,6 +133,10 @@ public class GameResultService {
             GameResultResponseDto responseDto = createGameResultResponse(gameId, winner);
             namespace.getRoomOperations(GAME_KEY_PREFIX + gameId)
                     .sendEvent("game:result:send", responseDto);
+
+            // AI 메시지 스케줄링 중지
+//            aiChatService.stopGameMessageScheduling(gameId);
+            log.info("Stopped AI message scheduling for game: {}", gameId);
 
             // 플레이어 로비로 이동
             movePlayersToLobby(gameId);

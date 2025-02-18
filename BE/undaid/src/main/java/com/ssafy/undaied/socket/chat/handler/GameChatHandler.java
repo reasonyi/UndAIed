@@ -75,9 +75,11 @@ public class GameChatHandler {
                         if ("subject_debate".equals(currentStage)) {
                             String errorMessage = gameChatService.storeSubjectChat(gameId, client, userId, data);
                             sendResponse(ackRequest, errorMessage == null, errorMessage);
-                        } else {
+                        } else if("free_debate".equals(currentStage)) {
                             String errorMessage = gameChatService.processFreeChat(gameId, client, userId, data);
                             sendResponse(ackRequest, errorMessage == null, errorMessage);
+                        } else {
+                            sendResponse(ackRequest, false, "지금은 토론 시간이 아닙니다.");
                         }
 
                     } catch (Exception e) {
