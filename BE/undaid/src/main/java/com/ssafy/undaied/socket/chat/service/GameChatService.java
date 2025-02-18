@@ -100,7 +100,7 @@ public class GameChatService {
 
         log.info("Selected subject {} for game {} round {}", subjectId, gameId, currentRound);
         namespace.getRoomOperations("game:" + gameId).sendEvent("game:chat:send", sendSubjectResponseDto);
-//        aiChatService.startGameMessageScheduling(gameId);
+        aiChatService.startGameMessageScheduling(gameId);
     }
 
     private boolean hasUserSpokenInSubjectDebate(Integer gameId, String round, int number) {
@@ -138,7 +138,7 @@ public class GameChatService {
         try {
             // 자유토론 채팅 저장
             String chatKey = String.format("%s%d:round:%s:freechats", GAME_KEY_PREFIX, gameId, currentRound);
-            String message = String.format("{%d} [%s] <%d>(%s) %s|",
+            String message = String.format("{%d} [%s] <%d> (%s) %s | ",
                     userId, nickname, number, gameChatRequestDto.getContent(),
                     LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
 
@@ -191,7 +191,7 @@ public class GameChatService {
         try {
             // 주제토론 채팅 저장
             String chatKey = String.format("%s%d:round:%s:subjectchats", GAME_KEY_PREFIX, gameId, currentRound);
-            String message = String.format("{%d} [%s] <%d>(%s) %s|",
+            String message = String.format("{%d} [%s] <%d> (%s) %s | ",
                     userId, nickname, number, gameChatRequestDto.getContent(),
                     LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
 
@@ -225,7 +225,7 @@ public class GameChatService {
         for (String message : messages) {
             if (message.isEmpty()) continue;
 
-            Pattern pattern = Pattern.compile("\\{(\\d+)\\} \\[(.*?)\\] <(\\d+)>\\((.*?)\\) (.*)");
+            Pattern pattern = Pattern.compile("\\{(\\d+)\\} \\[(.*?)\\] <(\\d+)> \\((.*?)\\) (.*)");
             Matcher matcher = pattern.matcher(message);
 
             if (matcher.find()) {
