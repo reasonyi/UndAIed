@@ -1,36 +1,77 @@
+# from fastapi import FastAPI, status
+# from models import Gemini, ChatGPT, DeepSeek
+# from pydantic import BaseModel
+# from utils.parser import dialogue_parser, AI_response_parser
+# import logging
+
+# # 로깅 설정
+# logging.basicConfig(level=logging.INFO)
+# logger = logging.getLogger(__name__)
+
+
+# class Request(BaseModel):
+#     selectedAIs: list[dict[str, int]]  # [{"aiId": 1, "number": 7}, ...]
+#     message: str
+
+
+# # AI 봇 매핑
+# AI_BOTS = {-1: DeepSeek.DeepSeek(), -2: Gemini.GeminiBot(), -3: ChatGPT.ChatGPTBot()}
+
+# app = FastAPI()
+
+
+# @app.post("/api/ai/{game_id}/", status_code=status.HTTP_201_CREATED)
+# async def create_message(request: Request):
+#     selected_AI = {ai["aiId"]: ai["number"] for ai in request.selectedAIs}
+#     parsed_dialogue = dialogue_parser(request.message)
+#     response: list[dict] = []
+#     for ai_id, bot in AI_BOTS.items():
+#         if ai_id in selected_AI:
+#             logger.info("-" * 100)  # 디버깅 용 로그
+#             bot_response = AI_response_parser(
+#                 bot.generate_response(selected_AI, parsed_dialogue)
+#             )
+#             logger.info(bot_response)  # 디버깅 용 로그
+#             response.append(
+#                 {"number": selected_AI[ai_id], "content": bot_response["content"]}
+#             )
+
+#     return response
+
+
+import json, re
+from fastapi import FastAPI, status, HTTPException
+from pydantic import BaseModel
 from openai import OpenAI
-from openai.types.chat import ChatCompletion
-from openai.types.chat.completion_create_params import CompletionCreateParams
 from environs import Env
 
-# from .prompt import prompt
+app = FastAPI()
 
 
-class ChatGPTBot:
-    def __init__(self):
-        env = Env()
-        env.read_env()
-        
-        
-        self.client = OpenAI(api_key=env.str("OPENAI_API_KEY"))
+# env = Env()
+# env.read_env()
 
-        # 모델 설정 구성
-        self.config = {
-            "model": "gpt-4o",
-            # "model": "gpt-4o-mini",
-            "temperature": 0.7,
-            "max_tokens": 150,
-            "top_p": 1,
-            "frequency_penalty": 0,
-            "presence_penalty": 0,
-        }
-        # self.system_prompt = prompt
 
-    def generate_response(self, AI_INFO: dict, user_input: dict) -> str:
-        """단일 턴 채팅에서 새로운 입력에 대한 응답을 생성합니다."""
-        AI_NUM = AI_INFO[-3]
-        print(user_input)
-        prompt = f"""
+class Request(BaseModel):
+    ai_num: int
+    ai_assist: int
+    message: dict
+
+
+@app.post("/api/chatgpt/{game_id}")
+async def chatgpt_api(request: Request):
+    #     # 1) request로 전달된 문자열(JSON 형식) 파싱
+    #     try:
+    #         parsed_request_data = json.loads(request.message)
+    #     except json.JSONDecodeError as e:
+    #         raise HTTPException(
+    #             status_code=400, detail=f"Request message is not valid JSON: {str(e)}"
+    #         )
+
+    AI_NUM = request.ai_num
+    env = Env()
+    env.read_env()
+    prompt = f"""
 # [참가자에게 공개 가능한 정보]
 ## 게임
 언다이드(undaied) 게임은 여덟 명의 참가자와 한 명의 사회자로 구성된 사회적 추론 게임이다.
@@ -204,67 +245,55 @@ json output example:
 {{"content": "나 찍으면 게임 진다?"}}
 ```
 """
-        messages = [
-            # {"role": "system", "content": self.system_prompt},
-            # {
-            #     "role": "user",
-            #     "content": f"- AI 정보:\nAI_NUM: {AI_NUM}\nAI_ASSIST: {AI_ASSIST}`\n\n- 현재 게임 상황:\n{user_input}\n\n- 당신의 응답:",
-            # },
-            {"role": "user", "content": f"{prompt}\n\n\n현재 게임 상황 : {user_input}"},
-        ]
+    # system prompt와 user prompt
+    system_prompt = prompt
+    user_prompt = str(request.message)
 
-        response: ChatCompletion = self.client.chat.completions.create(
-            messages=messages, **self.config
+    current_situation = "현재 2라운드 자유토론[free_debate] 시간입니다. output 구조에 맞춰서 대답을 생성하세요"
+
+    client = OpenAI(api_key=env.str("OPENAI_API_KEY"))
+
+    try:
+        # 2) ChatGPT API 호출
+        completion = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": f"{user_prompt}\n + {current_situation}"},
+            ],
         )
-        print("=" * 100)
-        print(response.choices[0].message.content.strip())
-        return response.choices[0].message.content.strip()
 
+        # ChatGPT 응답 내용
+        gpt_response = completion.choices[0].message.content
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Error calling OpenAI API: {str(e)}"
+        )
+    # 3) 응답 문자열에서 {} 형태의 JSON 추출
+    matched_json = re.search(r"\{.*\}", gpt_response, flags=re.DOTALL)
+    if not matched_json:
+        # JSON 형태를 찾지 못한 경우
+        return {
+            "error": "No valid JSON object found in the ChatGPT response.",
+            "raw_response": gpt_response,
+        }
 
+    # 4) 추출된 JSON 파싱 후 'content' 필드 반환
+    extracted_json_str = matched_json.group(0).strip()
+    try:
+        extracted_json = json.loads(extracted_json_str)
+    except json.JSONDecodeError as e:
+        # 혹시 추출된 부분이 JSON으로 파싱되지 않는 경우 예외 처리
+        raise HTTPException(
+            status_code=500, detail=f"Extracted string is not valid JSON: {str(e)}"
+        )
 
-## 
-# from openai import OpenAI
-# from openai.types.chat import ChatCompletion
-# from openai.types.chat.completion_create_params import CompletionCreateParams
-# from environs import Env
-# from .prompt import prompt
+    final_content = extracted_json.get("content", None)
+    if final_content is None:
+        return {
+            "error": "'content' field not found in the extracted JSON.",
+            "extracted_json": extracted_json,
+        }
 
-
-# class ChatGPTBot:
-#     def __init__(self):
-#         env = Env()
-#         env.read_env()
-
-#         # OpenAI 클라이언트 초기화
-#         self.client = OpenAI(api_key=env.str("OPENAI_API_KEY"))
-
-#         # 모델 설정 구성
-#         self.config = {
-#             "model": "gpt-4o-mini",
-#             "temperature": 0.7,
-#             "max_tokens": 150,
-#             "top_p": 1,
-#             "frequency_penalty": 0,
-#             "presence_penalty": 0,
-#         }
-#         self.system_prompt = prompt
-
-#     def generate_response(self, AI_INFO: dict, user_input: dict) -> str:
-#         """단일 턴 채팅에서 새로운 입력에 대한 응답을 생성합니다."""
-#         AI_NUM = AI_INFO[-3]
-#         AI_ASSIST = 99 if len(AI_INFO) == 1 else AI_INFO[-2]
-#         print(user_input)
-#         messages = [
-#             {"role": "system", "content": self.system_prompt},
-#             {
-#                 "role": "user",
-#                 "content": f"- AI 정보:\nAI_NUM: {AI_NUM}\nAI_ASSIST: {AI_ASSIST}`\n\n- 현재 게임 상황:\n{user_input}\n\n- 당신의 응답:",
-#             },
-#         ]
-
-#         response: ChatCompletion = self.client.chat.completions.create(
-#             messages=messages, **self.config
-#         )
-#         print("="*100)
-#         print(response.choices[0].message.content.strip())
-#         return response.choices[0].message.content.strip()
+    # 최종 응답
+    return {"content": final_content}
