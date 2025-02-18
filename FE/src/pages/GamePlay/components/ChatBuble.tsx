@@ -28,7 +28,7 @@ function ChatBubble({ message, playerName }: ChatBubbleProps) {
   ];
 
   // message.player가 유효하지 않은 경우 기본값 사용
-  const currentPlayer = playerColor[message.player - 1] || playerColor[0];
+  const currentPlayer = playerColor[message.player] || playerColor[0];
 
   return (
     <div>
@@ -41,8 +41,8 @@ function ChatBubble({ message, playerName }: ChatBubbleProps) {
         <img
           className="w-6 h-6 mr-1"
           src={
-            playerColor[message.player - 1]
-              ? playerColor[message.player - 1][3]
+            playerColor[message.player]
+              ? playerColor[message.player][3]
               : undefined
           }
           alt="player-icon"
