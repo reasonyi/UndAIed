@@ -393,6 +393,7 @@ function GameRoom() {
                 <RightSideBar
                   players={roomInfo?.currentPlayers}
                   iconArr={iconArr}
+                  messages={messages}
                 />
               </div>
             </div>

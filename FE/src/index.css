@@ -204,3 +204,27 @@ input {
 .profile-container {
   background: rgba(255, 255, 255, 0.03);
 }
+
+/* 게임 결과 */
+@keyframes text-view-appear {
+  0% {
+    opacity: 0;
+    height: 0vh;
+  }
+  33% {
+    opacity: 1;
+    height: 0vh;
+  }
+  50% {
+    opacity: 1;
+    height: 0vh;
+  }
+  100% {
+    opacity: 1;
+    height: 10rem;
+  }
+}
+
+.modal-open {
+  animation: modal-view-appear 1.3s ease-in forwards;
+}
