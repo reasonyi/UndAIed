@@ -81,8 +81,19 @@ def parse_event(dialogue: str) -> list[dict]:
 
 def parse_round(round_str: str) -> tuple:
     """각 라운드 문자열 파싱"""
-    round_num = round_str[1]
-    round_dialogue = round_str.strip()[4:-1]
+    # 입력 문자열이 너무 짧거나 형식이 맞지 않으면 기본값 반환
+    if len(round_str) < 2:
+        return 1, ""
+        
+    # 숫자만 추출하는 패턴
+    round_match = re.search(r'R(\d+)', round_str)
+    if not round_match:
+        return "", ""
+        
+    round_num = round_match.group(1)
+    # 라운드 번호 이후의 내용을 dialogue로 추출
+    round_dialogue = re.sub(r'^R\d+\s*', '', round_str).strip()
+    
     return round_num, round_dialogue
 
 
@@ -103,16 +114,22 @@ def dialogue_parser(dialogue: str) -> dict:
     return round_dict
 
 
+def AI_response_parser(response: str) -> dict:
+    # {} 안의 내용을 찾는 정규식 패턴
+    pattern = r"{(.*?)}"
 
+    # 정규식으로 {} 안의 내용 추출
+    match = re.search(pattern, response)
+    if not match:
+        return None
 
-def parse_nunchi_status(text:str) -> bool:
-    # "nunchi": "X" 또는 "nunchi": "O" 패턴을 찾는 정규식
-    pattern = r'"nunchi":\s*"(O|)"'
-    
-    # 정규식으로 매칭 찾기
-    match = re.search(pattern, text)
-    
-    # 해당 AI가 대화에 참여해야한다면 True를 반환
-    if match:
-        return match.group(1) == "O"
-    return False
+    content = match.group(1)
+
+    # key:value 쌍을 찾는 패턴
+    pair_pattern = r'(\w+)\s*:\s*"([^"]*)"'
+
+    # 모든 key:value 쌍을 찾아서 딕셔너리로 변환
+    pairs = re.findall(pair_pattern, content)
+    result = {key: value for key, value in pairs}
+
+    return result

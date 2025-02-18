@@ -1,7 +1,7 @@
 from fastapi import FastAPI, status
 from models import Gemini, ChatGPT, DeepSeek
 from pydantic import BaseModel
-from utils.parser import dialogue_parser, parse_nunchi_status
+from utils.parser import dialogue_parser, AI_response_parser
 import logging
 
 # 로깅 설정
@@ -16,40 +16,22 @@ class Request(BaseModel):
 
 # AI 봇 매핑
 AI_BOTS = {-1: DeepSeek.DeepSeek(), -2: Gemini.GeminiBot(), -3: ChatGPT.ChatGPTBot()}
+
 app = FastAPI()
 
 
 @app.post("/api/ai/{game_id}/", status_code=status.HTTP_201_CREATED)
 async def create_message(request: Request):
-
-    logger.info(f"[Request] Selected AIs: {request.selectedAIs}")
-    logger.info(f"[Request] Message: {request.message}")
-
-   
     selected_AI = {ai["aiId"]: ai["number"] for ai in request.selectedAIs}
-    logger.info(f"[Processing] Selected AI mapping: {selected_AI}")
     parsed_dialogue = dialogue_parser(request.message)
-    logger.info(f"[Processing] Parsed dialogue: {parsed_dialogue}")
+    response: list[dict] = []
 
-    response:list[dict] = []
-
-    ## 디버깅용 로깅
-    # logger.info(f"\n\n")
-    # logger.info(f"--------------------------------------------------------")
-    # logger.info(f"--------------------------------------------------------")
-    
     for ai_id, bot in AI_BOTS.items():
         if ai_id in selected_AI:
-            logger.info(f"[AI Processing] Starting AI {ai_id}")
-
-            bot_response = bot.generate_response(request.selectedAIs, parsed_dialogue)
-            logger.info(f"[AI Response] AI {ai_id} generated response: {bot_response}")
-
-            logger.info(bot_response)  
-            # if parse_nunchi_status(bot_response):
-            
-            response.append({"number": selected_AI[ai_id], "content": bot_response})
-
-            logger.info(f"[Response] Final response list: {response}")
+            bot_response = AI_response_parser(bot.generate_response(selected_AI, parsed_dialogue))
+            logger.info(bot_response)  # 디버깅용 로그
+            logger.info("--------------")  # 디버깅용 로그
+            if bot_response["flexible"] == "O":
+                response.append({"number": selected_AI[ai_id], "content": bot_response["content"]})
 
     return response
