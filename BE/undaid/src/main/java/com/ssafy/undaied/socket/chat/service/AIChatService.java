@@ -156,6 +156,7 @@ public class AIChatService {
                             error -> log.error("AI 서버 통신 실패 - gameId: {}", gameId, error)
                     );
 
+
         } catch (Exception e) {
             log.error("Error in free debate processing - gameId: {}", gameId, e);
         }
@@ -226,6 +227,8 @@ public class AIChatService {
             return;
         }
 
+        log.info("🚀 AI 응답 전송 준비 - gameId: {}, stage: {}, response: {}", gameId, originalStage, response);
+
         String currentRound = redisTemplate.opsForValue().get(GAME_KEY_PREFIX + gameId + ":round");
 
         if ("subject_debate".equals(originalStage)) {
@@ -235,8 +238,7 @@ public class AIChatService {
 
             if (Boolean.TRUE.equals(redisTemplate.opsForSet().isMember(spokenUsersKey,
                     String.valueOf(response.getNumber())))) {
-                log.info("AI {} has already spoken in subject debate round {}",
-                        response.getNumber(), currentRound);
+                    log.info("⚠️ AI {} 이미 발언 완료 - round {}", response.getNumber(), currentRound);
                 return;
             }
 
@@ -244,16 +246,18 @@ public class AIChatService {
             redisTemplate.opsForSet().add(spokenUsersKey, String.valueOf(response.getNumber()));
             redisTemplate.expire(spokenUsersKey, EXPIRE_TIME, TimeUnit.SECONDS);
             storeAIMessage(gameId, response, originalStage);
-            log.info("Subject debate message stored - gameId: {}, number: {}, content: {}",
+            log.info("✅ 주제토론 AI 메시지 저장 완료 - gameId: {}, number: {}, content: {}",
                     gameId, response.getNumber(), response.getContent());
 
         } else if ("free_debate".equals(originalStage)) {
             // 자유토론은 전송 성공한 경우에만 저장
             if (isValidStage(gameId, originalStage)) {
+                log.info("🚀 자유토론 AI 메시지 전송 중 - gameId: {}, number: {}, content: {}",
+                        gameId, response.getNumber(), response.getContent());
                 namespace.getRoomOperations(GAME_KEY_PREFIX + gameId)
                         .sendEvent("game:chat:send", response);
                 storeAIMessage(gameId, response, originalStage);
-                log.info("Free debate message sent and stored - gameId: {}, number: {}, content: {}",
+                log.info("✅ 자유토론 AI 메시지 저장 및 전송 완료 - gameId: {}, number: {}, content: {}",
                         gameId, response.getNumber(), response.getContent());
             }
         }
@@ -278,7 +282,7 @@ public class AIChatService {
             return false;
         }
 
-        String message = String.format("{%d} [%s] <%d>(%s) %s|",
+        String message = String.format("{%d} [%s] <%d> (%s) %s | ",
                 aiId,
                 "AI" + aiId,
                 response.getNumber(),
