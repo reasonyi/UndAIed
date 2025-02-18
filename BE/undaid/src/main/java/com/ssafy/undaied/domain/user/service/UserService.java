@@ -17,6 +17,7 @@ import com.ssafy.undaied.global.auth.service.OAuth2Service;
 import com.ssafy.undaied.global.auth.token.JwtTokenProvider;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +29,7 @@ import static com.ssafy.undaied.global.common.exception.ErrorCode.*;
 
 @Service
 @Transactional
+@Slf4j
 @RequiredArgsConstructor
 public class UserService{
 
@@ -152,6 +154,14 @@ public class UserService{
     public UserProfileResponseDto updateProfile(UpdateProfileRequestDto requestDto, int userId) {
         Users user = userRepository.findById(userId)
                 .orElseThrow(() -> new BaseException(USER_NOT_FOUND));
+
+        if(userRepository.existsByNickname(requestDto.getNickname())) {
+            log.error("중복되는 닉네임으로 변경 요청");
+            throw new BaseException(ALREADY_NICKNAME_EXISTS);
+        } else if(requestDto.getNickname().equalsIgnoreCase("system")) {
+            log.error("시스템 사용 닉네임으로 변경 시도");
+            throw new BaseException(NOT_ALLOW_NICKNAME);
+        }
 
         System.out.println("현재 유저 데이터: " +
                 "프로필 이미지: "+user.getProfileImage()+", 아바타 이미지: "+ user.getAvatar()+", 성별: "+user.getSex()+", 닉네임 {}" +user.getNickname());
