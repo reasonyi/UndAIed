@@ -101,7 +101,6 @@ function GameRoom() {
       console.log("send 발생! data 수신:", data);
       debugger;
       if (data.currentPlayers) {
-        debugger;
         const newUsers: IPlayer[] = data.currentPlayers.sort(
           (a: IPlayer, b: IPlayer) => a.enterId - b.enterId
         );
@@ -130,26 +129,28 @@ function GameRoom() {
       console.log("chat:send 발생! data 수신:", data);
       debugger;
       if (data.message && data.nickname && roomInfo) {
-        const player = roomInfo.currentPlayers.find(
-          (player) => player.nickname === data.nickname
-        );
+        if (data.nickname === "system") {
+          const newMessage: IMessage = {
+            player: -1,
+            nickname: data.nickname,
+            text: data.message,
+            isMine: false,
+          };
+          debugger;
+          setMessages((prevMessages) => [...prevMessages, newMessage]);
+        } else {
+          const player = roomInfo.currentPlayers.find(
+            (player) => player.nickname === data.nickname
+          );
 
-        if (player) {
-          if (data.nickname === "system") {
-            const newMessage: IMessage = {
-              player: -1,
-              nickname: data.nickname,
-              text: data.message,
-              isMine: false,
-            };
-            setMessages((prevMessages) => [...prevMessages, newMessage]);
-          } else {
+          if (player) {
             const newMessage: IMessage = {
               player: player.enterId,
               nickname: data.nickname,
               text: data.message,
               isMine: Boolean(player.enterId === playerEnterId),
             };
+            debugger;
             setMessages((prevMessages) => [...prevMessages, newMessage]);
           }
         }
