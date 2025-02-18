@@ -94,6 +94,10 @@ public class RoomHandler {
                         LobbyUpdateResponseDto lobbyUpdateResponseDto = roomService.leaveRoom(data.getRoomId(), client);
                         log.info("클라이언트가 성공적으로 방을 나갔습니다. - userId: {}, room: {}", client.get("userId"), data.getRoomId());
 
+                        // 방에 있는 모든 사용자에게 업데이트된 정보 전송
+                        String key = ROOM_KEY_PREFIX + data.getRoomId();
+                        roomService.leaveRoomSystemChat(client.get("nickname"), key);   // 시스템 메시지 알림
+
                         // 로비에 데이터 보내주기
                         if(lobbyUpdateResponseDto != null) {
                             namespace.getRoomOperations(LOBBY_ROOM).sendEvent(UPDATE_ROOM_AT_LOBBY.getValue(), lobbyUpdateResponseDto);
@@ -157,6 +161,7 @@ public class RoomHandler {
                         // 방에 있는 모든 사용자에게 업데이트된 정보 전송
                         String key = ROOM_KEY_PREFIX + data.getRoomId();
                         namespace.getRoomOperations(key).sendEvent(ENTER_ROOM_SEND.getValue(), roomEnterResponseDto.getRoom());
+                        roomService.enterRoomSystemChat(client.get("nickname"), key);   // 시스템 메시지 알림
                         log.info("room:enter:send 이벤트를 발생시켜 {}번 방 정보를 해당 방 안에 남은 유저들에게 알림.", key);
 
                     } catch (Exception e) {

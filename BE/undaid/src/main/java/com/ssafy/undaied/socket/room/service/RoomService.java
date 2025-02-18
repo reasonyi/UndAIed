@@ -4,6 +4,7 @@ import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.SocketIONamespace;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.undaied.domain.user.entity.repository.UserRepository;
+import com.ssafy.undaied.socket.chat.dto.response.RoomChatResponseDto;
 import com.ssafy.undaied.socket.common.exception.SocketException;
 import com.ssafy.undaied.socket.lobby.dto.response.LobbyRoomListResponseDto;
 import com.ssafy.undaied.socket.lobby.dto.response.LobbyUpdateResponseDto;
@@ -140,7 +141,6 @@ public class RoomService {
         }
     }
 
-
     public void clientLeaveAllRooms(SocketIOClient client) throws SocketException {
         log.debug("클라이언트가 모든 방에서 나가기를 시도합니다. - Client ID: {}", client.getSessionId());
         log.debug("모든 방에서 나가기 전 현재 입장되어있는 방: {}", client.getAllRooms());
@@ -268,13 +268,14 @@ public class RoomService {
         }
     }
 
-    public LobbyUpdateResponseDto leaveRoom(SocketIOClient client, String roomKey) throws SocketException {
-        // "room:" 접두사 이후의 문자열을 추출하여 Long으로 변환
-        String room = roomKey.substring(ROOM_LIST.length());
-        Long roomId = Long.parseLong(room.substring(ROOM_KEY_PREFIX.length()));
+    public void leaveRoomSystemChat(String nickname, String key) {
+        RoomChatResponseDto responseDto = RoomChatResponseDto.builder()
+                .nickname("system")
+                .message(nickname + " 님이 퇴장하셨습니다.")
+                .build();
 
-        // 기존의 leaveRoom 메서드 호출
-        return leaveRoom(roomId, client);
+        namespace.getRoomOperations(key).sendEvent(ROOM_CHAT_SEND.getValue(), responseDto);
+        log.info("room:chat:send 이벤트를 발생시켜 {}번 방에 {} 유저 퇴장을 시스템 메시지로 알림.", key, nickname);
     }
 
     public void leaveRoomAlarmToAnotherClient(String roomKey) throws SocketException {
@@ -433,6 +434,16 @@ public class RoomService {
                 .enterId(enterId)
                 .room(roomResponse)  // RoomCreateResponseDto로 변경
                 .build();
+    }
+
+    public void enterRoomSystemChat(String nickname, String key) {
+        RoomChatResponseDto responseDto = RoomChatResponseDto.builder()
+                .nickname("system")
+                .message(nickname + " 님이 입장하셨습니다.")
+                .build();
+
+        namespace.getRoomOperations(key).sendEvent(ROOM_CHAT_SEND.getValue(), responseDto);
+        log.info("room:chat:send 이벤트를 발생시켜 {}번 방에 {} 유저 입장을 시스템 메시지로 알림.", key, nickname);
     }
 
     public LobbyRoomListResponseDto findWaitingRoomList() {

@@ -1,14 +1,20 @@
 package com.ssafy.undaied.socket.result.service;
 
 import com.corundumstudio.socketio.SocketIOClient;
+import com.corundumstudio.socketio.SocketIONamespace;
 import com.corundumstudio.socketio.SocketIOServer;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ssafy.undaied.domain.ai.entity.AIBenchmarks;
+import com.ssafy.undaied.domain.ai.entity.AIs;
+import com.ssafy.undaied.domain.ai.entity.repository.AIBenchmarksRepository;
+import com.ssafy.undaied.domain.ai.entity.repository.AIRepository;
 import com.ssafy.undaied.domain.game.entity.GameRecords;
 import com.ssafy.undaied.domain.game.entity.Games;
 import com.ssafy.undaied.domain.game.entity.Subjects;
 import com.ssafy.undaied.domain.game.entity.respository.GameRecordsRepository;
 import com.ssafy.undaied.domain.game.entity.respository.GamesRepository;
 import com.ssafy.undaied.domain.game.entity.respository.SubjectsRepository;
+import com.ssafy.undaied.socket.chat.service.AIChatService;
 import com.ssafy.undaied.socket.common.exception.SocketErrorCode;
 import com.ssafy.undaied.socket.common.exception.SocketException;
 import com.ssafy.undaied.socket.result.dto.response.GameResultResponseDto;
@@ -25,8 +31,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.ssafy.undaied.socket.common.constant.SocketRoom.*;
+
+import com.fasterxml.jackson.core.type.TypeReference;
 import static com.ssafy.undaied.socket.common.constant.SocketRoom.WAITING_LIST;
-import static com.ssafy.undaied.socket.common.exception.SocketErrorCode.ROOM_NOT_FOUND;
+import static com.ssafy.undaied.socket.common.exception.SocketErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -34,141 +42,208 @@ import static com.ssafy.undaied.socket.common.exception.SocketErrorCode.ROOM_NOT
 public class GameResultService {
     private final RedisTemplate<String, String> redisTemplate;
     private final RedisTemplate<String, Object> jsonRedisTemplate;
-    private final SocketIOServer socketIOServer;
     private final ObjectMapper objectMapper;
     private final GamesRepository gamesRepository;
     private final GameRecordsRepository gameRecordsRepository;
     private final SubjectsRepository subjectsRepository;
+    private final AIBenchmarksRepository aiBenchmarksRepository;
+    private final AIRepository aiRepository;
+    private final SocketIONamespace namespace;
+    private final AIChatService aiChatService;
 
-    public GameResultResponseDto checkGameResult(SocketIOClient client, int gameId) throws SocketException {
-        String gameKey = GAME_KEY_PREFIX + gameId;
-        String statusKey = GAME_KEY_PREFIX + gameId + ":player_status";
-        String aiKey = GAME_KEY_PREFIX + gameId + ":ai_numbers";
-        String mappingKey = GAME_KEY_PREFIX + gameId + ":number_mapping";
-        String userNicknameKey = GAME_KEY_PREFIX + gameId + ":user_nicknames";
+    public String checkGameResult(int gameId) throws SocketException {
+        try {
+            String statusKey = GAME_KEY_PREFIX + gameId + ":player_status";
+            String aiKey = GAME_KEY_PREFIX + gameId + ":ai_numbers";
 
-        Map<Object, Object> playerStatus = redisTemplate.opsForHash().entries(statusKey);
-        Set<String> aiNumbers = redisTemplate.opsForSet().members(aiKey);
+            Map<Object, Object> playerStatus = redisTemplate.opsForHash().entries(statusKey);
+            if (playerStatus.isEmpty()) {
+                log.error("Player status not found for game: {}", gameId);
+                throw new SocketException(GAME_STATUS_NOT_FOUND);
+            }
 
-        List<String> humanNumbers = playerStatus.keySet().stream()
-                .map(Object::toString)
-                .filter(number -> !aiNumbers.contains(number))
-                .collect(Collectors.toList());
+            Set<String> aiNumbers = redisTemplate.opsForSet().members(aiKey);
+            if (aiNumbers == null || aiNumbers.isEmpty()) {
+                log.error("AI numbers not found for game: {}", gameId);
+                throw new SocketException(GAME_DATA_NOT_FOUND);
+            }
 
-        boolean isHumanDefeated = isHumanDefeated(playerStatus, humanNumbers);
-        boolean isAIDefeated = isAIDefeated(playerStatus, aiNumbers);
+            List<String> humanNumbers = playerStatus.keySet().stream()
+                    .map(Object::toString)
+                    .filter(number -> !aiNumbers.contains(number))
+                    .collect(Collectors.toList());
 
-        String winner;
-        String message;
-        if (isHumanDefeated) {
-            winner = "AI";
-            message = "AI 승리!";
-        } else if (isAIDefeated) {
-            winner = "HUMAN";
-            message = "HUMAN 승리!";
-        } else {
-            throw new SocketException(SocketErrorCode.GAME_NOT_ENDED);
+            if (humanNumbers.isEmpty()) {
+                log.error("No human players found for game: {}", gameId);
+                throw new SocketException(NO_PLAYERS_FOUND);
+            }
+
+            int aliveHumans = countAliveHuman(playerStatus, humanNumbers);
+            int aliveAIs = countAliveAI(playerStatus, aiNumbers);
+
+            return aliveHumans <= aliveAIs ? "AI" : (aliveAIs == 0 ? "HUMAN" : null);
+
+        } catch (Exception e) {
+            log.error("Error checking game result for game {}: {}", gameId, e.getMessage());
+            throw new SocketException(CHECKING_GAME_ERROR);
         }
-
-        updateGameEndStatus(gameId, winner);
-
-        GameResultResponseDto responseDto = createGameResultResponse(gameId, winner, message,
-                playerStatus, mappingKey, userNicknameKey);
-        socketIOServer.getRoomOperations(GAME_KEY_PREFIX + gameId)
-                .sendEvent("game:result:send", responseDto);
-
-        log.info("게임 결과 - gameId: {}, winner: {}", gameId, winner);
-
-        return responseDto;  // ✅ 게임 결과를 반환하도록 변경
     }
 
-    private boolean isHumanDefeated(Map<Object, Object> playerStatus, List<String> humanNumbers) {
-        return humanNumbers.stream()
-                .allMatch(number -> {
-                    String status = playerStatus.get(number).toString();
-                    if (!status.contains("isInGame=true")) {
-                        return false;
-                    }
-                    return status.contains("isDied=true");
-                });
-    }
+    private int countAliveHuman(Map<Object, Object> playerStatus, List<String> humanNumbers) {
+        try {
+            long count = humanNumbers.stream()
+                    .filter(number ->  {
+                        String status = playerStatus.get(number).toString();
+                        boolean isAlive = !status.contains("isDied=true") && status.contains("isInGame=true");
+                        log.debug("Player {} status: {}", number, status);
+                        return  isAlive;
+                    }).count();
 
-    private boolean isAIDefeated(Map<Object, Object> playerStatus, Set<String> aiNumbers) {
-        return aiNumbers.stream()
-                .allMatch(number -> {
-                    String status = playerStatus.get(number).toString();
-                    return status.contains("isDied=true") && status.contains("isInGame=true");
-                });
-    }
+            return (int) count;
 
-    private void updateGameEndStatus(int gameId, String winner) {
-        String gameKey = GAME_KEY_PREFIX + gameId;
-        LocalDateTime endedAt = LocalDateTime.now();
-        String startedAtStr = jsonRedisTemplate.opsForHash().get(gameKey, "startedAt").toString();
-        LocalDateTime startedAt = LocalDateTime.parse(startedAtStr);
-
-        long seconds = ChronoUnit.SECONDS.between(startedAt, endedAt);
-        String playtime = String.format("%02d:%02d", seconds / 60, seconds % 60);
-
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("status", "ENDED");
-        updates.put("endedAt", endedAt.toString());
-        updates.put("playtime", playtime);
-        updates.put("humanWin", winner.equals("HUMAN"));
-
-        jsonRedisTemplate.opsForHash().putAll(gameKey, updates);
-    }
-
-    private GameResultResponseDto createGameResultResponse(int gameId, String winner, String message,
-                                                           Map<Object, Object> playerStatus,
-                                                           String mappingKey, String userNicknameKey) {
-        List<PlayerResultDto> players = new ArrayList<>();
-
-        Map<Object, Object> numberToUserMapping = redisTemplate.opsForHash().entries(mappingKey);
-        Map<String, String> reverseMapping = new HashMap<>();
-        numberToUserMapping.forEach((userId, number) ->
-                reverseMapping.put(number.toString(), userId.toString()));
-
-        playerStatus.forEach((number, status) -> {
-            String statusStr = status.toString();
-            String userId = reverseMapping.get(number.toString());
-            String nickname = redisTemplate.opsForHash().get(userNicknameKey, userId).toString();
-
-            players.add(PlayerResultDto.builder()
-                    .number(Integer.parseInt(number.toString()))
-                    .nickname(nickname)
-                    .isDied(statusStr.contains("isDied=true"))
-                    .isInGame(statusStr.contains("isInGame=true"))
-                    .build());
-        });
-
-        players.sort(Comparator.comparingInt(PlayerResultDto::getNumber));
-
-        return GameResultResponseDto.builder()
-                .winner(winner)
-                .message(message)
-                .players(players)
-                .build();
-    }
-
-    public boolean movePlayersToRoom(SocketIOClient client, int gameId) {
-        // 🔹 Redis에서 roomId 가져오기
-        String roomKey = GAME_KEY_PREFIX + gameId + ":roomId";
-        String roomIdStr = redisTemplate.opsForValue().get(roomKey);
-
-        if (roomIdStr != null) {
-            int roomId = Integer.parseInt(roomIdStr);
-
-            // 🔹 게임 방에서 나가기
-            client.leaveRoom(GAME_KEY_PREFIX + gameId);
-            log.info("User {} left game room: game:{}", client.get("userId"), gameId);
-
-            // 🔹 원래 방(room:{roomId})으로 복귀
-            client.joinRoom(ROOM_KEY_PREFIX + roomId);
-            log.info("User {} joined back to room: room:{}", client.get("userId"), roomId);
-            return true;
+        } catch (Exception e) {
+            log.error("인간 생존 수 확인 중 에러: {}", e.getMessage());
+            return -1;
         }
-        return false;
+    }
+
+    private int countAliveAI(Map<Object, Object> playerStatus, Set<String> aiNumbers) {
+        try {
+            long count = aiNumbers.stream()
+                    .filter(number -> {
+                        String status = playerStatus.get(number).toString();
+                        boolean isAlive = !status.contains("isDied=true") && status.contains("isInGame=true");
+                        log.debug("AI {} status: {}", number, status);
+                        return isAlive;
+                    }).count();
+
+            return (int) count;
+        } catch (Exception e) {
+            log.error("AI 생존 수 확인 중 에러: {}", e.getMessage());
+            return -1;
+        }
+    }
+
+    public void gameEnd(int gameId, String winner) throws SocketException {
+        try {
+            log.info("게임 종료 과정이 시행됩니다.: {}", gameId);
+
+            updateGameEndStatus(gameId, winner);
+            // 게임 결과 발표
+            GameResultResponseDto responseDto = createGameResultResponse(gameId, winner);
+            namespace.getRoomOperations(GAME_KEY_PREFIX + gameId)
+                    .sendEvent("game:result:send", responseDto);
+
+            // AI 메시지 스케줄링 중지
+//            aiChatService.stopGameMessageScheduling(gameId);
+            log.info("Stopped AI message scheduling for game: {}", gameId);
+
+            // 플레이어 로비로 이동
+            movePlayersToLobby(gameId);
+            // Redis 게임 결과 저장
+
+            saveGameResult(gameId);
+
+            log.info("게임 종료가 성공적으로 진행됐습니다.: {}", gameId);
+        } catch (Exception e) {
+            log.error("게임 종료 과정 중 에러가 발생했습니다. {}: {}", gameId, e.getMessage());
+            throw new SocketException(GAME_END_PROCESS_FAILED);
+        }
+    }
+
+    private void updateGameEndStatus(int gameId, String winner) throws SocketException {
+        try {
+            String gameKey = GAME_KEY_PREFIX + gameId;
+            Object startedAtObj = jsonRedisTemplate.opsForHash().get(gameKey, "startedAt");
+
+            if (startedAtObj == null) {
+                log.error("게임 시작 시간을 찾을 수 없습니다.: {}", gameId);
+                throw new SocketException(GAME_DATA_NOT_FOUND);
+            }
+
+            LocalDateTime endedAt = LocalDateTime.now();
+            LocalDateTime startedAt = LocalDateTime.parse(startedAtObj.toString());
+
+            long seconds = ChronoUnit.SECONDS.between(startedAt, endedAt);
+            String playtime = String.format("%02d:%02d", seconds / 60, seconds % 60);
+
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("status", "ENDED");
+            updates.put("endedAt", endedAt.toString());
+            updates.put("playtime", playtime);
+            updates.put("humanWin", winner.equals("HUMAN"));
+
+            jsonRedisTemplate.opsForHash().putAll(gameKey, updates);
+            log.debug("게임 상태가 성공적으로 변경되었습니다.: {}", gameId);
+        } catch (Exception e) {
+            log.error("게임 상태 변경에 실패했습니다. {}: {}", gameId, e.getMessage());
+            throw new SocketException(GAME_UPDATE_FAILED);
+        }
+    }
+
+    private GameResultResponseDto createGameResultResponse(int gameId, String winner) throws SocketException {
+        try {
+            String statusKey = GAME_KEY_PREFIX + gameId + ":player_status";
+            String mappingKey = GAME_KEY_PREFIX + gameId + ":number_mapping";
+            String userNicknameKey = GAME_KEY_PREFIX + gameId + ":user_nicknames";
+
+            // 🔹 Redis에서 데이터 가져오기
+            Map<Object, Object> playerStatus = redisTemplate.opsForHash().entries(statusKey);
+            Map<Object, Object> numberToUserMapping = redisTemplate.opsForHash().entries(mappingKey);
+            Map<Object, Object> userNicknames = redisTemplate.opsForHash().entries(userNicknameKey);
+
+            // 🔹 number -> userId 매핑 변환
+            Map<String, String> reverseMapping = new HashMap<>();
+            numberToUserMapping.forEach((userId, number) ->
+                    reverseMapping.put(number.toString(), userId.toString()));
+
+            List<PlayerResultDto> players = playerStatus.entrySet().stream()
+                    .map(entry -> {
+                        String number = entry.getKey().toString();
+                        String statusStr = entry.getValue().toString();
+                        String userId = reverseMapping.get(number);
+                        String nickname = (userId != null) ? userNicknames.getOrDefault(userId, "Unknown").toString() : "Unknown";
+
+                        return PlayerResultDto.builder()
+                                .number(Integer.parseInt(number))
+                                .nickname(nickname)
+                                .isDied(statusStr.contains("isDied=true"))
+                                .isInGame(statusStr.contains("isInGame=true"))
+                                .build();
+                    })
+                    .sorted(Comparator.comparingInt(PlayerResultDto::getNumber))
+                    .collect(Collectors.toList());
+
+            // 🔹 승리 메시지 설정
+            String message = (winner.equals("HUMAN")) ? "인간 승리" : "AI 승리";
+
+            return GameResultResponseDto.builder()
+                    .winner(winner)
+                    .message(message)
+                    .players(players)
+                    .build();
+        } catch (Exception e) {
+            log.error("게임 결과 응답 생성 중 에러가 발생했습니다. {}: {}", gameId, e.getMessage());
+            throw new SocketException(RESULT_CREATION_FAILED);
+        }
+    }
+
+    public void movePlayersToLobby(int gameId) throws SocketException {
+        Collection<SocketIOClient> clients = namespace.getRoomOperations(GAME_KEY_PREFIX+gameId).getClients();
+        try {
+            if (clients == null) {
+                log.error("Client가 null 입니다 : {}", gameId);
+                throw new SocketException(CLIENT_NOT_FOUND);
+            }
+            for (SocketIOClient client : clients) {
+                client.leaveRoom(GAME_KEY_PREFIX + gameId);
+                client.joinRoom(LOBBY_ROOM);
+            }
+            log.info("백엔드상 게임방 나가기 처리됩니다");
+        } catch (Exception e) {
+            log.error("백엔드상 게임방 나가기 처리 중 에러가 발생했습니다. {}: {}", gameId, e.getMessage());
+            throw new SocketException(ROOM_OPERATION_FAILED);
+        }
     }
 
     // db에 게임 결과 저장하는 메서드.
@@ -212,6 +287,44 @@ public class GameResultService {
 
             gamesRepository.save(game);
             log.debug("Games 객체 성공적으로 저장");
+
+            // AI 죽은 결과 저장.
+            // AI 죽은 결과 저장.
+            String aiDeadKey = GAME_KEY_PREFIX + gameId + ":ai_died";
+            Object aiDeadObj = jsonRedisTemplate.opsForValue().get(aiDeadKey);
+            if(aiDeadObj == null) {
+                log.info("AI가 제거되지 않고 진행된 게임. (벤치마크 테이블에 데이터 저장 X) - roomId: {}", roomId);
+                return;
+            }
+
+            if(aiDeadObj != null) {  // null이 아닐 때만 처리
+                // Object를 Map으로 변환
+                Map<String, Object> aiDeadResult = objectMapper.convertValue(aiDeadObj, new TypeReference<Map<String, Object>>() {});
+
+                // AI 탈락 결과를 순회하면서 처리
+                aiDeadResult.forEach((aiId, eliminatedRound) -> {
+
+                    AIs ai = aiRepository.findById(Integer.parseInt(aiId))
+                            .orElse(null);
+
+                    if (ai == null) {
+                        log.error("AI를 찾을 수 없어 데이터 저장 실패");
+                        return;
+                    }
+
+                    AIBenchmarks aiBenchmarks = AIBenchmarks.builder()
+                            .game(game)
+                            .ai(ai)
+                            .deadRound(Integer.parseInt(eliminatedRound.toString()))
+                            .build();
+
+                    aiBenchmarksRepository.save(aiBenchmarks);
+                });
+
+                log.debug("AI 탈락 결과 성공적으로 저장");
+            } else {
+                log.debug("AI 탈락 데이터가 없습니다 - gameId: {}", gameId);
+            }
 
             // 레코드마다 저장....
 

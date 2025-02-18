@@ -17,6 +17,7 @@ import com.ssafy.undaied.global.auth.service.OAuth2Service;
 import com.ssafy.undaied.global.auth.token.JwtTokenProvider;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +29,7 @@ import static com.ssafy.undaied.global.common.exception.ErrorCode.*;
 
 @Service
 @Transactional
+@Slf4j
 @RequiredArgsConstructor
 public class UserService{
 
@@ -148,10 +150,31 @@ public class UserService{
         return user;
     }
 
+    public void nicknameValidation(String nickname) {
+        if(nickname.equalsIgnoreCase("system") || nickname.equalsIgnoreCase("event")) {
+            log.error("시스템 사용 닉네임으로 변경 시도");
+            throw new BaseException(NOT_ALLOW_NICKNAME);
+        }
+        if(nickname.matches(".*[^a-zA-Z0-9가-힣].*")) {
+            log.error("닉네임에 특수문자 사용 시도");
+            throw new BaseException(NOT_ALLOW_NICKNAME);
+        }
+    }
+
     @Transactional
     public UserProfileResponseDto updateProfile(UpdateProfileRequestDto requestDto, int userId) {
         Users user = userRepository.findById(userId)
                 .orElseThrow(() -> new BaseException(USER_NOT_FOUND));
+
+        if(requestDto.getNickname() != null) {
+            if(!requestDto.getNickname().equals(user.getNickname())) {
+                if(userRepository.existsByNickname(requestDto.getNickname())) {
+                    log.error("중복되는 닉네임으로 변경 요청");
+                    throw new BaseException(ALREADY_NICKNAME_EXISTS);
+                }
+                nicknameValidation(requestDto.getNickname());
+            }
+        }
 
         System.out.println("현재 유저 데이터: " +
                 "프로필 이미지: "+user.getProfileImage()+", 아바타 이미지: "+ user.getAvatar()+", 성별: "+user.getSex()+", 닉네임 {}" +user.getNickname());

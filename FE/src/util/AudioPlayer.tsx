@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useRecoilValue } from "recoil";
-import { settingsState } from "../util/Setting";
 import { preloadAudio } from "./AudioCache";
+import { settingsState } from "../store/settingState";
 
 interface AudioPlayerProps {
   src: string;

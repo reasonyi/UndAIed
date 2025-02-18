@@ -44,6 +44,7 @@ function LeftSideBar({
   player,
 }: ILeftSideBarProps) {
   const [isOpen, setIsOpen] = useState(false);
+  console.log("프로필 이미지 번호: ", player?.profileImage);
   return (
     <>
       <button

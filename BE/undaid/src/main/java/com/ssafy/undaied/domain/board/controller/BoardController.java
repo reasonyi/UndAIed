@@ -37,7 +37,6 @@ public class BoardController {
     }
 
 
-
     //게시글 작성
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/board")
@@ -49,9 +48,12 @@ public class BoardController {
 
     // 게시글 목록 조회
     @GetMapping("/board")
-    public ApiDataResponse<?> getAllBoards(@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        Page<BoardListResponseDto> result = boardService.getAllBoards(pageable);
-        return new ApiDataResponse<>(HttpStatusCode.OK, result,null);
+    public ApiDataResponse<?> getAllBoards(
+            @RequestParam(required = false) Byte category,  // category 값을 받음 (nullable)
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+
+        Page<BoardListResponseDto> result = boardService.getAllBoards(category, pageable);
+        return new ApiDataResponse<>(HttpStatusCode.OK, result, null);
     }
 
     // 특정 게시글 조회
@@ -72,7 +74,6 @@ public class BoardController {
     }
 
     //게시글 수정
-
     @PreAuthorize("isAuthenticated()")
     @PatchMapping("/board/{boardId}")
     public ApiDataResponse<BoardUpdateResponseDto> updateBoard(@PathVariable("boardId") Integer boardId,

@@ -34,6 +34,13 @@ export function GameProfileEditor({
     onClose();
   };
 
+  const handleNicknameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    // 12자 제한
+    if (newValue.length <= 12) {
+      setNickname(newValue);
+    }
+  };
   const updateData = {
     sex: null,
     profileImage: selectedProfileImage,
@@ -58,7 +65,7 @@ export function GameProfileEditor({
             <input
               type="text"
               value={nickname}
-              onChange={(e) => setNickname(e.target.value)}
+              onChange={handleNicknameChange}
               className="w-full px-3 py-2 bg-[#2e2e2ef0] border border-[#f74a5c]/40 rounded text-white focus:outline-none focus:border-[#f74a5c]"
               placeholder="닉네임을 입력하세요"
             />
