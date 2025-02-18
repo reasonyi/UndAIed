@@ -369,6 +369,7 @@ function GamePlay() {
                 </div>
               </div>
               <RightGameSideBar
+                messages={messages}
                 players={gameInfo?.players}
                 iconArr={iconArr}
                 onVoteSubmit={handleVoteSubmit}
