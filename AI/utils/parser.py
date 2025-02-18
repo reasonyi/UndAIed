@@ -4,25 +4,17 @@ from collections import defaultdict
 
 #######################
 def AI_response_parser(response: str) -> dict:
-    """AI의 대답을 파싱하는 함수"""
-    # {} 안의 내용을 찾는 정규식 패턴
-    pattern = r"{(.*?)}"
+    # "content"의 값을 찾는 정규식 패턴
+    pattern = r'"content"\s*:\s*"([^"]*)'  # 끝 따옴표 매칭 제거
 
-    # 정규식으로 {} 안의 내용 추출
+    # 정규식으로 매칭
     match = re.search(pattern, response)
+
     if not match:
-        return None
+        return {"content": "응답을 파싱할 수 없습니다"}
 
-    content = match.group(1)
-
-    # key:value 쌍을 찾는 패턴
-    pair_pattern = r'(\w+)\s*:\s*"([^"]*)"'
-
-    # 모든 key:value 쌍을 찾아서 딕셔너리로 변환
-    pairs = re.findall(pair_pattern, content)
-    result = {key: value for key, value in pairs}
-
-    return result
+    # 매칭된 값 반환
+    return {"content": match.group(1)}
 
 
 #######################
@@ -66,7 +58,7 @@ def debate_extractor(stage: str) -> tuple:
     return topic_debates, free_debates
 
 
-# 주제토론, 자유 토론을 파싱하는 함수수
+# 주제토론, 자유 토론을 파싱하는 함수
 def debate_parser(debates: list) -> list:
     debate_list: list = []
     for debate in debates:
@@ -129,6 +121,7 @@ def event_parser(events) -> list:
     return event_list or ([{"vote": vote_dict}] if vote_dict else [])
 
 
+# 메인 파싱 함수
 def dialogue_parser(full_str: str) -> defaultdict:
     result: defaultdict = {}
     stages = stage_extractor(full_str)

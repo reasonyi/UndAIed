@@ -1,13 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import PlayerIcon1 from "../../assets/player-icon/player-icon-1.svg";
-import PlayerIcon2 from "../../assets/player-icon/player-icon-2.svg";
-import PlayerIcon3 from "../../assets/player-icon/player-icon-3.svg";
-import PlayerIcon4 from "../../assets/player-icon/player-icon-4.svg";
-import PlayerIcon5 from "../../assets/player-icon/player-icon-5.svg";
-import PlayerIcon6 from "../../assets/player-icon/player-icon-1.svg";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import { toast } from "sonner";
 import ChatBubble from "../GamePlay/components/ChatBuble";
 import SystemBubble from "../GamePlay/components/SystemBubble";
@@ -16,6 +8,9 @@ import { useSocket } from "../../hooks/useSocket";
 import LeftSideBar from "./components/LeftSideBar";
 import RightSideBar from "./components/RightSideBar";
 import { IMessage, IPlayer } from "../../types/gameroom";
+import AudioPlayer from "../../util/AudioPlayer";
+import gameRoomBgm from "../../assets/bgm/game-room.mp3";
+import { getPlayerIcon } from "../../util/PlayerIcon";
 
 interface IRoomInfo {
   roomId: number;
@@ -60,15 +55,6 @@ function GameRoom() {
   const [searchParams] = useSearchParams();
   const password = searchParams.get("pwd");
 
-  const iconArr = [
-    PlayerIcon1,
-    PlayerIcon2,
-    PlayerIcon3,
-    PlayerIcon4,
-    PlayerIcon5,
-    PlayerIcon6,
-  ];
-
   //socket 훅 사용
   const socket = useSocket();
 
@@ -82,10 +68,6 @@ function GameRoom() {
   //방 전체 정보보
   const [roomInfo, setRoomInfo] = useState<IRoomInfo>();
   const [messages, setMessages] = useState<IMessage[]>([]);
-
-  const addMessage = (newMessage: IMessage) => {
-    setMessages([...messages, newMessage]);
-  };
 
   const scrollToBottom = () => {
     scrollRef.current?.scrollIntoView({ block: "end" });
@@ -103,7 +85,6 @@ function GameRoom() {
       console.log("send 발생! data 수신:", data);
       debugger;
       if (data.currentPlayers) {
-        debugger;
         const newUsers: IPlayer[] = data.currentPlayers.sort(
           (a: IPlayer, b: IPlayer) => a.enterId - b.enterId
         );
@@ -132,20 +113,30 @@ function GameRoom() {
       console.log("chat:send 발생! data 수신:", data);
       debugger;
       if (data.message && data.nickname && roomInfo) {
-        const player = roomInfo.currentPlayers.find(
-          (player) => player.nickname === data.nickname
-        );
-        debugger;
-
-        if (player) {
+        if (data.nickname === "system") {
           const newMessage: IMessage = {
-            player: player.enterId,
+            player: -1,
             nickname: data.nickname,
             text: data.message,
-            isMine: Boolean(player.enterId === playerEnterId),
+            isMine: false,
           };
-          setMessages([...messages, newMessage]);
           debugger;
+          setMessages((prevMessages) => [...prevMessages, newMessage]);
+        } else {
+          const player = roomInfo.currentPlayers.find(
+            (player) => player.nickname === data.nickname
+          );
+
+          if (player) {
+            const newMessage: IMessage = {
+              player: player.enterId,
+              nickname: data.nickname,
+              text: data.message,
+              isMine: Boolean(player.enterId === playerEnterId),
+            };
+            debugger;
+            setMessages((prevMessages) => [...prevMessages, newMessage]);
+          }
         }
       }
     });
@@ -332,64 +323,67 @@ function GameRoom() {
     scrollToBottom();
   }, [messages]);
   return (
-    <div className="bg-[#07070a]">
-      <div className="background-gradient max-w-[90rem] mx-auto px-4 sm:px-4 md:px-6">
-        <LeftSideBar
-          roomId={roomInfo?.roomId}
-          roomTitle={roomInfo?.roomTitle}
-          nickname={playerInfo ? playerInfo.nickname : "연결이 끊어졌습니다."}
-          icon={iconArr[playerInfo ? playerInfo.enterId : 1]}
-          socket={socket}
-          onLeaveRoom={handleLeaveRoom}
-          onGameStart={handleGameStart}
-          player={playerInfo}
-        />
-        <div className="lg:pl-[19.5rem]">
-          <div className="max-w-3xl mx-auto xl:max-w-none xl:ml-0 xl:mr-[32rem]">
-            <div className="chat-container flex flex-col h-screen overflow-auto">
-              {/* 메시지 리스트 영역 */}
-              <div className="flex-1 px-5 pt-4">
-                {messages.map((msg: IMessage, index) => {
-                  if (msg.player === 10) {
-                    return <SystemBubble key={index} message={msg} />;
-                  } else {
-                    return (
-                      <ChatBubble
-                        key={index}
-                        message={msg}
-                        playerName={
-                          roomInfo?.currentPlayers.find(
-                            (user) => user.enterId === msg.player
-                          )?.nickname
-                        }
-                      />
-                    );
-                  }
-                })}
-                <div
-                  ref={scrollRef}
-                  className="chat-input-temp h-[4.5rem] w-full"
-                ></div>
-                <div
-                  className="chat-input fixed z-10 h-10 bottom-4"
-                  style={{ width: chatInputWidth }}
-                >
-                  <ChatForm
-                    playerNum={playerInfo?.enterId}
-                    socket={socket}
-                    onSendChat={handleRoomChat}
-                  />
+    <>
+      <AudioPlayer src={gameRoomBgm} isPlaying={true} shouldLoop={true} />
+      <div className="bg-[#07070a]">
+        <div className="background-gradient max-w-[90rem] mx-auto px-4 sm:px-4 md:px-6">
+          <LeftSideBar
+            roomId={roomInfo?.roomId}
+            roomTitle={roomInfo?.roomTitle}
+            nickname={playerInfo ? playerInfo.nickname : "연결이 끊어졌습니다."}
+            icon={getPlayerIcon(playerInfo ? playerInfo.profileImage : 0)}
+            socket={socket}
+            onLeaveRoom={handleLeaveRoom}
+            onGameStart={handleGameStart}
+            player={playerInfo}
+          />
+          <div className="lg:pl-[19.5rem]">
+            <div className="max-w-3xl mx-auto xl:max-w-none xl:ml-0 xl:mr-[32rem]">
+              <div className="chat-container flex flex-col h-screen overflow-auto">
+                {/* 메시지 리스트 영역 */}
+                <div className="flex-1 px-5 pt-4">
+                  {messages.map((msg: IMessage, index) => {
+                    if (msg.player === -1) {
+                      return <SystemBubble key={index} message={msg} />;
+                    } else {
+                      return (
+                        <ChatBubble
+                          key={index}
+                          message={msg}
+                          playerName={
+                            roomInfo?.currentPlayers.find(
+                              (user) => user.enterId === msg.player
+                            )?.nickname
+                          }
+                        />
+                      );
+                    }
+                  })}
+                  <div
+                    ref={scrollRef}
+                    className="chat-input-temp h-[4.5rem] w-full"
+                  ></div>
+                  <div
+                    className="chat-input fixed z-10 h-10 bottom-4"
+                    style={{ width: chatInputWidth }}
+                  >
+                    <ChatForm
+                      playerNum={playerInfo?.enterId}
+                      socket={socket}
+                      onSendChat={handleRoomChat}
+                    />
+                  </div>
                 </div>
+                <RightSideBar
+                  players={roomInfo?.currentPlayers}
+                  messages={messages}
+                />
               </div>
-              <RightSideBar
-                players={roomInfo?.currentPlayers}
-                iconArr={iconArr}
-              />
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 

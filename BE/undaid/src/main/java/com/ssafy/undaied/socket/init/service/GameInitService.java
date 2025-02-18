@@ -5,6 +5,7 @@ import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.SocketIONamespace;
 import com.corundumstudio.socketio.SocketIOServer;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ssafy.undaied.socket.chat.service.AIChatService;
 import com.ssafy.undaied.socket.common.constant.EventType;
 import com.ssafy.undaied.socket.common.exception.SocketErrorCode;
 import com.ssafy.undaied.socket.common.exception.SocketException;
@@ -37,123 +38,19 @@ import static com.ssafy.undaied.socket.common.constant.SocketRoom.*;
 public class GameInitService {
     private final RedisTemplate<String, String> redisTemplate;
     private final RedisTemplate<String, Object> jsonRedisTemplate;
-    private final SocketIOServer socketIOServer;
     private final ObjectMapper objectMapper;
     private final SocketIONamespace namespace;
     private final GameTimer gameTimer;
-    private final WebClient webClient;
-
+    private final AIChatService aiChatService;
     private static final long EXPIRE_TIME = 7200;
     private static final int REQUIRED_PLAYERS = 6;
     private static final int TOTAL_NUMBERS = 8;
 
     // AI 후보 리스트
     private static final Map<String, String> AI_POOL = new HashMap<>() {{
-        put("1", "deepseek");
         put("2", "gemini");
         put("3", "chatgpt");
     }};
-
-//     테스트 데이터. 나중에 지우려고 함.
-//@PostConstruct
-//public void initTestData() {
-//    int testRoomId = 456;
-//    String roomKey = ROOM_LIST+ROOM_KEY_PREFIX+ testRoomId;
-//
-//    // 기존 데이터 삭제
-//    redisTemplate.delete(roomKey + testRoomId);
-//
-//    // 테스트용 RoomUser 목록 생성
-//    List<RoomUser> players = new ArrayList<>();
-//    players.add(RoomUser.builder()
-//            .userId(11)
-//            .enterId(0)
-//            .isHost(true)
-//            .nickname("cchh6462")
-//            .profileImage(1)
-//            .build());
-//
-//    players.add(RoomUser.builder()
-//            .userId(12)
-//            .enterId(1)
-//            .isHost(false)
-//            .nickname("TestUser2")
-//            .profileImage(2)
-//            .build());
-//
-//    players.add(RoomUser.builder()
-//            .userId(13)
-//            .enterId(2)
-//            .isHost(false)
-//            .nickname("TestUser3")
-//            .profileImage(3)
-//            .build());
-//
-//    players.add(RoomUser.builder()
-//            .userId(14)
-//            .enterId(3)
-//            .isHost(false)
-//            .nickname("TestUser4")
-//            .profileImage(4)
-//            .build());
-//
-//    players.add(RoomUser.builder()
-//            .userId(15)
-//            .enterId(4)
-//            .isHost(false)
-//            .nickname("TestUser5")
-//            .profileImage(5)
-//            .build());
-//
-//    players.add(RoomUser.builder()
-//            .userId(16)
-//            .enterId(5)
-//            .isHost(false)
-//            .nickname("TestUser6")
-//            .profileImage(6)
-//            .build());
-//
-//    // Room 객체 생성 및 저장
-//    Room room = Room.builder()
-//            .roomId((long) testRoomId)
-//            .roomTitle("Test Game Room")
-//            .isPrivate(false)
-//            .roomPassword(null)
-//            .playing(false)
-//            .currentPlayers(players)
-//            .build();
-//
-//    jsonRedisTemplate.opsForValue().set(roomKey, room);
-//
-//    // 소켓 room에도 join시키기
-//    namespace.getAllClients().forEach(client -> {
-//        Integer userId = client.get("userId");
-//        if (userId != null && userId == 11) {  // 방장
-//            client.joinRoom(ROOM_KEY_PREFIX+testRoomId);
-//            log.info("Host joined room - userId: {}, roomKey: {}", userId, roomKey);
-//        }
-//    });
-//
-//    log.info("Test data initialized - roomId: {}, players: {}", testRoomId, players.stream()
-//            .map(user -> String.format("%s(%d)", user.getNickname(), user.getUserId()))
-//            .collect(Collectors.joining(", ")));
-//
-//    log.info("\n=== Postman 테스트 가이드 ===\n" +
-//            "1. Socket.IO 연결 설정:\n" +
-//            "   URL: ws://localhost:8080\n" +
-//            "   Auth:\n" +
-//            "   {\n" +
-//            "     \"userId\": 11,\n" +
-//            "     \"nickname\": \"cchh6462\"\n" +
-//            "   }\n\n" +
-//            "2. 게임 시작 테스트:\n" +
-//            "   이벤트명: game:init:emit\n" +
-//            "=========================");
-//
-//    // 테스트 데이터 확인용 로그
-//    Object savedRoom = jsonRedisTemplate.opsForValue().get(roomKey);
-//    log.info("Saved room data: {}", savedRoom);
-//}
 
     public int startGame(SocketIOClient client, int roomId) throws SocketException {
         Integer userId = validateAuthentication(client);
@@ -177,6 +74,9 @@ public class GameInitService {
         savePlayersAndAssignNumbers(gameId, players, room, selectedAIs);
 
         handleSocketConnections(gameId, roomId);
+
+        // AI 요청 스케줄링 시작
+        log.info("AI 요청 시작: {}", gameId);
 
         return gameId;
     }
@@ -301,6 +201,7 @@ public class GameInitService {
         String statusKey = GAME_KEY_PREFIX + gameId + ":player_status";
         String userNicknameKey = GAME_KEY_PREFIX + gameId + ":user_nicknames";
         String numberNicknameKey = GAME_KEY_PREFIX + gameId + ":number_nicknames";
+        String aiKey = GAME_KEY_PREFIX + gameId + ":ai_numbers";
 
         // 실제 플레이어 닉네임 매핑
         Map<Integer, String> userNicknames = room.getCurrentPlayers().stream()
@@ -322,24 +223,21 @@ public class GameInitService {
             redisTemplate.opsForHash().put(userNicknameKey, userId.toString(), nickname);
             redisTemplate.opsForHash().put(numberNicknameKey, assignedNumber.toString(), nickname);
         }
-
-        // AI 플레이어 할당 및 정보 저장
-        List<AiInfo> aiInfoList = new ArrayList<>();
         for (String aiIdStr : selectedAIs) {
-            int aiId = Integer.parseInt(aiIdStr);  // ✅ aiId를 int로 변환
+            int originalAiId = Integer.parseInt(aiIdStr);
+            int negativeAiId = -originalAiId;  // AI ID를 음수로 변환
             int aiNumber = availableNumbers.remove(0);
-        
-            // Redis에 AI 정보 저장
-            redisTemplate.opsForHash().put(mappingKey, String.valueOf(aiId), String.valueOf(aiNumber));
-            redisTemplate.opsForHash().put(userNicknameKey, String.valueOf(aiId), "AI-" + aiId);
-            savePlayerStatus(statusKey, String.valueOf(aiNumber), false, true);
-        
-            // AI 정보 리스트 구성 (Python 서버로 전송용)
-            aiInfoList.add(new AiInfo(aiId, aiNumber));
-        }
 
-       // AI 서버에 알림
-       notifyAiServer(gameId, aiInfoList);
+
+            // Redis에 음수 AI ID로 정보 저장
+            redisTemplate.opsForHash().put(mappingKey, String.valueOf(negativeAiId), String.valueOf(aiNumber));
+            redisTemplate.opsForHash().put(userNicknameKey, String.valueOf(negativeAiId), "AI" + negativeAiId);
+            redisTemplate.opsForHash().put(numberNicknameKey, String.valueOf(aiNumber), "AI" + negativeAiId);
+            savePlayerStatus(statusKey, String.valueOf(aiNumber), false, true);
+
+            // AI 번호를 Redis Set에 추가
+            redisTemplate.opsForSet().add(aiKey, String.valueOf(aiNumber));
+        }
 
         // Redis 키 만료시간 설정
         Arrays.asList(mappingKey, playersKey, statusKey, userNicknameKey, numberNicknameKey)
@@ -367,7 +265,7 @@ public class GameInitService {
     public void broadcastGameInit(Integer gameId) {
 
         // BroadcastResponseDto 객체 생성
-    BroadcastResponseDto responseDto = BroadcastResponseDto.builder()
+        BroadcastResponseDto responseDto = BroadcastResponseDto.builder()
             .gameId(gameId)
             .build();
 
@@ -380,7 +278,7 @@ public class GameInitService {
                 log.info("Broadcast sent with responseDto: {}", responseDto);
     }
 
-    public void updatePlayerStatus(int gameId, int number, boolean isDied, boolean isInfected, boolean isInGame) {
+    public void updatePlayerStatus(int gameId, int number, boolean isDied, boolean isInGame) {
         savePlayerStatus(GAME_KEY_PREFIX + gameId + ":player_status",
                 String.valueOf(number), isDied, isInGame);
     }
@@ -389,16 +287,18 @@ public class GameInitService {
         String statusKey = GAME_KEY_PREFIX + gameId + ":player_status";
         Map<Object, Object> allStatus = redisTemplate.opsForHash().entries(statusKey);
 
+        // round 값 처리
+        String roundKey = "game:" + gameId + ":round";
+        String roundValue = redisTemplate.opsForValue().get(roundKey);
+        int round =Integer.parseInt(roundValue);
 
-        //임시 저장. 수정 필요
+        // stage 값 처리
         String stageKey = "game:" + gameId + ":stage";
-//        String currentStage = redisTemplate.opsForValue().get(stageKey).toString();
-        String currentStage="Start";
+        String stageValue = redisTemplate.opsForValue().get(stageKey);
+        String stage = (stageValue == null) ? "start" : stageValue;
 
         Integer remainingTime = gameTimer.getRemainingTime(gameId);
-        log.info("Checking timer: gameId={}, remainingTime={}", gameId, remainingTime);
-
-
+        log.info("타이머 동작 확인: gameId={}, remainingTime={}", gameId, remainingTime);
 
         List<PlayerInfoDto> players = allStatus.entrySet().stream()
                 .map(entry -> {
@@ -414,7 +314,8 @@ public class GameInitService {
 
         return GameInfoResponseDto.builder()
                 .gameId(gameId)
-                .currentStage(currentStage)
+                .round(round)
+                .stage(stage)
                 .timer(remainingTime)
                 .players(players)
                 .build();
@@ -434,7 +335,6 @@ public class GameInitService {
         Boolean isDeleted = jsonRedisTemplate.delete(waitingKey);
         log.debug("레디스 대기방 목록에서 방을 제거합니다. - waitingKey: {}, 제거 성공 여부: {}", waitingKey, isDeleted);
 
-
         return LobbyUpdateResponseDto.builder()
                 .type("update")
                 .data(UpdateData.builder()
@@ -447,19 +347,4 @@ public class GameInitService {
                 .build();
     }
 
-    private void notifyAiServer(int gameId, List<AiInfo> aiInfoList) {
-        AiNotificationDto notification = new AiNotificationDto(aiInfoList);
-
-        webClient.post()
-                .uri("/api/ai/{gameId}/", gameId)
-                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .bodyValue(notification)
-                .retrieve()
-                .bodyToMono(String.class)
-                .subscribe(
-                        response -> log.info("AI 서버로 게임시작 데이터 전송 성공. gameId: {} with AI info: {}",
-                                gameId, aiInfoList),
-                        error -> log.error("AI 서버로 게임시작 데이터 전송 실패 - gameId: {}", gameId, error)
-          );
-     }
 }

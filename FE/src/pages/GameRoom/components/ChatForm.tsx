@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useForm, FieldErrors } from "react-hook-form";
 import { toast } from "sonner";
 import { Socket } from "socket.io-client";
+import { useRef } from "react";
 
 interface IFormProps {
   playerNum: number | undefined;
@@ -23,14 +24,27 @@ function ChatForm({ playerNum, socket, onSendChat }: IFormProps) {
     formState: { errors },
   } = useForm<IForm>();
 
+  const lastChatTimeRef = useRef<number>(0);
+
   const onValidSubmit = (data: IForm, e?: React.BaseSyntheticEvent) => {
     //local storage에서 토큰 가져오기, player num 가져오기기
     //axios api 작성성
     e?.preventDefault();
 
+    //현재 시각각
+    const currentTime = Date.now();
+
+    // 마지막 채팅 이후 1초 이내인 경우 도배로 판단
+    if (currentTime - lastChatTimeRef.current < 1000) {
+      toast.error("작성한지 1초 이내의 반복 채팅은 도배로 판단됩니다.");
+      return;
+    }
+
     try {
       onSendChat(data.chat);
       resetField("chat");
+      // 마지막 채팅 시간 갱신
+      lastChatTimeRef.current = currentTime;
     } catch (error) {
       console.error(error);
     }

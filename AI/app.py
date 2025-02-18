@@ -28,10 +28,9 @@ async def create_message(request: Request):
 
     for ai_id, bot in AI_BOTS.items():
         if ai_id in selected_AI:
+            logger.info("-"*100)  # 디버깅 용 로그
             bot_response = AI_response_parser(bot.generate_response(selected_AI, parsed_dialogue))
-            logger.info(bot_response)  # 디버깅용 로그
-            logger.info("--------------")  # 디버깅용 로그
-            if bot_response["flexible"] == "O":
-                response.append({"number": selected_AI[ai_id], "content": bot_response["content"]})
+            logger.info(bot_response)  # 디버깅 용 로그
+            response.append({"number": selected_AI[ai_id], "content": bot_response["content"]})
 
     return response

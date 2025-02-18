@@ -24,12 +24,11 @@ public enum EventType {
 
     START_GAME("game:start:emit"),
     GAME_INFO_EMIT("game:info:emit"),
-
     GAME_INFO_SEND("game:info:send"),
-    SEND_SUBJECT("send:subject"),
-
     GAME_CHAT_SEND("game:chat:send"),
     GAME_CHAT_EMIT("game:chat:emit"),
+
+    GAME_RESULT_SEND("game:result:send"),
 
     // 투표
     SUBMIT_VOTE("vote:submit:emit"),
