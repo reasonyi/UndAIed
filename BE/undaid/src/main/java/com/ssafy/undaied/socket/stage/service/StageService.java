@@ -7,6 +7,7 @@ import com.ssafy.undaied.socket.common.constant.EventType;
 import com.ssafy.undaied.socket.common.exception.SocketException;
 import com.ssafy.undaied.socket.common.util.GameTimer;
 import com.ssafy.undaied.socket.common.util.GameTimerConstants;
+import com.ssafy.undaied.socket.infect.dto.InfectResponseDto;
 import com.ssafy.undaied.socket.infect.service.InfectService;
 import com.ssafy.undaied.socket.init.service.GameInitService;
 import com.ssafy.undaied.socket.result.service.GameResultService;
@@ -67,14 +68,18 @@ public class StageService {
         try {
             // 현재 스테이지 상태 저장
             saveCurrentStage(gameId, currentStage);
+            if (currentStage.equals(StageType.DAY)) {
+                // 라운드 알림
+                saveCurrentRound(gameId);
+                RoundNotifyDto roundNotifyDto = RoundNotifyDto.notifyRoundStart(getCurrentRound(gameId));
+                namespace.getRoomOperations("game:" + gameId).sendEvent(EventType.GAME_CHAT_SEND.getValue(), roundNotifyDto);
+            }
 
             // 스테이지 시작 알림
             gameTimer.setTimer(gameId, GameTimerConstants.STAGE_START_NOTIFY, STAGE_DURATIONS.get("notify"), () -> {
                 handleNotifyStartStage(gameId, currentStage);
-
                 // 스테이지별 메인 로직 실행
                 handleStageUpdate(gameId, currentStage);
-
             });
         } catch (Exception e) {
             log.error("Error in startStage: {}", e.getMessage());
@@ -104,15 +109,42 @@ public class StageService {
     }
 
     private void handleDayStage(Integer gameId) {
-        saveCurrentRound(gameId);
-        // 라운드 알림
-        RoundNotifyDto roundNotifyDto = RoundNotifyDto.notifyRoundStart(getCurrentRound(gameId));
-        namespace.getRoomOperations("game:" + gameId).sendEvent(EventType.GAME_CHAT_SEND.getValue(), roundNotifyDto);
 
         // 2라운드부터 감염 처리
         if (Integer.parseInt(getCurrentRound(gameId)) > 1) {
-            handleInfection(gameId);
-            gameInitService.sendGameInfo(gameId);
+            gameTimer.setTimer(gameId, GameTimerConstants.STAGE_START_NOTIFY, 1, () -> {
+                try {
+                    handleInfection(gameId);
+                    gameInitService.sendGameInfo(gameId);
+
+                    String winner = gameResultService.checkGameResult(gameId);
+                    if (winner != null) {
+                        handleGameEnd(gameId, winner);
+                    } else {
+                        // 승자가 없는 경우 다음 스테이지로
+                        // 시작 시 5초
+                        gameTimer.setTimer(gameId, GameTimerConstants.STAGE_END_NOTIFY, 5, () -> {
+                            try {
+                                startStage(gameId, StageType.SUBJECT_DEBATE);
+                            } catch (Exception e) {
+                                handleGameError(gameId, e);
+                            }
+                        });
+                        gameInitService.sendGameInfo(gameId);
+                    }
+                } catch (SocketException e) {
+                    log.error("🍳게임 결과 처리 중 오류 : {} ", e.getMessage());
+                }
+                // 시작 시 5초
+                gameTimer.setTimer(gameId, GameTimerConstants.STAGE_END_NOTIFY, 5, () -> {
+                    try {
+                        startStage(gameId, StageType.SUBJECT_DEBATE);
+                    } catch (Exception e) {
+                        handleGameError(gameId, e);
+                    }
+                });
+                gameInitService.sendGameInfo(gameId);
+            });
         }
 
         try {
@@ -137,11 +169,9 @@ public class StageService {
 
     private void handleInfection(Integer gameId) {
         try {
-            String infectedPlayerNumber = infectService.infectPlayer(gameId);
-            log.info("InfectedPlayerNumber: {}", infectedPlayerNumber);
+            InfectResponseDto responseDto = infectService.infectPlayer(gameId);
             namespace.getRoomOperations("game:" + gameId).sendEvent(
-                    EventType.GAME_CHAT_SEND.getValue(),
-                    Map.of("number", 0, "content", "밤 사이에 인간 한 명이 사라졌습니다.")
+                    EventType.GAME_CHAT_SEND.getValue(), responseDto
             );
         } catch (Exception e) {
             log.error("Infection stage error: {}", e.getMessage());
@@ -159,7 +189,7 @@ public class StageService {
                     String currentRound = getCurrentRound(gameId);
                     List<GameChatResponseDto> subjectChatList =
                             gameChatService.getSubjectDebateChats(gameId, currentRound);
-                            log.info("주제토론 뭉치 넘기기");
+                            log.debug("주제토론 뭉치 넘기기");
                     namespace.getRoomOperations("game:" + gameId)
                             .sendEvent(EventType.CHAT_SUBJECT_SEND.getValue(), subjectChatList);
 

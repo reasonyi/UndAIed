@@ -76,16 +76,7 @@ public class VoteService {
             if (hasVoted(eventKey, voterNumber))
                 throw new SocketException(SocketErrorCode.VOTE_ALREADY_SUBMITTED);
 
-            // 투표 이벤트 저장을 위한 닉네임 찾기
-            String userNameKey = "game:" + gameId + ":number_nicknames";
-            String voteUserName = redisTemplate.opsForHash().get(userNameKey, voterNumber).toString();
-            String targetUserName = redisTemplate.opsForHash().get(userNameKey, targetNumber).toString();
-            log.info("voteUserName: " + voteUserName + ", targetUserName: " + targetUserName);
-            String voteEvent = String.format("{vote} [%s] <%s> (%s) ~%s~ %s | ",
-                    voteUserName, voterNumber, targetUserName, targetNumber, LocalDateTime.now());
-
-            // 투표 이벤트 저장
-            redisTemplate.opsForValue().append(eventKey, voteEvent);
+            storeVoteSubmitEvent(gameId, voterNumber, targetNumber, eventKey);
 
             VoteSubmitResponseDto responseDto = VoteSubmitResponseDto.builder()
                     .number(Integer.parseInt(targetNumber))
@@ -209,6 +200,15 @@ public class VoteService {
         voteCounts[randomTarget] += AICount;
         log.debug("AI votes ({} votes) added to player {}", AICount, randomTarget);
 
+        // 살아있는 AI만 필터링
+        for (String aiNumber : aiSet) {
+            String statusStr = redisTemplate.opsForHash().get(statusKey, aiNumber).toString();
+            if (!statusStr.contains("isDied=true")) {
+                storeVoteSubmitEvent(gameId, aiNumber, String.valueOf(randomTarget), eventKey);
+            }
+        }
+        log.debug("🍳AI vote events stored for {} AIs targeting player {}", AICount, randomTarget);
+
         // AI 투표까지 종료 후 최다 득표자 찾기 => 최다 득표자가 여러 명일 경우 비김
         List<Integer> maxVotedCandidates = new ArrayList<>();
         int finalMaxVotes = Arrays.stream(voteCounts)
@@ -317,6 +317,7 @@ public class VoteService {
         int randomIndex = (int) (Math.random() * randomTargetCandidates.size());
         Integer randomTarget = randomTargetCandidates.get(randomIndex);
         log.debug("RandomTarget: {}", randomTarget);
+
         return randomTarget;
     }
 
@@ -338,6 +339,19 @@ public class VoteService {
             }
         }
         return null;
+    }
+
+    public void storeVoteSubmitEvent(Integer gameId, String voterNumber, String targetNumber, String eventKey) {
+        // 투표 이벤트 저장을 위한 닉네임 찾기
+        String userNameKey = "game:" + gameId + ":number_nicknames";
+        String voteUserName = redisTemplate.opsForHash().get(userNameKey, voterNumber).toString();
+        String targetUserName = redisTemplate.opsForHash().get(userNameKey, targetNumber).toString();
+        log.info("voteUserName: " + voteUserName + ", targetUserName: " + targetUserName);
+        String voteEvent = String.format("{vote} [%s] <%s> (%s) ~%s~ %s | ",
+                voteUserName, voterNumber, targetUserName, targetNumber, LocalDateTime.now());
+
+        // 투표 이벤트 저장
+        redisTemplate.opsForValue().append(eventKey, voteEvent);
     }
 }
 
