@@ -29,6 +29,7 @@ function RightGameSideBar({
   onVoteSubmit,
 }: IRightGameSideBarProps) {
   const [isRightOpen, setIsRightOpen] = useState(true);
+
   return (
     <>
       <div

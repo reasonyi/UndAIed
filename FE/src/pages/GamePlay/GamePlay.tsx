@@ -15,11 +15,11 @@ import { useSocket } from "../../hooks/useSocket";
 import RightGameSideBar from "./components/RightGameSideBar";
 import LeftGameSideBar from "./components/LeftGameSideBar";
 import { IMessage } from "../../types/gameroom";
-import { IAnonimus } from "../../types/gameplay";
+import { IAnonimus, IGameResultSend } from "../../types/gameplay";
 import { toast } from "sonner";
 import { STAGE_INFO } from "./components/info";
 import { useRecoilState } from "recoil";
-import { isGameEndState } from "../../store/gamePlayState";
+import { isGameEndState, isUserDiedState } from "../../store/gamePlayState";
 import GameEndModal from "./components/GameEndModal";
 
 interface IChatSend {
@@ -55,8 +55,6 @@ interface IVoteEmitDone {
   };
 }
 
-interface IGameResultSend {}
-
 function GamePlay() {
   const { number } = useParams();
   const scrollRef = useRef<HTMLDivElement | null>(null);
@@ -69,6 +67,8 @@ function GamePlay() {
   //게임 전체 정보보 (유저 정보 포함)
   const [gameInfo, setGameInfo] = useState<IGameInfoSend>();
   const [gameResult, setGameResult] = useState<IGameResultSend>();
+
+  const [isUserDead, setIsUserDead] = useRecoilState<boolean>(isUserDiedState);
 
   const [isGameEnd, setIsGameEnd] = useRecoilState(isGameEndState);
 
@@ -249,6 +249,12 @@ function GamePlay() {
     );
   }, [gameInfo, playerEnterId]);
 
+  useEffect(() => {
+    if (playerInfo) {
+      setIsUserDead(playerInfo.died);
+    }
+  }, [playerInfo]);
+
   const handleGameChat = useCallback(
     (input: string) => {
       debugger;
@@ -312,7 +318,11 @@ function GamePlay() {
 
   return (
     <div className="bg-[#07070a]">
-      {isGameEnd ?? <GameEndModal />}
+      {isGameEnd && gameResult !== undefined ? (
+        <GameEndModal gameResult={gameResult} />
+      ) : (
+        <></>
+      )}
       <div className="background-gradient max-w-[90rem] mx-auto px-4 sm:px-4 md:px-6">
         <LeftGameSideBar
           nickname={
@@ -351,7 +361,11 @@ function GamePlay() {
                   className="chat-input-temp h-[4.5rem] w-full"
                 ></div>
                 <div className="chat-input fixed h-10 bottom-4 w-[calc(90rem-21rem-33.5rem-2rem)]">
-                  <ChatForm socket={socket} onSendChat={handleGameChat} />
+                  <ChatForm
+                    isDead={playerInfo ? playerInfo.died : true}
+                    socket={socket}
+                    onSendChat={handleGameChat}
+                  />
                 </div>
               </div>
               <RightGameSideBar
