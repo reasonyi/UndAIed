@@ -54,6 +54,8 @@ public enum SocketErrorCode {
     VOTE_ALREADY_SUBMITTED(4203, "이미 투표를 제출했습니다."),
     VOTE_STAGE_INVALID(4204, "현재는 투표가 불가합니다."),
     VOTE_SUBMIT_FAILED(4205, "투표 제출이 실패하였습니다." ),
+    VOTE_DIED_PLAYER(4206, "죽은 플레이어는 투표를 할 수 없습니다."),
+    VOTE_SELF_TARGET(4208, "본인에게 투표할 수 없습니다."),
 
     // 감염 관련 예외
     INFECT_PLAYER_NOT_FOUND(4301, "감염이 가능한 플레이어가 없습니다."),
