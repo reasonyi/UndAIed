@@ -3,7 +3,6 @@ import { apiClient } from "./apiClient";
 
 export const updateProfile = async (data: ProfileUpdate) => {
   const response = await apiClient.patch("api/v1/user/profile", data);
-  console.log(response.data.status);
 
   // status가 400인 경우 에러 객체 반환
   if (response.data.status === 400) {
