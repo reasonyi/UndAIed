@@ -1,13 +1,53 @@
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import boardBanner from "../../assets/board/upscalingBoard.png";
-
+import { jwtDecode } from "jwt-decode";
 import Banner from "./components/Banner";
 import Header from "../../components/Header";
-import { useGetPost } from "../../hooks/useBoard";
+import { useGetPost, useDeletePost } from "../../hooks/useBoard";
+
+interface JWTPayload {
+  roles: string;
+}
 
 function BoardDetail() {
   const { number } = useParams<{ number: string }>();
+  const navigate = useNavigate();
   const { data, isLoading, isError } = useGetPost(Number(number));
+  const deletePostMutation = useDeletePost();
+
+  // ADMIN 권한 확인
+  const isAdmin = () => {
+    try {
+      const userData = localStorage.getItem("userPersist");
+      if (!userData) return false;
+
+      const { userState } = JSON.parse(userData);
+      const decoded = jwtDecode<JWTPayload>(userState.token);
+      return decoded.roles === "ROLE_ADMIN";
+    } catch {
+      return false;
+    }
+  };
+
+  const handleDelete = async () => {
+    if (window.confirm("정말로 이 게시글을 삭제하시겠습니까?")) {
+      try {
+        await deletePostMutation.mutateAsync(Number(number), {
+          onSuccess: () => {
+            alert("게시글이 삭제되었습니다.");
+            navigate("/board");
+          },
+          onError: (error) => {
+            console.error("삭제 실패:", error);
+            alert("게시글 삭제에 실패했습니다.");
+          },
+        });
+      } catch (error) {
+        console.error("Error:", error);
+        alert("게시글 삭제 중 오류가 발생했습니다.");
+      }
+    }
+  };
 
   const formatDate = (dateString: string): string => {
     try {
@@ -70,9 +110,24 @@ function BoardDetail() {
             dangerouslySetInnerHTML={{ __html: post.content }}
           />
         </div>
-        <div className="flex justify-center mt-8">
+        <div className="flex justify-center mt-8 gap-2">
+          {isAdmin() && (
+            <>
+              <Link to={`/board/edit/${number}`}>
+                <button className="mx-1.5 px-9 py-2 bg-[#000000c0] text-white hover:bg-black border border-black">
+                  수정하기
+                </button>
+              </Link>
+              <button
+                onClick={handleDelete}
+                className="mx-1.5 px-9 py-2 bg-red-600 text-white hover:bg-red-700 border border-red-600"
+              >
+                삭제하기
+              </button>
+            </>
+          )}
           <Link to="/board">
-            <button className="mx-1.5 px-9 py-2 bg-white border  border-black hover:bg-gray-50 text-black">
+            <button className="mx-1.5 px-9 py-2 bg-white border border-black hover:bg-gray-50 text-black">
               목록
             </button>
           </Link>
@@ -81,4 +136,5 @@ function BoardDetail() {
     </>
   );
 }
+
 export default BoardDetail;
