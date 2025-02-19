@@ -6,6 +6,7 @@ import com.corundumstudio.socketio.SocketIOServer;
 import com.ssafy.undaied.socket.chat.dto.request.GameChatRequestDto;
 import com.ssafy.undaied.socket.chat.dto.response.GameChatResponseDto;
 import com.ssafy.undaied.socket.chat.dto.response.SendSubjectResponseDto;
+import com.ssafy.undaied.socket.chat.util.SubjectUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -33,29 +34,6 @@ public class GameChatService {
     private final SocketIONamespace namespace;
     private final AIChatService aiChatService;
 
-    public static final Map<Integer, String> SUBJECTS = new HashMap<>() {{
-        put(1, "인공지능이 인간을 이길 수 있을까?");
-        put(2, "인공지능은 인류를 멸망시킬까?");
-        put(3, "사람의 존재를 규정하는 건 뭘까?");
-        put(4, "기후 변화는 인류의 가장 큰 위협인가?");
-        put(5, "우주 탐사에 더 많은 자원을 투자해야 하는가?");
-        put(6, "완전한 프라이버시는 디지털 시대에 가능한가?");
-        put(7, "유전자 조작은 윤리적으로 허용되어야 하는가?");
-        put(8, "보편적 기본소득이 필요한가?");
-        put(9, "온라인 교육이 전통적 교육을 대체할 수 있는가?");
-        put(10, "소셜 미디어는 사회를 더 좋게 만들었는가?");
-        put(11, "인간의 수명 연장 연구는 계속되어야 하는가?");
-        put(12, "디지털 화폐가 실물 화폐를 대체해야 하는가?");
-        put(13, "자율주행 자동차는 도로를 더 안전하게 만들 것인가?");
-        put(14, "메타버스는 현실 세계를 대체할 수 있는가?");
-        put(15, "인공지능 예술은 진정한 예술인가?");
-        put(16, "개인정보 보호와 국가 안보 중 무엇이 더 중요한가?");
-        put(17, "로봇에게 시민권을 부여해야 하는가?");
-        put(18, "인터넷 접속은 기본권이 되어야 하는가?");
-        put(19, "인공지능 판사가 가능한가?");
-        put(20, "우주 자원 채굴은 허용되어야 하는가?");
-    }};
-
     public void sendSubject(int gameId) {
         String gameKey = "game:" + gameId;
         String roundKey = gameKey + ":round";
@@ -72,8 +50,9 @@ public class GameChatService {
         }
 
         // 사용 가능한 주제 리스트 생성
+        Map<Integer, String> subjects = SubjectUtil.SUBJECTS;
         List<Integer> availableSubjects = new ArrayList<>();
-        for (int i = 1; i <= SUBJECTS.size(); i++) {
+        for (int i = 1; i <= subjects.size(); i++) {
             if (!usedSubjects.contains(String.valueOf(i))) {
                 availableSubjects.add(i);
             }
@@ -95,7 +74,7 @@ public class GameChatService {
 
         SendSubjectResponseDto sendSubjectResponseDto = SendSubjectResponseDto.builder()
                 .number(0)
-                .content(SUBJECTS.get(subjectId))
+                .content(subjects.get(subjectId))
                 .build();
 
         log.info("Selected subject {} for game {} round {}", subjectId, gameId, currentRound);
