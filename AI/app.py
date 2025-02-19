@@ -17,6 +17,12 @@ class Request(BaseModel):
     message: dict
 
 
+@app.post("/api/ai/{game_id}/", status_code=status.HTTP_200_OK)
+async def create_message(request:Request):
+    return request.message
+
+
+
 @app.post("/api/chatgpt/{game_id}", status_code=status.HTTP_201_CREATED)
 async def chatgpt_api(request: Request):
     #     # 1) request로 전달된 문자열(JSON 형식) 파싱
