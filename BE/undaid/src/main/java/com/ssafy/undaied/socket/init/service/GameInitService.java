@@ -41,7 +41,6 @@ public class GameInitService {
     private final ObjectMapper objectMapper;
     private final SocketIONamespace namespace;
     private final GameTimer gameTimer;
-    private final AIChatService aiChatService;
     private static final long EXPIRE_TIME = 7200;
     private static final int REQUIRED_PLAYERS = 6;
     private static final int TOTAL_NUMBERS = 8;

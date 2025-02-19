@@ -31,7 +31,7 @@ public class GameChatService {
     private final RedisTemplate<String, Object> jsonRedisTemplate;
     private final Random random = new Random();
     private final SocketIONamespace namespace;
-    private final AIChatService aiChatService;
+    private final JsonAIChatService jsonAIChatService;
 
     public static final Map<Integer, String> SUBJECTS = new HashMap<>() {{
         put(1, "인공지능이 인간을 이길 수 있을까?");
@@ -55,6 +55,10 @@ public class GameChatService {
         put(19, "인공지능 판사가 가능한가?");
         put(20, "우주 자원 채굴은 허용되어야 하는가?");
     }};
+
+    public String getSubject(int subjectId) {
+        return SUBJECTS.get(subjectId);
+    }
 
     public void sendSubject(int gameId) {
         String gameKey = "game:" + gameId;
@@ -100,7 +104,7 @@ public class GameChatService {
 
         log.info("Selected subject {} for game {} round {}", subjectId, gameId, currentRound);
         namespace.getRoomOperations("game:" + gameId).sendEvent("game:chat:send", sendSubjectResponseDto);
-        aiChatService.startGameMessageScheduling(gameId);
+        jsonAIChatService.startGameMessageScheduling(gameId);
     }
 
     private boolean hasUserSpokenInSubjectDebate(Integer gameId, String round, int number) {
