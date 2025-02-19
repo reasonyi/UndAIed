@@ -1,6 +1,7 @@
 package com.ssafy.undaied.socket.chat.service;
 
 import com.corundumstudio.socketio.SocketIONamespace;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.undaied.socket.chat.dto.request.AIRequestDto;
 import com.ssafy.undaied.socket.chat.dto.response.AIInputDataDto;
 import com.ssafy.undaied.socket.chat.dto.response.AINumberDto;
@@ -137,6 +138,7 @@ public class JsonAIChatService {
         AIRequestDto aiRequestDto = createAIRequest(gameId, true);  // Gemini용
         if (aiRequestDto != null) {
             final int aiNumber = aiRequestDto.getAi_num();
+            log.info("ai에 보내는 요청 {}", aiRequestDto);
             webClient.post()
                     .uri("/api/gemini/{gameId}", gameId)
                     .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -164,6 +166,7 @@ public class JsonAIChatService {
         AIRequestDto aiRequestDto = createAIRequest(gameId, false);  // ChatGPT용
         if (aiRequestDto != null) {
             final int aiNumber = aiRequestDto.getAi_num();
+            log.info("ai에 보내는 요청 {}", aiRequestDto);
             webClient.post()
                     .uri("/api/chatgpt/{gameId}", gameId)
                     .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -190,6 +193,7 @@ public class JsonAIChatService {
 
         AIRequestDto aiRequestDto = createAIRequest(gameId, true);  // Gemini용
         if (aiRequestDto != null) {
+            log.info("ai에 보내는 요청 {}", aiRequestDto);
             final int aiNumber = aiRequestDto.getAi_num();
             webClient.post()
                     .uri("/api/gemini/{gameId}", gameId)
@@ -240,6 +244,12 @@ public class JsonAIChatService {
     private void handleAIResponse(int gameId, GameChatResponseDto response, String originalStage) {
         if(response==null){
             log.info("AI응답이 null입니다-gameId:{}", gameId);
+            return;
+        }
+
+        // content 유효성 체크 추가
+        if(response.getContent() == null || response.getContent().trim().isEmpty()){
+            log.info("AI응답의 content가 비어있습니다-gameId:{}", gameId);
             return;
         }
 
