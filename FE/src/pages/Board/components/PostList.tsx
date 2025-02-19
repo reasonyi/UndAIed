@@ -3,7 +3,8 @@ import { boardRefreshState } from "../../../store/boardState";
 import { PostListProps, Post } from "../../../types/board";
 import WriteButton from "./WriteButton";
 import { useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 function PostList({
   currentPosts,
   postPerPage,
@@ -12,6 +13,25 @@ function PostList({
 }: PostListProps) {
   const boardRefresh = useRecoilValue(boardRefreshState);
   console.log(currentPosts);
+
+  interface JWTPayload {
+    roles: string;
+  }
+
+  const userData = localStorage.getItem("userPersist");
+  const token = JSON.parse(userData!).userState.token;
+  const decodeToken = (token: string) => {
+    if (!token) return null;
+    try {
+      return jwtDecode<JWTPayload>(token);
+    } catch (error) {
+      console.log("jwt decode error", error);
+    }
+  };
+
+  const { category } = useParams<{ category: string }>();
+  const userRole = decodeToken(token)?.roles;
+  console.log(userRole);
   useEffect(() => {}, [boardRefresh]);
   return (
     <main className="w-full max-w-[1260px] mx-auto">
@@ -50,8 +70,12 @@ function PostList({
           </tbody>
         </table>
       </div>
-
-      <WriteButton />
+      {category === "notice" && userRole === "ROLE_ADMIN" ? (
+        <WriteButton />
+      ) : (
+        <></>
+      )}
+      {category === "bugreport" && <WriteButton />}
     </main>
   );
 }
