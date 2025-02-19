@@ -43,7 +43,7 @@ export interface Category {
 export interface BoardRequest {
   title: string;
   content: string;
-  category: "0" | "1";
+  category: number;
 }
 export interface UpdatePostParams {
   id: number;
