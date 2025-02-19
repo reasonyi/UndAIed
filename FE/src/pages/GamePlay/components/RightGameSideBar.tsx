@@ -59,6 +59,7 @@ function RightGameSideBar({
                   <DiedProfile
                     nickname={`익명${players[0].number}`}
                     icon={iconArr[players[0].number]}
+                    playerNum={players[0].number}
                   />
                 ) : (
                   <GameProfile
@@ -80,6 +81,7 @@ function RightGameSideBar({
                   <DiedProfile
                     nickname={`익명${players[1].number}`}
                     icon={iconArr[players[1].number]}
+                    playerNum={players[1].number}
                   />
                 ) : (
                   <GameProfile
@@ -101,6 +103,7 @@ function RightGameSideBar({
                   <DiedProfile
                     nickname={`익명${players[2].number}`}
                     icon={iconArr[players[2].number]}
+                    playerNum={players[2].number}
                   />
                 ) : (
                   <GameProfile
@@ -122,6 +125,7 @@ function RightGameSideBar({
                   <DiedProfile
                     nickname={`익명${players[3].number}`}
                     icon={iconArr[players[3].number]}
+                    playerNum={players[3].number}
                   />
                 ) : (
                   <GameProfile
@@ -143,6 +147,7 @@ function RightGameSideBar({
                   <DiedProfile
                     nickname={`익명${players[4].number}`}
                     icon={iconArr[players[4].number]}
+                    playerNum={players[4].number}
                   />
                 ) : (
                   <GameProfile
@@ -164,6 +169,7 @@ function RightGameSideBar({
                   <DiedProfile
                     nickname={`익명${players[5].number}`}
                     icon={iconArr[players[5].number]}
+                    playerNum={players[5].number}
                   />
                 ) : (
                   <GameProfile
@@ -185,6 +191,7 @@ function RightGameSideBar({
                   <DiedProfile
                     nickname={`익명${players[6].number}`}
                     icon={iconArr[players[6].number]}
+                    playerNum={players[6].number}
                   />
                 ) : (
                   <GameProfile
@@ -206,6 +213,7 @@ function RightGameSideBar({
                   <DiedProfile
                     nickname={`익명${players[7].number}`}
                     icon={iconArr[players[7].number]}
+                    playerNum={players[7].number}
                   />
                 ) : (
                   <GameProfile
