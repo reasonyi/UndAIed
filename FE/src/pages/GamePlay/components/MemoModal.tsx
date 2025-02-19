@@ -43,7 +43,7 @@ function MemoModal({ isOpen, onClose, playerNum }: MemoModalProps) {
         className="bg-black w-96 p-4 rounded shadow text-white opacity-100"
         onClick={handleModalClick}
       >
-        <h2 className="text-xl font-bold mb-2">메모</h2>
+        <h2 className="text-xl font-bold mb-2">추리</h2>
         <textarea
           className="w-full h-32 p-2 border bg-gray-950 border-gray-600 rounded focus:border-gray-500 focus:outline-none"
           value={userMemos[playerNum - 1].memo}

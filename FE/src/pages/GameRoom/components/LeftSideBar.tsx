@@ -12,6 +12,7 @@ import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Socket } from "socket.io-client";
 import { IPlayer } from "../../../types/gameroom";
+import { toast } from "sonner";
 
 interface ILeftSideBarProps {
   roomId?: number;
@@ -45,6 +46,19 @@ function LeftSideBar({
 }: ILeftSideBarProps) {
   const [isOpen, setIsOpen] = useState(false);
   console.log("프로필 이미지 번호: ", player?.profileImage);
+
+  const copyCurrentURL = () => {
+    const url = window.location.href;
+    navigator.clipboard
+      .writeText(url)
+      .then(() => {
+        toast.success("URL이 복사되었습니다!");
+      })
+      .catch((err) => {
+        toast.error("URL 복사 실패: ", err);
+      });
+  };
+
   return (
     <>
       <button
@@ -125,7 +139,7 @@ function LeftSideBar({
                 className="text-white p-1 w-[1.25rem] h-[1.25rem]"
               />
             </button>
-            <button>
+            <button onClick={copyCurrentURL}>
               <FontAwesomeIcon
                 icon={userGroup}
                 className="text-white p-1 w-[1.25rem] h-[1.25rem]"
