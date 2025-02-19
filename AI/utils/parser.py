@@ -1,20 +1,58 @@
-import re
+# temporarly deprecated
+
+
+import re, json
 from collections import defaultdict
+from fastapi import HTTPException
 
 
 #######################
+# def AI_response_parser(response: str) -> dict:
+#     # "content"의 값을 찾는 정규식 패턴
+#     pattern = r'"content"\s*:\s*"([^"]*)'  # 끝 따옴표 매칭 제거
+
+#     # 정규식으로 매칭
+#     match = re.search(pattern, response)
+
+#     if not match:
+#         return {"content": "응답을 파싱할 수 없습니다"}
+
+#     # 매칭된 값 반환
+#     return {"content": match.group(1)}
+
 def AI_response_parser(response: str) -> dict:
-    # "content"의 값을 찾는 정규식 패턴
-    pattern = r'"content"\s*:\s*"([^"]*)'  # 끝 따옴표 매칭 제거
+    # 3) 응답 문자열에서 {} 형태의 JSON 추출
+    matched_json = re.search(r"\{.*\}", response, flags=re.DOTALL)
+    if not matched_json:
+        # JSON 형태를 찾지 못한 경우
+        return {
+            "error": "No valid JSON object found in the ChatGPT response.",
+            "raw_response": response
+        }
 
-    # 정규식으로 매칭
-    match = re.search(pattern, response)
+    # 4) 추출된 JSON 파싱 후 'content' 필드 반환
+    extracted_json_str = matched_json.group(0).strip()
+    try:
+        extracted_json:dict = json.loads(extracted_json_str)
+    except json.JSONDecodeError as e:
+        # 혹시 추출된 부분이 JSON으로 파싱되지 않는 경우 예외 처리
+        raise HTTPException(
+            status_code=500,
+            detail=f"Extracted string is not valid JSON: {str(e)}"
+        )
 
-    if not match:
-        return {"content": "응답을 파싱할 수 없습니다"}
+    final_content = extracted_json.get("content", None)
+    if final_content is None:
+        return {
+            "error": "'content' field not found in the extracted JSON.",
+            "extracted_json": extracted_json
+        }
 
-    # 매칭된 값 반환
-    return {"content": match.group(1)}
+    # 최종 응답
+    return {
+        "content": final_content
+    }
+
 
 
 #######################

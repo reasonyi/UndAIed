@@ -120,7 +120,16 @@ ILeftGameSideBarProps) {
                 className="text-white p-1 w-[1.25rem] h-[1.25rem]"
               />
             </button>
-            <button>
+            <button
+              onClick={(event) => {
+                event.preventDefault();
+                window.open(
+                  "/board/bugreport",
+                  "_blank",
+                  "noopener,noreferrer"
+                );
+              }}
+            >
               <FontAwesomeIcon
                 icon={circleExclamation}
                 className="text-white p-1 w-[1.25rem] h-[1.25rem]"

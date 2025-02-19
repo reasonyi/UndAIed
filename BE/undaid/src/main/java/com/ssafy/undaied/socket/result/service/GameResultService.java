@@ -14,7 +14,6 @@ import com.ssafy.undaied.domain.game.entity.Subjects;
 import com.ssafy.undaied.domain.game.entity.respository.GameRecordsRepository;
 import com.ssafy.undaied.domain.game.entity.respository.GamesRepository;
 import com.ssafy.undaied.domain.game.entity.respository.SubjectsRepository;
-import com.ssafy.undaied.socket.chat.service.AIChatService;
 import com.ssafy.undaied.socket.chat.service.JsonAIChatService;
 import com.ssafy.undaied.socket.common.exception.SocketErrorCode;
 import com.ssafy.undaied.socket.common.exception.SocketException;

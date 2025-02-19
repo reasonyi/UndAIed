@@ -5,6 +5,8 @@ import com.ssafy.undaied.socket.chat.dto.request.AIRequestDto;
 import com.ssafy.undaied.socket.chat.dto.response.AIInputDataDto;
 import com.ssafy.undaied.socket.chat.dto.response.AINumberDto;
 import com.ssafy.undaied.socket.chat.dto.response.GameChatResponseDto;
+import com.ssafy.undaied.socket.json.dto.JsonRoundInfoDto;
+import com.ssafy.undaied.socket.json.service.JsonSendService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -43,6 +45,7 @@ public class JsonAIChatService {
     private final RedisTemplate<String, String> redisTemplate;
     private final SocketIONamespace namespace;
     private final TaskScheduler taskScheduler;
+    private final JsonSendService jsonSendService;
 
     private final Map<Integer, Map<String, ScheduledFuture<?>>> aiGameSchedulers = new ConcurrentHashMap<>();
 
@@ -134,7 +137,8 @@ public class JsonAIChatService {
         AIRequestDto aiRequestDto = createAIRequest(gameId, true);  // Gemini용
         if (aiRequestDto != null) {
             webClient.post()
-                    .uri("/api/gemini/{gameId}/")
+                    .uri("/api/gemini/{gameId}", gameId)
+                    .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                     .contentType(MediaType.APPLICATION_JSON)
                     .bodyValue(aiRequestDto)
                     .retrieve()
@@ -155,7 +159,8 @@ public class JsonAIChatService {
         AIRequestDto aiRequestDto = createAIRequest(gameId, false);  // ChatGPT용
         if (aiRequestDto != null) {
             webClient.post()
-                    .uri("/api/chatgpt/{gameId}")
+                    .uri("/api/gemini/{gameId}", gameId)
+                    .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                     .contentType(MediaType.APPLICATION_JSON)
                     .bodyValue(aiRequestDto)
                     .retrieve()
@@ -168,6 +173,29 @@ public class JsonAIChatService {
         }
     }
 
+    //            webClient.post()
+//                    .uri("/api/ai/{gameId}/", gameId)
+//                    .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+//                    .bodyValue(sendData)
+//                    .retrieve()
+//                    .bodyToFlux(GameChatResponseDto.class)
+//                    .doOnNext(response -> log.info("✅ AI 응답: {}", response))
+//                    .doOnError(error -> log.error("❌ AI 응답 오류", error))
+//                    .collectList()
+//                    .flatMapMany(responses -> {
+//                        return Flux.fromIterable(responses)
+//                                .concatMap(response -> {
+//                                    int delay = MIN_CHAT_DELAY + random.nextInt(MAX_CHAT_DELAY - MIN_CHAT_DELAY);
+//                                    return Mono.just(response)
+//                                            .delayElement(Duration.ofMillis(delay));
+//                                });
+//                    })
+//                    .subscribe(
+//                            response -> handleAIResponse(gameId, response, currentStage),
+//                            error -> log.error("AI 서버 통신 실패 - gameId: {}", gameId, error)
+//                    );
+
+
     private void handleGeminiFreeDebate(int gameId) {
         if (!isValidStage(gameId, "free_debate")) {
             return;
@@ -176,7 +204,8 @@ public class JsonAIChatService {
         AIRequestDto aiRequestDto = createAIRequest(gameId, true);  // Gemini용
         if (aiRequestDto != null) {
             webClient.post()
-                    .uri("/api/gemini/{gameId}/")
+                    .uri("/api/gemini/{gameId}", gameId)
+                    .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                     .contentType(MediaType.APPLICATION_JSON)
                     .bodyValue(aiRequestDto)
                     .retrieve()
@@ -197,7 +226,8 @@ public class JsonAIChatService {
         AIRequestDto aiRequestDto = createAIRequest(gameId, false);  // ChatGPT용
         if (aiRequestDto != null) {
             webClient.post()
-                    .uri("/api/chatgpt/{gameId}")
+                    .uri("/api/gemini/{gameId}", gameId)
+                    .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                     .contentType(MediaType.APPLICATION_JSON)
                     .bodyValue(aiRequestDto)
                     .retrieve()
@@ -292,8 +322,7 @@ public class JsonAIChatService {
                 return null;
             }
 
-            String AIData = null;
-            //String AIData=//선희DTO//
+            Map<Integer, JsonRoundInfoDto> AIData=sendGameData(gameId);
 
             return AIRequestDto.builder()
                     .ai_num(mainAiNum)
@@ -346,5 +375,17 @@ public class JsonAIChatService {
             }
         }
         return null;
+    }
+    private Map<Integer, JsonRoundInfoDto> sendGameData(Integer gameId) {
+        String roundKey = String.format("game:%d:round", gameId);
+        Integer currentRound = Integer.parseInt(redisTemplate.opsForValue().get(roundKey).toString());
+
+        Map<Integer, JsonRoundInfoDto> roundsMap = new HashMap<>();
+        for (Integer i=1; i<= currentRound; i++) {
+            JsonRoundInfoDto round = jsonSendService.getSendData(gameId, i);
+            roundsMap.put(i, round);
+        }
+
+        return roundsMap;
     }
 }
