@@ -44,18 +44,18 @@ function Header({ scrollRatio }: IHeaderProps) {
               </Link>
             </li>
             <li className="ml-12">
-              <Link to="/board/notice" className="font-medium">
+              <Link to="/board/notice" className="font-medium text-gray-300">
                 공지사항
               </Link>
             </li>
             <li className="ml-12">
-              <Link to="/board/bugreport" className="font-medium">
+              <Link to="/board/bugreport" className="font-medium text-gray-300">
                 버그리포트
               </Link>
             </li>
           </div>
 
-          <li className="mr-8">
+          <li className="mr-8 text-gray-300">
             {!isLogin ? (
               <HashLink to="/#login" smooth className="font-semibold">
                 로그인
