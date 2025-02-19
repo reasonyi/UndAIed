@@ -32,7 +32,7 @@ public class GameChatService {
     private final RedisTemplate<String, Object> jsonRedisTemplate;
     private final Random random = new Random();
     private final SocketIONamespace namespace;
-    private final AIChatService aiChatService;
+    private final JsonAIChatService jsonAIChatService;
 
     public void sendSubject(int gameId) {
         log.debug("🍳여기는 들어오겠지");
@@ -87,7 +87,7 @@ public class GameChatService {
 
         log.info("Selected subject {} for game {} round {}", subjectId, gameId, currentRound);
         namespace.getRoomOperations("game:" + gameId).sendEvent("game:chat:send", sendSubjectResponseDto);
-        aiChatService.startGameMessageScheduling(gameId);
+        jsonAIChatService.startGameMessageScheduling(gameId);
     }
 
     private boolean hasUserSpokenInSubjectDebate(Integer gameId, String round, int number) {

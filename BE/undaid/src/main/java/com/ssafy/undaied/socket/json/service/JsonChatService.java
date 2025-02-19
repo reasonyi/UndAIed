@@ -34,15 +34,20 @@ public class JsonChatService {
         String subjectChatKey = String.format("game:%d:round:%d:subjectchats", gameId, round);
         List<ChatDto> subjectList = new ArrayList<>();
 
+        if (!redisTemplate.hasKey(subjectChatKey)) {
+            log.debug("🍳No subject Key for game:{} and round:{}", gameId, round);
+            return subjectList;
+        }
+
         String subjectChatStr = redisTemplate.opsForValue().get(subjectChatKey).toString();
 
         if (subjectChatStr == null || subjectChatStr.trim().isEmpty()) {
-            log.debug("No subject data found for game:{} and round:{}", gameId, round);
+            log.debug("🍳No subject data found for game:{} and round:{}", gameId, round);
             return subjectList;
         }
 
         String[] subjectChats = subjectChatStr.split("\\s*\\|\\s*");
-        log.debug("subjectChats: {}", Arrays.stream(subjectChats).toList());
+        log.debug("🍳subjectChats: {}", Arrays.stream(subjectChats).toList());
 
         for (String chat : subjectChats) {
             log.debug(chat.trim());
@@ -66,15 +71,20 @@ public class JsonChatService {
         String freeChatKey = String.format("game:%d:round:%d:freechats", gameId, round);
         List<ChatDto> freeList = new ArrayList<>();
 
+        if(!redisTemplate.hasKey(freeChatKey)) {
+            log.debug("🍳No free Key for game:{} and round:{}", gameId, round);
+            return freeList;
+        }
+
         String freeChatStr = redisTemplate.opsForValue().get(freeChatKey).toString();
 
         if (freeChatStr == null || freeChatStr.trim().isEmpty()) {
-            log.debug("No subject data found for game:{} and round:{}", gameId, round);
+            log.debug("🍳No subject data found for game:{} and round:{}", gameId, round);
             return freeList;
         }
 
         String[] freeChats = freeChatStr.split("\\s*\\|\\s*");
-        log.debug("freeChats: {}", Arrays.stream(freeChats).toList());
+        log.debug("🍳freeChats: {}", Arrays.stream(freeChats).toList());
 
         for (String chat : freeChats) {
             log.debug(chat.trim());
