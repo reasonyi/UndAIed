@@ -51,7 +51,7 @@ async def chatgpt_api(request: Request):
         return {"content": "주제가 아직 주어지지 않았습니다.", "flag": False}
     elif not topic_debate:
         current_situation = f"현재 {round}라운드 주제토론[topic_debate] 시간입니다. output 구조에 맞춰서 주제에 대한 대답을 반드시 생성하세요.\n이번 라운드 주제 : {topic}"
-    elif not event:
+    else:
         current_situation = f"현재 {round}라운드 자유토론[free_debate] 시간입니다. output 구조에 맞춰서 대답을 생성하세요"
 
     try:
