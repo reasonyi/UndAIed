@@ -27,7 +27,11 @@ import { IAnonimus, IGameResultSend } from "../../types/gameplay";
 import { toast } from "sonner";
 import { STAGE_INFO } from "./components/info";
 import { useRecoilState } from "recoil";
-import { isGameEndState, isUserDiedState } from "../../store/gamePlayState";
+import {
+  isGameEndState,
+  isUserDiedState,
+  userMemoState,
+} from "../../store/gamePlayState";
 import GameEndModal from "./components/GameEndModal";
 
 interface IChatSend {
