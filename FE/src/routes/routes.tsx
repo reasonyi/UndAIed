@@ -3,14 +3,21 @@ import App from "../App";
 import NotFound from "../pages/NotFound";
 import Home from "../pages/Home";
 import Policy from "../pages/Policy";
+<<<<<<< HEAD
 import GameRooms from "../pages/GameRooms";
 import GameLobby from "../pages/GameLobby";
 import GameChats from "../pages/GameChats";
+=======
+import GameRoom from "../pages/GameRoom/GameRoom";
+import GamePlay from "../pages/GamePlay/GamePlay";
+import GameMain from "../pages/GameMain/GameMain";
+>>>>>>> release
 import BoardDetails from "../pages/BoardDetails";
 import Board from "../pages/Board/Board";
 import User from "../pages/User";
 import Log from "../pages/Log";
 import BoardWrite from "../pages/BoardWrite";
+<<<<<<< HEAD
 
 const router = createBrowserRouter([
     {
@@ -66,5 +73,84 @@ const router = createBrowserRouter([
         errorElement: <NotFound />
     }
 ])
+=======
+import Friends from "../pages/Friends/Friends";
+import Game from "../pages/Game/Game";
+import GameMyPage from "../pages/GameMyPage/GameMyPage";
+import Signup from "../pages/Signup";
+
+const router = createBrowserRouter([
+  {
+    // 모든 라우터들의 컨테이너 개념. home router도 이 하위에 작성한다다
+    path: "/",
+    element: <App />,
+    children: [
+      {
+        path: "",
+        element: <Home />,
+      },
+      {
+        path: "/policy",
+        element: <Policy />,
+      },
+      {
+        path: "/signup",
+        element: <Signup />,
+      },
+      {
+        path: "/game",
+        element: <Game />,
+        children: [
+          {
+            path: "",
+            element: <GameMain />,
+          },
+          {
+            path: "room/:number",
+            element: <GameRoom />,
+          },
+          {
+            path: "play/:number",
+            element: <GamePlay />,
+          },
+        ],
+      },
+      {
+        path: "/board/:category/:number",
+        element: <BoardDetails />,
+      },
+      {
+        path: "/board/:category",
+        element: <Board />,
+      },
+      {
+        path: "/board",
+        element: <Board />,
+      },
+      {
+        path: "/write",
+        element: <BoardWrite />,
+      },
+      {
+        path: "/user/:userId",
+        element: <User />,
+      },
+      {
+        path: "/log/:gameId",
+        element: <Log />,
+      },
+      {
+        path: "/friends",
+        element: <Friends />,
+      },
+      {
+        path: "/gamemypage",
+        element: <GameMyPage />,
+      },
+    ],
+    errorElement: <NotFound />,
+  },
+]);
+>>>>>>> release
 
 export default router;
