@@ -46,8 +46,6 @@ public class GameInitHandler {
     public void init() {
         namespace.addEventListener("game:init:emit", Object.class, (client, data, ackRequest) -> {
             try {
-                log.info("게임 초기화 요청 확인");
-
                 // 클라이언트가 속한 방 찾기
                 Set<String> rooms = client.getAllRooms();
                 String roomKey = rooms.stream()
@@ -72,11 +70,8 @@ public class GameInitHandler {
                     log.info("방 목록 업데이트 및 대기방 삭제");
 
                     gameInitService.broadcastGameInit(gameId);
-                    log.info("게임 초기화 완료 - gameId: {}, roomId: {}", gameId, roomId);
 
-                    log.info("ACK 요청 확인: {}", ackRequest);
                     sendResponse(ackRequest, true, null);
-                    log.info("ACK 요청 보냄");
 
                     log.info("게임 시작");
                     stageService.handleGameStart(gameId);
@@ -112,8 +107,6 @@ public class GameInitHandler {
 
                 Integer assignedNumber = (assignedNumberStr != null) ? Integer.parseInt(assignedNumberStr) : null;
 
-                log.info("Game info requested - gameId: {}, userId: {}, assignedNumber: {}", gameId, userId, assignedNumber);
-
                 // ✅ `NumberResponseDto` 객체 생성
                 NumberResponseDto numberResponse = NumberResponseDto.builder()
                         .number(assignedNumber)
@@ -148,7 +141,6 @@ public class GameInitHandler {
             }
 
             ackRequest.sendAckData(response);
-            log.info("📢 Sending ACK Response: {}", response);
         }
     }
 }
