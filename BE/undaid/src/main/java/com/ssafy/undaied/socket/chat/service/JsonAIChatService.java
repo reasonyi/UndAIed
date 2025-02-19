@@ -1,10 +1,7 @@
 package com.ssafy.undaied.socket.chat.service;
 
 import com.corundumstudio.socketio.SocketIONamespace;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.undaied.socket.chat.dto.request.AIRequestDto;
-import com.ssafy.undaied.socket.chat.dto.response.AIInputDataDto;
-import com.ssafy.undaied.socket.chat.dto.response.AINumberDto;
 import com.ssafy.undaied.socket.chat.dto.response.GameChatResponseDto;
 import com.ssafy.undaied.socket.json.dto.JsonRoundInfoDto;
 import com.ssafy.undaied.socket.json.service.JsonSendService;
@@ -16,8 +13,6 @@ import org.springframework.http.MediaType;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 import java.time.Instant;

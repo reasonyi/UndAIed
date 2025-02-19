@@ -126,7 +126,7 @@ public class GameResultService {
 
     public void gameEnd(int gameId, String winner) throws SocketException {
         try {
-            log.info("게임 종료 과정이 시행됩니다.: {}", gameId);
+            log.debug("게임 종료 과정이 시행됩니다.: {}", gameId);
 
             updateGameEndStatus(gameId, winner);
             // 게임 결과 발표
@@ -136,7 +136,7 @@ public class GameResultService {
 
             // AI 메시지 스케줄링 중지
             jsonAIChatService.stopGameMessageScheduling(gameId);
-            log.info("Stopped AI message scheduling for game: {}", gameId);
+            log.info("AI 메시지 스케줄링 중지: {}", gameId);
 
             // 플레이어 로비로 이동
             movePlayersToLobby(gameId);
@@ -144,7 +144,7 @@ public class GameResultService {
 
             saveGameResult(gameId);
 
-            log.info("게임 종료가 성공적으로 진행됐습니다.: {}", gameId);
+            log.debug("게임 종료가 성공적으로 진행됐습니다.: {}", gameId);
         } catch (Exception e) {
             log.error("게임 종료 과정 중 에러가 발생했습니다. {}: {}", gameId, e.getMessage());
             throw new SocketException(GAME_END_PROCESS_FAILED);
@@ -239,7 +239,7 @@ public class GameResultService {
                 client.leaveRoom(GAME_KEY_PREFIX + gameId);
                 client.joinRoom(LOBBY_ROOM);
             }
-            log.info("백엔드상 게임방 나가기 처리됩니다");
+            log.debug("백엔드상 게임방 나가기 처리됩니다");
         } catch (Exception e) {
             log.error("백엔드상 게임방 나가기 처리 중 에러가 발생했습니다. {}: {}", gameId, e.getMessage());
             throw new SocketException(ROOM_OPERATION_FAILED);
