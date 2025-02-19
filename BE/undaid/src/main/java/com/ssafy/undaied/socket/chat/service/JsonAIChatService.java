@@ -136,6 +136,7 @@ public class JsonAIChatService {
 
         AIRequestDto aiRequestDto = createAIRequest(gameId, true);  // Gemini용
         if (aiRequestDto != null) {
+            final int aiNumber = aiRequestDto.getAi_num();
             webClient.post()
                     .uri("/api/gemini/{gameId}", gameId)
                     .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -143,6 +144,10 @@ public class JsonAIChatService {
                     .bodyValue(aiRequestDto)
                     .retrieve()
                     .bodyToMono(GameChatResponseDto.class)
+                    .map(response -> {
+                        response.setNumber(aiNumber);
+                        return response;
+                    })
                     .delayElement(Duration.ofMillis(MIN_CHAT_DELAY + random.nextInt(MAX_CHAT_DELAY - MIN_CHAT_DELAY)))
                     .subscribe(
                             response -> handleAIResponse(gameId, response, "subject_debate"),
@@ -158,13 +163,18 @@ public class JsonAIChatService {
 
         AIRequestDto aiRequestDto = createAIRequest(gameId, false);  // ChatGPT용
         if (aiRequestDto != null) {
+            final int aiNumber = aiRequestDto.getAi_num();
             webClient.post()
-                    .uri("/api/gemini/{gameId}", gameId)
+                    .uri("/api/chatgpt/{gameId}", gameId)
                     .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                     .contentType(MediaType.APPLICATION_JSON)
                     .bodyValue(aiRequestDto)
                     .retrieve()
                     .bodyToMono(GameChatResponseDto.class)
+                    .map(response -> {
+                        response.setNumber(aiNumber);
+                        return response;
+                    })
                     .delayElement(Duration.ofMillis(MIN_CHAT_DELAY + random.nextInt(MAX_CHAT_DELAY - MIN_CHAT_DELAY)))
                     .subscribe(
                             response -> handleAIResponse(gameId, response, "subject_debate"),
@@ -173,29 +183,6 @@ public class JsonAIChatService {
         }
     }
 
-    //            webClient.post()
-//                    .uri("/api/ai/{gameId}/", gameId)
-//                    .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-//                    .bodyValue(sendData)
-//                    .retrieve()
-//                    .bodyToFlux(GameChatResponseDto.class)
-//                    .doOnNext(response -> log.info("✅ AI 응답: {}", response))
-//                    .doOnError(error -> log.error("❌ AI 응답 오류", error))
-//                    .collectList()
-//                    .flatMapMany(responses -> {
-//                        return Flux.fromIterable(responses)
-//                                .concatMap(response -> {
-//                                    int delay = MIN_CHAT_DELAY + random.nextInt(MAX_CHAT_DELAY - MIN_CHAT_DELAY);
-//                                    return Mono.just(response)
-//                                            .delayElement(Duration.ofMillis(delay));
-//                                });
-//                    })
-//                    .subscribe(
-//                            response -> handleAIResponse(gameId, response, currentStage),
-//                            error -> log.error("AI 서버 통신 실패 - gameId: {}", gameId, error)
-//                    );
-
-
     private void handleGeminiFreeDebate(int gameId) {
         if (!isValidStage(gameId, "free_debate")) {
             return;
@@ -203,6 +190,7 @@ public class JsonAIChatService {
 
         AIRequestDto aiRequestDto = createAIRequest(gameId, true);  // Gemini용
         if (aiRequestDto != null) {
+            final int aiNumber = aiRequestDto.getAi_num();
             webClient.post()
                     .uri("/api/gemini/{gameId}", gameId)
                     .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -210,6 +198,10 @@ public class JsonAIChatService {
                     .bodyValue(aiRequestDto)
                     .retrieve()
                     .bodyToMono(GameChatResponseDto.class)
+                    .map(response -> {
+                        response.setNumber(aiNumber);
+                        return response;
+                    })
                     .delayElement(Duration.ofMillis(MIN_CHAT_DELAY + random.nextInt(MAX_CHAT_DELAY - MIN_CHAT_DELAY)))
                     .subscribe(
                             response -> handleAIResponse(gameId, response, "free_debate"),
@@ -225,13 +217,18 @@ public class JsonAIChatService {
 
         AIRequestDto aiRequestDto = createAIRequest(gameId, false);  // ChatGPT용
         if (aiRequestDto != null) {
+            final int aiNumber = aiRequestDto.getAi_num();
             webClient.post()
-                    .uri("/api/gemini/{gameId}", gameId)
+                    .uri("/api/chatgpt/{gameId}", gameId)
                     .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                     .contentType(MediaType.APPLICATION_JSON)
                     .bodyValue(aiRequestDto)
                     .retrieve()
                     .bodyToMono(GameChatResponseDto.class)
+                    .map(response -> {
+                        response.setNumber(aiNumber);
+                        return response;
+                    })
                     .delayElement(Duration.ofMillis(MIN_CHAT_DELAY + random.nextInt(MAX_CHAT_DELAY - MIN_CHAT_DELAY)))
                     .subscribe(
                             response -> handleAIResponse(gameId, response, "free_debate"),
