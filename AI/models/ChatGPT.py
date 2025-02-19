@@ -4,6 +4,7 @@ from openai.types.chat.completion_create_params import CompletionCreateParams
 from environs import Env
 
 # from .prompt import prompt
+# deprecated
 
 
 class ChatGPTBot:

@@ -1,7 +1,7 @@
 import google.generativeai as genai
 from environs import Env
 # from .prompt import prompt
-
+# deprecated
 
 class GeminiBot:
     def __init__(self):

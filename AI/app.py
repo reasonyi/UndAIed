@@ -18,9 +18,8 @@ class Request(BaseModel):
 
 
 @app.post("/api/ai/{game_id}/", status_code=status.HTTP_200_OK)
-async def create_message(request:Request):
+async def create_message(request: Request):
     return request.message
-
 
 
 @app.post("/api/chatgpt/{game_id}", status_code=status.HTTP_201_CREATED)
@@ -42,7 +41,7 @@ async def chatgpt_api(request: Request):
     # user_prompt와 round 번호
     game_progress = str(request.message)
     round = int(max(request.message.keys()))
-    phase = request.message[f"{round}"]
+    phase:dict = request.message[f"{round}"]
     topic = phase.get("topic")  # 현재 라운드의 주제
     topic_debate = phase.get("topic_debate")  # 현재 라운드의 주제토론 내용
     # free_debate = phase["free_debate"]  # 현재 라운드의 자유토론 내용
@@ -52,7 +51,7 @@ async def chatgpt_api(request: Request):
         return {"content": "주제가 아직 주어지지 않았습니다.", "flag": False}
     elif not topic_debate:
         current_situation = f"현재 {round}라운드 주제토론[topic_debate] 시간입니다. output 구조에 맞춰서 주제에 대한 대답을 반드시 생성하세요.\n이번 라운드 주제 : {topic}"
-    elif not event:
+    else:
         current_situation = f"현재 {round}라운드 자유토론[free_debate] 시간입니다. output 구조에 맞춰서 대답을 생성하세요"
 
     try:
@@ -68,6 +67,7 @@ async def chatgpt_api(request: Request):
                     },
                 ],
                 response_format={"type": "json_object"},
+                temperature=1
             )
             .choices[0]
             .message.content
@@ -135,7 +135,7 @@ async def gemini_api(request: Request):
     # user_prompt와 round 번호
     game_progress = str(request.message)
     round = int(max(request.message.keys()))
-    phase = request.message[f"{round}"]
+    phase:dict = request.message[f"{round}"]
     topic = phase.get("topic")  # 현재 라운드의 주제
     topic_debate = phase.get("topic_debate")  # 현재 라운드의 주제토론 내용
     # free_debate = phase["free_debate"]  # 현재 라운드의 자유토론 내용
@@ -195,13 +195,9 @@ async def gemini_api(request: Request):
 """
 
 
-
 """
 어째서인지 리팩토링 전이 대답이 더 기깔나는 것 같다
 """
-
-
-
 
 
 # # 실험적 리팩토링
@@ -299,7 +295,7 @@ async def gemini_api(request: Request):
 #     game_progress = str(request.message)
 #     round_num = int(max(request.message.keys()))
 #     phase = GamePhase(request.message[f"{round_num}"])
-    
+
 #     current_situation = get_current_situation(round_num, phase)
 #     if current_situation is None:
 #         return {"content": "주제가 아직 주어지지 않았습니다.", "flag": False}
@@ -360,7 +356,7 @@ async def gemini_api(request: Request):
 #     game_progress = str(request.message)
 #     round_num = int(max(request.message.keys()))
 #     phase = GamePhase(request.message[f"{round_num}"])
-    
+
 #     current_situation = get_current_situation(round_num, phase)
 #     if current_situation is None:
 #         return {"content": "주제가 아직 주어지지 않았습니다.", "flag": False}
