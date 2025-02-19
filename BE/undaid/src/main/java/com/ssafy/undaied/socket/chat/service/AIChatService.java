@@ -395,6 +395,7 @@ public class AIChatService {
     private Map<Integer, JsonRoundInfoDto> sendGameData(Integer gameId) {
         String roundKey = String.format("game:%d:round", gameId);
         Integer currentRound = Integer.parseInt(redisTemplate.opsForValue().get(roundKey).toString());
+
         Map<Integer, JsonRoundInfoDto> roundsMap = new HashMap<>();
         for (Integer i=1; i<= currentRound; i++) {
             JsonRoundInfoDto round = jsonSendService.getSendData(gameId, i);

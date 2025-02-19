@@ -8,9 +8,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -21,8 +19,8 @@ public class JsonChatService {
 
     public String getSubjectTopic(Integer gameId, Integer round) {
         log.debug("🍳Start getting subject topic Id...");
-        String subjectKey = String.format("game:%d:round:%d:used_subjects", gameId, round);
-        Integer subjectId = Integer.parseInt(redisTemplate.opsForValue().get(subjectKey).toString());
+        String subjectKey = String.format("game:%d:subjects", gameId);
+        Integer subjectId = Integer.parseInt(redisTemplate.opsForHash().get(subjectKey, String.valueOf(round)).toString());
         log.debug("🍳Subject debate topic ID : {}", subjectId);
 
         String topic = SubjectUtil.SUBJECTS.get(subjectId);

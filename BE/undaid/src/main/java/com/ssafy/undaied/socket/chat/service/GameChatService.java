@@ -35,19 +35,28 @@ public class GameChatService {
     private final AIChatService aiChatService;
 
     public void sendSubject(int gameId) {
+        log.debug("🍳여기는 들어오겠지");
         String gameKey = "game:" + gameId;
         String roundKey = gameKey + ":round";
+        String subjectKey = String.format("game:%d:subjects", gameId);
         String currentRound = redisTemplate.opsForValue().get(roundKey);
 
-        // 해당 게임에서 지금까지 사용된 모든 주제 확인
-        Set<String> usedSubjects = new HashSet<>();
-        for (int round = 1; round <= Integer.parseInt(currentRound); round++) {
-            String roundSubjectKey = String.format("%s:round:%d:used_subjects", gameKey, round);
-            String usedSubject = redisTemplate.opsForValue().get(roundSubjectKey);
-            if (usedSubject != null) {
-                usedSubjects.add(usedSubject);
+        log.debug("🍳여기도 들어올 거 같은데....");
+        Set<Integer> usedSubjects = new HashSet<>();
+        if (redisTemplate.hasKey(subjectKey)) {
+            log.debug("🍳여기가 문제인가요....?");
+            Map<Object, Object> subjectMap = redisTemplate.opsForHash().entries(subjectKey);
+            if (!subjectMap.isEmpty()) {
+                log.debug("🍳GameId : {}, Used subjects size : {}", gameId, subjectMap.size());
+                for (Map.Entry<Object, Object> entry : subjectMap.entrySet()) {
+                        usedSubjects.add(Integer.parseInt(entry.getValue().toString()));
+                        log.debug("🍳{} round used Subject : {}", entry.getKey(), entry.getValue());
+                }
             }
+        } else {
+            log.debug("🍳No subjects used yet for game: {}", gameId);
         }
+        log.debug("🍳Ended searching used subjects");
 
         // 사용 가능한 주제 리스트 생성
         Map<Integer, String> subjects = SubjectUtil.SUBJECTS;
@@ -66,11 +75,10 @@ public class GameChatService {
 
         // 주제 선택 (랜덤)
         int subjectId = availableSubjects.get(new Random().nextInt(availableSubjects.size()));
-        String usedSubjectsKey = String.format("%s:round:%s:used_subjects", gameKey, currentRound);
 
         // 선택된 주제 ID 저장
-        redisTemplate.opsForValue().set(usedSubjectsKey, String.valueOf(subjectId));
-        redisTemplate.expire(usedSubjectsKey, EXPIRE_TIME, TimeUnit.SECONDS);
+        redisTemplate.opsForHash().put(subjectKey, currentRound, String.valueOf(subjectId));
+        redisTemplate.expire(subjectKey, EXPIRE_TIME, TimeUnit.SECONDS);
 
         SendSubjectResponseDto sendSubjectResponseDto = SendSubjectResponseDto.builder()
                 .number(0)
