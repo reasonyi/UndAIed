@@ -212,7 +212,7 @@ public class GameChatService {
         for (String message : messages) {
             if (message.isEmpty()) continue;
 
-            Pattern pattern = Pattern.compile("\\{(\\d+)\\} \\[(.*?)\\] <(\\d+)> \\((.*?)\\) (.*)");
+            Pattern pattern = Pattern.compile("\\{(-?\\d+)\\} \\[(.*?)\\] <(\\d+)> \\((.*?)\\) (.*)");
             Matcher matcher = pattern.matcher(message);
 
             if (matcher.find()) {
