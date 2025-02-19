@@ -1,0 +1,80 @@
+{
+    "ai_num" : -3,
+    "ai_assist" : -2,
+    "message":{
+        "1": {
+            "topic": "AI가 인간의 일자리를 완전히 대체할까요?",
+            "topic_debate": [
+                {
+                    "user_id": 1,
+                    "content": "에이 말도 안돼"
+                },
+                {
+                    "user_id": 2,
+                    "content": "저는 AI가 도구일 뿐이라고 생각해요"
+                },
+                {
+                    "user_id": 3,
+                    "content": "AI가 인간의 일자리를 대체한들, 또 새로운 직업이 생길 거에요"
+                },
+                {
+                    "user_id": 4,
+                    "content": "AI 발전 속도가 너무 빨라서 걱정이네요"
+                },
+                {
+                    "user_id": 5,
+                    "content": "우리가 잘 활용하면 될 것 같아요"
+                }
+            ],
+            "free_debate": [
+                {
+                    "user_id": 1,
+                    "content": "안녕하세요"
+                },
+                {
+                    "user_id": 2,
+                    "content": "반갑습니다"
+                }
+            ],
+            "event": [
+                {
+                    "vote_result": 2
+                },
+                {
+                    "dead": 1
+                }
+            ]
+        },
+        "2": {
+            "topic": "철수가 20개의 연필과 24개의 지우개를 가지고 있었습니다. 영희가 연필의 절반을 가져가고 민수가 지우개 중 15개를 가져갔을 때, 철수는 연필과 지우개 세트를 몇 쌍 만들 수 있을까요?",
+            "topic_debate": [
+                {
+                    "user_id": 1,
+                    "content": "9쌍"
+                },
+                {
+                    "user_id": 2,
+                    "content": "5쌍"
+                },
+                {
+                    "user_id": 8,
+                    "content": "9999999"
+                }
+            ],
+            "free_debate": [
+                {
+                    "user_id": 1,
+                    "content": "익명2 5쌍?"
+                },
+                {
+                    "user_id": 1,
+                    "content": "무조건ai"
+                },
+                {
+                    "user_id": 5,
+                    "content": "투표ㄱ"
+                }
+            ]
+        }
+    }
+}

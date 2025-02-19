@@ -1,11 +1,8 @@
 package com.ssafy.undaied.socket.init.service;
 
-import com.corundumstudio.socketio.AckRequest;
 import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.SocketIONamespace;
-import com.corundumstudio.socketio.SocketIOServer;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ssafy.undaied.socket.chat.service.AIChatService;
 import com.ssafy.undaied.socket.common.constant.EventType;
 import com.ssafy.undaied.socket.common.exception.SocketErrorCode;
 import com.ssafy.undaied.socket.common.exception.SocketException;
@@ -15,14 +12,11 @@ import com.ssafy.undaied.socket.lobby.dto.response.LobbyUpdateResponseDto;
 import com.ssafy.undaied.socket.lobby.dto.response.UpdateData;
 import com.ssafy.undaied.socket.room.dto.Room;
 import com.ssafy.undaied.socket.room.dto.RoomUser;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
+
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -41,7 +35,6 @@ public class GameInitService {
     private final ObjectMapper objectMapper;
     private final SocketIONamespace namespace;
     private final GameTimer gameTimer;
-    private final AIChatService aiChatService;
     private static final long EXPIRE_TIME = 7200;
     private static final int REQUIRED_PLAYERS = 6;
     private static final int TOTAL_NUMBERS = 8;
