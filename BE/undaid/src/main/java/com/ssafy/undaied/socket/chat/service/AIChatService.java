@@ -3,6 +3,8 @@ import com.corundumstudio.socketio.SocketIONamespace;
 import com.ssafy.undaied.socket.chat.dto.response.AINumberDto;
 import com.ssafy.undaied.socket.chat.dto.response.AIInputDataDto;
 import com.ssafy.undaied.socket.chat.dto.response.GameChatResponseDto;
+import com.ssafy.undaied.socket.json.dto.JsonRoundInfoDto;
+import com.ssafy.undaied.socket.json.service.JsonSendService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -40,6 +42,7 @@ public class AIChatService {
     private final RedisTemplate<String, String> redisTemplate;
     private final SocketIONamespace namespace;
     private final TaskScheduler taskScheduler;
+    private final JsonSendService jsonSendService;
 
     private final Map<Integer, ScheduledFuture<?>> gameSchedulers = new ConcurrentHashMap<>();
 
@@ -386,5 +389,18 @@ public class AIChatService {
         data.put("events", redisTemplate.opsForValue().get(eventsKey));
 
         return data;
+    }
+
+    // 현재 라운드까지 진행된 내용 Json 형태로 넘기기
+    private Map<Integer, JsonRoundInfoDto> sendGameData(Integer gameId) {
+        String roundKey = String.format("game:%d:round", gameId);
+        Integer currentRound = Integer.parseInt(redisTemplate.opsForValue().get(roundKey).toString());
+        Map<Integer, JsonRoundInfoDto> roundsMap = new HashMap<>();
+        for (Integer i=1; i<= currentRound; i++) {
+            JsonRoundInfoDto round = jsonSendService.getSendData(gameId, i);
+            roundsMap.put(i, round);
+        }
+
+        return roundsMap;
     }
 }
