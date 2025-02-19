@@ -38,8 +38,8 @@ public class JsonAIChatService {
     private static final long EXPIRE_TIME = 7200;
     private static final long MIN_DELAY = 3000;  // 스케줄링 최소 지연 시간
     private static final long MAX_DELAY = 3000;  // 스케줄링 최대 지연 시간
-    private static final int MIN_CHAT_DELAY = 1000;  // 채팅 응답 최소 지연 시간 (1초)
-    private static final int MAX_CHAT_DELAY = 7000;  // 채팅 응답 최대 지연 시간 (7초)
+    private static final int MIN_CHAT_DELAY = 1000;  // 채팅 응답 최소 지연 시간
+    private static final int MAX_CHAT_DELAY = 10000;  // 채팅 응답 최대 지연 시간
     private static final Random random = new Random();
 
     private final WebClient webClient;
@@ -49,6 +49,9 @@ public class JsonAIChatService {
     private final JsonSendService jsonSendService;
 
     private final Map<Integer, Map<String, ScheduledFuture<?>>> aiGameSchedulers = new ConcurrentHashMap<>();
+    private final Map<Integer, Boolean> isProcessingGemini = new ConcurrentHashMap<>();
+    private final Map<Integer, Boolean> isProcessingChatGPT = new ConcurrentHashMap<>();
+
 
     public void startGameMessageScheduling(int gameId) {
         log.info("AI 메시지 스케쥴링이 시작됩니다.: {}", gameId);
@@ -191,9 +194,17 @@ public class JsonAIChatService {
             return;
         }
 
+        // 🚨 이미 처리 중이면 요청하지 않음 (멀티스레드 보호)
+        synchronized (isProcessingGemini) {
+            if (isProcessingGemini.getOrDefault(gameId, false)) {
+                log.info("🚨 Gemini AI가 현재 응답 중입니다 - gameId: {}", gameId);
+                return;
+            }
+            isProcessingGemini.put(gameId, true);
+        }
+
         AIRequestDto aiRequestDto = createAIRequest(gameId, true);  // Gemini용
         if (aiRequestDto != null) {
-            log.info("ai에 보내는 요청 {}", aiRequestDto);
             final int aiNumber = aiRequestDto.getAi_num();
             webClient.post()
                     .uri("/api/gemini/{gameId}", gameId)
@@ -208,15 +219,33 @@ public class JsonAIChatService {
                     })
                     .delayElement(Duration.ofMillis(MIN_CHAT_DELAY + random.nextInt(MAX_CHAT_DELAY - MIN_CHAT_DELAY)))
                     .subscribe(
-                            response -> handleAIResponse(gameId, response, "free_debate"),
-                            error -> log.error("Gemini 요청 실패 - gameId: {}", gameId, error)
+                            response -> {
+                                handleAIResponse(gameId, response, "free_debate");
+                                isProcessingGemini.put(gameId, false); // ✅ 처리 완료 후 다시 false 설정
+                            },
+                            error -> {
+                                log.error("Gemini 요청 실패 - gameId: {}", gameId, error);
+                                isProcessingGemini.put(gameId, false); // 🚨 오류 발생해도 다시 false 설정
+                            }
                     );
+        } else {
+            isProcessingGemini.put(gameId, false); // 🚨 요청 실패 시에도 다시 false 설정
         }
     }
+
 
     private void handleChatGPTFreeDebate(int gameId) {
         if (!isValidStage(gameId, "free_debate")) {
             return;
+        }
+
+        // 🚨 이미 처리 중이면 요청하지 않음 (멀티스레드 보호)
+        synchronized (isProcessingChatGPT) {
+            if (isProcessingChatGPT.getOrDefault(gameId, false)) {
+                log.info("🚨 ChatGPT AI가 현재 응답 중입니다 - gameId: {}", gameId);
+                return;
+            }
+            isProcessingChatGPT.put(gameId, true);
         }
 
         AIRequestDto aiRequestDto = createAIRequest(gameId, false);  // ChatGPT용
@@ -235,11 +264,20 @@ public class JsonAIChatService {
                     })
                     .delayElement(Duration.ofMillis(MIN_CHAT_DELAY + random.nextInt(MAX_CHAT_DELAY - MIN_CHAT_DELAY)))
                     .subscribe(
-                            response -> handleAIResponse(gameId, response, "free_debate"),
-                            error -> log.error("ChatGPT 요청 실패 - gameId: {}", gameId, error)
+                            response -> {
+                                handleAIResponse(gameId, response, "free_debate");
+                                isProcessingChatGPT.put(gameId, false); // ✅ 처리 완료 후 다시 false 설정
+                            },
+                            error -> {
+                                log.error("ChatGPT 요청 실패 - gameId: {}", gameId, error);
+                                isProcessingChatGPT.put(gameId, false); // 🚨 오류 발생해도 다시 false 설정
+                            }
                     );
+        } else {
+            isProcessingChatGPT.put(gameId, false); // 🚨 요청 실패 시에도 다시 false 설정
         }
     }
+
 
     private void handleAIResponse(int gameId, GameChatResponseDto response, String originalStage) {
         if(response==null){
