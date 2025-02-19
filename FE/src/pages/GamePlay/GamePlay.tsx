@@ -378,6 +378,7 @@ function GamePlay() {
                     isDead={playerInfo ? playerInfo.died : true}
                     socket={socket}
                     onSendChat={handleGameChat}
+                    isVote={gameInfo?.stage === "vote"}
                   />
                 </div>
               </div>

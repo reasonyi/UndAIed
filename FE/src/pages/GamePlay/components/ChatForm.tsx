@@ -10,12 +10,13 @@ interface IFormProps {
   socket: Socket | null; // 부모에서 전달받을 소켓 인스턴스
   isDead: boolean;
   onSendChat: (input: string) => void;
+  isVote: boolean;
 }
 interface IForm {
   chat: string;
 }
 
-function ChatForm({ socket, isDead, onSendChat }: IFormProps) {
+function ChatForm({ socket, isDead, onSendChat, isVote }: IFormProps) {
   const paperPlane: IconDefinition = faPaperPlane;
   const {
     register,
@@ -77,8 +78,14 @@ function ChatForm({ socket, isDead, onSendChat }: IFormProps) {
           },
         })}
         className="bg-transparent text-[#848484] focus:text-[#dddddd] w-full"
-        placeholder={isDead ? "죽은 자는 말이 없다." : "채팅 입력하기"}
-        disabled={isDead}
+        placeholder={
+          isDead
+            ? "죽은 자는 말이 없다."
+            : isVote
+            ? "우측 초상화에서 투표하기."
+            : "채팅 입력하기"
+        }
+        disabled={isDead || isVote}
         type="text"
         autoComplete="off"
       />

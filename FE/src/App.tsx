@@ -7,7 +7,7 @@ function App() {
     <>
       <Toaster richColors={true} theme="dark" />
       <Outlet />
-      <ReactQueryDevtools initialIsOpen={false} />
+      {/* <ReactQueryDevtools initialIsOpen={false} /> */}
     </>
   );
 }
