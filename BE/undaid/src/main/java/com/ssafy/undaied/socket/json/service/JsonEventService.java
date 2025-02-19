@@ -51,7 +51,7 @@ public class JsonEventService {
                     died = targetNumber;
                 }
             }
-            log.debug("🍳GameId : {}, Round : {}, Driver Data to JSON completed");
+            log.debug("🍳GameId : {}, Round : {}, Driver Data to JSON completed", gameId, round);
             log.debug("🍳Vote Result : {}, Dead : {}", vote_result, died);
         }
         return JsonEventDto.builder()

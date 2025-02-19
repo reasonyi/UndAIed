@@ -28,6 +28,12 @@ public class JsonChatService {
             return null;
         }
 
+        Object value = redisTemplate.opsForHash().get(subjectKey, String.valueOf(round));
+        if (value == null) {
+            log.debug("🍳No subject data for game:{} and round:{}", gameId, round);
+            return null;
+        }
+
         Integer subjectId = Integer.parseInt(redisTemplate.opsForHash().get(subjectKey, String.valueOf(round)).toString());
         log.debug("🍳Subject debate topic ID : {}", subjectId);
 
