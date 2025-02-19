@@ -9,8 +9,8 @@ export const boardApi = {
   getPost: (id: number) => apiClient.get(`/api/v1/board/${id}`),
   createPost: (data: BoardRequest) => apiClient.post("/api/v1/board", data),
   updatePost: (id: number, data: Partial<BoardRequest>) =>
-    apiClient.put(`${id}`),
-  deletePost: (id: number) => apiClient.delete(`/${id}`),
+    apiClient.patch(`/api/v1/board/${id}`),
+  deletePost: (id: number) => apiClient.delete(`/api/v1/board/${id}`),
 };
 
 export const AdminBoardApi = {
@@ -18,6 +18,6 @@ export const AdminBoardApi = {
   createPost: (data: BoardRequest) =>
     apiClient.post("/api/v1/admin/board", data),
   updatePost: (id: number, data: Partial<BoardRequest>) =>
-    apiClient.put(`/api/v1/admin/board/${id}`, data),
+    apiClient.patch(`/api/v1/admin/board/${id}`, data),
   deletePost: (id: number) => apiClient.delete(`/api/v1/admin/board/${id}`),
 };

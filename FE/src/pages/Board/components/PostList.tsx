@@ -5,6 +5,7 @@ import WriteButton from "./WriteButton";
 import { useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+
 function PostList({
   currentPosts,
   postPerPage,
@@ -70,7 +71,7 @@ function PostList({
           </tbody>
         </table>
       </div>
-      {category === "notice" && userRole === "ROLE_ADMIN" ? (
+      {userRole === "ROLE_ADMIN" && category !== "bugreport" ? (
         <WriteButton />
       ) : (
         <></>

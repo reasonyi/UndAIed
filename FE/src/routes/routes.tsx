@@ -15,6 +15,7 @@ import Game from "../pages/Game/Game";
 import GameMyPage from "../pages/GameMyPage/GameMyPage";
 import Signup from "../pages/Signup";
 import BoardDetail from "../pages/Board/BoardDetail";
+import BoardEdit from "../pages/Board/components/BoardEdit";
 
 const router = createBrowserRouter([
   {
@@ -67,6 +68,10 @@ const router = createBrowserRouter([
       {
         path: "/write",
         element: <BoardWrite />,
+      },
+      {
+        path: "/board/edit/:number",
+        element: <BoardEdit />,
       },
 
       {

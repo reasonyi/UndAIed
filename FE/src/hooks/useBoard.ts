@@ -67,7 +67,24 @@ export const useUpdatePost = () => {
   });
 };
 
-const useDeletePost = () => {
+export const useAdminUpdatePost = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }: UpdatePostParams) =>
+      AdminBoardApi.updatePost(id, data),
+
+    onSuccess: (_, { id }) => {
+      // 수정 성공 시 해당 게시글의 캐시를 무효화
+      console.log("업데이트 성공");
+      queryClient.invalidateQueries({ queryKey: ["posts", id] });
+      // 게시글 목록 캐시도 무효화 (필요한 경우)
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+    },
+  });
+};
+
+export const useDeletePost = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
