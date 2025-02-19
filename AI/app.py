@@ -19,7 +19,7 @@ class Request(BaseModel):
 
 @app.post("/api/ai/{game_id}/", status_code=status.HTTP_200_OK)
 async def create_message(request:Request):
-    return "GOOD"
+    return request.message
 
 
 
