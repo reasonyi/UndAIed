@@ -71,8 +71,11 @@ function GameProfile({
       <div className="line"></div>
       <div className="line"></div>
       <div className="line"></div>
-      <div className="flex justify-center items-center px-4 py-1">
-        <img className="filter brightness-75 w-3/4 h-3/4" src={icon} />
+      <div className="flex justify-center items-center px-4 py-2">
+        <img
+          className="filter brightness-75 w-3/4 h-3/4 rounded-sm"
+          src={icon}
+        />
       </div>
       <div
         className={`${
