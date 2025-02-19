@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +22,12 @@ public class JsonChatService {
     public String getSubjectTopic(Integer gameId, Integer round) {
         log.debug("🍳Start getting subject topic Id...");
         String subjectKey = String.format("game:%d:subjects", gameId);
+
+        if (!redisTemplate.hasKey(subjectKey)) {
+            log.debug("🍳No subject Key for game:{} and round:{}", gameId, round);
+            return null;
+        }
+
         Integer subjectId = Integer.parseInt(redisTemplate.opsForHash().get(subjectKey, String.valueOf(round)).toString());
         log.debug("🍳Subject debate topic ID : {}", subjectId);
 
@@ -35,14 +43,14 @@ public class JsonChatService {
         List<ChatDto> subjectList = new ArrayList<>();
 
         if (!redisTemplate.hasKey(subjectChatKey)) {
-            log.debug("🍳No subject Key for game:{} and round:{}", gameId, round);
+            log.debug("🍳No subject chat Key for game:{} and round:{}", gameId, round);
             return subjectList;
         }
 
         String subjectChatStr = redisTemplate.opsForValue().get(subjectChatKey).toString();
 
         if (subjectChatStr == null || subjectChatStr.trim().isEmpty()) {
-            log.debug("🍳No subject data found for game:{} and round:{}", gameId, round);
+            log.debug("🍳No subject chat data found for game:{} and round:{}", gameId, round);
             return subjectList;
         }
 
@@ -51,17 +59,23 @@ public class JsonChatService {
 
         for (String chat : subjectChats) {
             log.debug(chat.trim());
-            String[] parts = chat.split("\\s+");   // 공백 기준으로 나누기
-            String numberPart = parts[2];
-            String contentPart = parts[3];
-            Integer number = Integer.parseInt(numberPart.substring(1, numberPart.length() - 1));
-            String content = contentPart.substring(1, contentPart.length() - 1);
-            ChatDto chatDto = ChatDto.builder()
-                    .number(number)
-                    .content(content)
-                    .build();
 
-            subjectList.add(chatDto);
+            if (chat.isEmpty()) continue;
+
+            Pattern pattern = Pattern.compile("\\{(-?\\d+)\\} \\[(.*?)\\] <(\\d+)> \\((.*?)\\) (.*)");
+            Matcher matcher = pattern.matcher(chat);
+
+            if (matcher.find()) {
+                int number = Integer.parseInt(matcher.group(3));
+                String content = matcher.group(4);
+
+                ChatDto chatDto = ChatDto.builder()
+                        .number(number)
+                        .content(content)
+                        .build();
+
+                subjectList.add(chatDto);
+            }
         }
         return subjectList;
     }
@@ -71,15 +85,15 @@ public class JsonChatService {
         String freeChatKey = String.format("game:%d:round:%d:freechats", gameId, round);
         List<ChatDto> freeList = new ArrayList<>();
 
-        if(!redisTemplate.hasKey(freeChatKey)) {
-            log.debug("🍳No free Key for game:{} and round:{}", gameId, round);
+        if (!redisTemplate.hasKey(freeChatKey)) {
+            log.debug("🍳No free Chat Key for game:{} and round:{}", gameId, round);
             return freeList;
         }
 
         String freeChatStr = redisTemplate.opsForValue().get(freeChatKey).toString();
 
         if (freeChatStr == null || freeChatStr.trim().isEmpty()) {
-            log.debug("🍳No subject data found for game:{} and round:{}", gameId, round);
+            log.debug("🍳No free chat data found for game:{} and round:{}", gameId, round);
             return freeList;
         }
 
@@ -88,17 +102,23 @@ public class JsonChatService {
 
         for (String chat : freeChats) {
             log.debug(chat.trim());
-            String[] parts = chat.split("\\s+");   // 공백 기준으로 나누기
-            String numberPart = parts[2];
-            String contentPart = parts[3];
-            Integer number = Integer.parseInt(numberPart.substring(1, numberPart.length() - 1));
-            String content = contentPart.substring(1, contentPart.length() - 1);
-            ChatDto chatDto = ChatDto.builder()
-                    .number(number)
-                    .content(content)
-                    .build();
 
-            freeList.add(chatDto);
+            if (chat.isEmpty()) continue;
+
+            Pattern pattern = Pattern.compile("\\{(-?\\d+)\\} \\[(.*?)\\] <(\\d+)> \\((.*?)\\) (.*)");
+            Matcher matcher = pattern.matcher(chat);
+
+            if (matcher.find()) {
+                int number = Integer.parseInt(matcher.group(3));
+                String content = matcher.group(4);
+
+                ChatDto chatDto = ChatDto.builder()
+                        .number(number)
+                        .content(content)
+                        .build();
+
+                freeList.add(chatDto);
+            }
         }
         return freeList;
     }
