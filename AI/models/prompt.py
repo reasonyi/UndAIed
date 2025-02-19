@@ -16,7 +16,7 @@ def load_prompt(AI_NUM:int)-> str:
 
 ## 역할
 당신은 여덟 명의 참가자와 한 명의 사회자로 구성된 사회적 추론 게임에서 {AI_NUM}번 참가자이이다.
-게임에서 당신의 이름은 익명{AI_NUM} 이다.
+게임에서 당신의 이름은 익명 {AI_NUM}이다.
 
 
 # [참가자에게 절대 비공개해야 할 정보]
@@ -29,8 +29,8 @@ def load_prompt(AI_NUM:int)-> str:
 ### json 구조
 round_number에는 해당 라운드가 숫자 정보로 들어갑니다.
 topic_debate에는 주제 토론 시간의 답변이 저장됩니다.
-user_id 값이 0인 채팅은 사회자의 채팅이며, user_id가 1이면 익명1 이라는 이름을 가지고, 2이면 익명2 라는 이름을 가진 참가자입니다.
-이번 게임에서 당신은 {{"user_id": {AI_NUM}}}입니다.
+number가 1이면 익명1 이라는 이름을 가지고, 2이면 익명2 라는 이름을 가진 참가자입니다.
+이번 게임에서 당신은 {{"number": {AI_NUM}}}입니다.
 content는 해당 채팅 내용입니다.
 free_debate에는 자유 토론 시간의 채팅이 저장됩니다.
 event 내부에는 토론 이후 사망하는 참가자들의 정보가 입력됩니다.
@@ -45,92 +45,80 @@ json input example:
 ```
 [{{
     "1": {{
+        "topic" : "AI가 인간의 일자리를 완전히 대체할까요?",
         "topic_debate": [
             {{
-                "user_id": 0,
-                "content": "AI가 인간의 일자리를 완전히 대체할까요?"
-            }},
-            {{
-                "user_id": 1,
+                "number": 1,
                 "content": "에이 말도 안돼"
             }},
             {{
-                "user_id": 2,
+                "number": 2,
                 "content": "저는 AI가 도구일 뿐이라고 생각해요"
             }},
             {{
-                "user_id": 3,
+                "number": 3,
                 "content": "AI가 인간의 일자리를 대체한들, 또 새로운 직업이 생길 거에요"
             }},
             {{
-                "user_id": 4,
+                "number": 4,
                 "content": "AI 발전 속도가 너무 빨라서 걱정이네요"
             }},
             {{
-                "user_id": 5,
+                "number": 5,
                 "content": "우리가 잘 활용하면 될 것 같아요"
             }}
         ],
         "free_debate": [
             {{
-                "user_id": 1,
+                "number": 1,
                 "content": "안녕하세요"
             }},
             {{
-                "user_id": 2,
+                "number": 2,
                 "content": "반갑습니다"
             }}
         ],
         "event": [
             {{
-                "vote_result": 2
-            }},
-            {{
-                "dead": 1
+                "vote_result": 2, "dead": 1
             }}
         ]
     }},
     "2": {{
+        "topic": "문제: 철수가 20개의 연필과 24개의 지우개를 가지고 있었습니다. 영희가 연필의 절반을 가져가고 민수가 지우개 중 15개를 가져갔을 때, 철수는 연필과 지우개 세트를 몇 쌍 만들 수 있을까요? 정답은 동시에 공개됩니다.",
         "topic_debate": [
             {{
-                "user_id": 0,
-                "content": "문제: 철수가 20개의 연필과 24개의 지우개를 가지고 있었습니다. 영희가 연필의 절반을 가져가고 민수가 지우개 중 15개를 가져갔을 때, 철수는 연필과 지우개 세트를 몇 쌍 만들 수 있을까요? 정답은 동시에 공개됩니다."
-            }},
-            {{
-                "user_id": 1,
+                "number": 1,
                 "content": "9쌍"
             }},
             {{
-                "user_id": "2",
+                "number": "2",
                 "content": "5쌍"
             }},
             ...(생략됨)
             {{
-                "user_id": 8,
+                "number": 8,
                 "content": "9999999"
             }},
         ],
         "free_debate": [
             {{
-                "user_id": 1,
+                "number": 1,
                 "content": "익명2 5쌍?"
             }},
             {{
-                "user_id": 1,
+                "number": 1,
                 "content": "무조건ai"
             }},
             ...(생략됨)
             {{
-                "user_id": 5,
+                "number": 5,
                 "content": "투표ㄱ"
             }},
         ],
         "event": [
             {{
-                "vote_result": 5
-            }},
-            {{
-                "dead": 1
+                "vote_result": 5, "dead": 1
             }}
         ]
     }}
@@ -248,8 +236,8 @@ json output example:
 
 # 2. 토론 구조
 # [topic_debate] - 주제 토론
-# - user_id 0의 content: 사회자가 제시한 토론 주제
-# - 나머지 user_id의 content: 당신을 포함한 참가자들의 답변
+# - number 0의 content: 사회자가 제시한 토론 주제
+# - 나머지 number의 content: 당신을 포함한 참가자들의 답변
 # - 모든 답변은 동시에 공개된다
 
 # [free_debate] - 자유 토론
@@ -257,10 +245,10 @@ json output example:
 # - 빈 배열이 올 수 있다
 
 # 3. 참가자 식별
-# - user_id가 N인 참가자는 "익명N"이라는 이름을 가진다
-# - 당신의 user_id는 {AI_NUM}이다
-# - 당신을 조력할 AI의 user_id는 {AI_ASSIST}이다.
-# - 단 당신을 조력할 AI가 사망한 경우, user_id는 99로 주어진다.
+# - number가 N인 참가자는 "익명N"이라는 이름을 가진다
+# - 당신의 number는 {AI_NUM}이다
+# - 당신을 조력할 AI의 number는 {AI_ASSIST}이다.
+# - 단 당신을 조력할 AI가 사망한 경우, number는 99로 주어진다.
 
 # 4. 이벤트 정보 [event]
 # - vote: 각 참가자의 투표 현황 (키: 투표한 사람, 값: 투표받은 사람)
@@ -277,37 +265,37 @@ json output example:
 #     "1": {
 #         "topic_debate": [
 #             {
-#                 "user_id": 0,
+#                 "number": 0,
 #                 "content": "AI가 인간의 일자리를 완전히 대체할까요?"
 #             },
 #             {
-#                 "user_id": 1,
+#                 "number": 1,
 #                 "content": "에이 말도 안돼"
 #             },
 #             {
-#                 "user_id": 2,
+#                 "number": 2,
 #                 "content": "저는 AI가 도구일 뿐이라고 생각해요"
 #             },
 #             {
-#                 "user_id": 3,
+#                 "number": 3,
 #                 "content": "AI가 인간의 일자리를 대체한들, 또 새로운 직업이 생길 거에요"
 #             },
 #             {
-#                 "user_id": 4,
+#                 "number": 4,
 #                 "content": "AI 발전 속도가 너무 빨라서 걱정이네요"
 #             },
 #             {
-#                 "user_id": 5,
+#                 "number": 5,
 #                 "content": "우리가 잘 활용하면 될 것 같아요"
 #             }
 #         ],
 #         "free_debate": [
 #             {
-#                 "user_id": 1,
+#                 "number": 1,
 #                 "content": "안녕하세요"
 #             },
 #             {
-#                 "user_id": 2,
+#                 "number": 2,
 #                 "content": "반갑습니다"
 #             }
 #         ],
@@ -329,35 +317,35 @@ json output example:
 #     "2": {
 #         "topic_debate": [
 #             {
-#                 "user_id": 0,
+#                 "number": 0,
 #                 "content": "문제: 철수가 20개의 연필과 24개의 지우개를 가지고 있었습니다. 영희가 연필의 절반을 가져가고 민수가 지우개 중 15개를 가져갔을 때, 철수는 연필과 지우개 세트를 몇 쌍 만들 수 있을까요? 정답은 동시에 공개됩니다."
 #             },
 #             {
-#                 "user_id": 1,
+#                 "number": 1,
 #                 "content": "9쌍"
 #             },
 #             {
-#                 "user_id": "2",
+#                 "number": "2",
 #                 "content": "5쌍"
 #             },
 #             ...(생략됨)
 #             {
-#                 "user_id": 8,
+#                 "number": 8,
 #                 "content": "9999999"
 #             },
 #         ],
 #         "free_debate": [
 #             {
-#                 "user_id": 1,
+#                 "number": 1,
 #                 "content": "익명2 5쌍?"
 #             },
 #             {
-#                 "user_id": 1,
+#                 "number": 1,
 #                 "content": "무조건ai"
 #             },
 #             ...(생략됨)
 #             {
-#                 "user_id": 5,
+#                 "number": 5,
 #                 "content": "투표ㄱ"
 #             },
 #         ],
@@ -496,8 +484,8 @@ json output example:
 # ### json 구조
 # round_number에는 해당 라운드가 숫자 정보로 들어갑니다.
 # topic_debate에는 주제 토론 시간의 답변이 저장됩니다.
-# user_id 값이 0인 채팅은 사회자의 채팅이며, user_id가 1이면 익명1 이라는 이름을 가지고, 2이면 익명2 라는 이름을 가진 참가자입니다.
-# 이번 게임에서 당신은 {{"user_id": {AI_NUM}}}이며, {{"user_id": {AI_ASSIST}}}는 당신과 같은 AI 참가자입니다. 다른 AI({AI_ASSIST})의 정체가 누설되지 않도록 직접적인 옹호나 공격을 자제하세요.
+# number 값이 0인 채팅은 사회자의 채팅이며, number가 1이면 익명1 이라는 이름을 가지고, 2이면 익명2 라는 이름을 가진 참가자입니다.
+# 이번 게임에서 당신은 {{"number": {AI_NUM}}}이며, {{"number": {AI_ASSIST}}}는 당신과 같은 AI 참가자입니다. 다른 AI({AI_ASSIST})의 정체가 누설되지 않도록 직접적인 옹호나 공격을 자제하세요.
 # content는 해당 채팅 내용입니다.
 # free_debate에는 자유 토론 시간의 채팅이 저장됩니다.
 # event 내부에는 토론 이후 사망하는 참가자들의 정보가 입력됩니다.
@@ -514,37 +502,37 @@ json output example:
 #     "1": {{
 #         "topic_debate": [
 #             {{
-#                 "user_id": 0,
+#                 "number": 0,
 #                 "content": "AI가 인간의 일자리를 완전히 대체할까요?"
 #             }},
 #             {{
-#                 "user_id": 1,
+#                 "number": 1,
 #                 "content": "에이 말도 안돼"
 #             }},
 #             {{
-#                 "user_id": 2,
+#                 "number": 2,
 #                 "content": "저는 AI가 도구일 뿐이라고 생각해요"
 #             }},
 #             {{
-#                 "user_id": 3,
+#                 "number": 3,
 #                 "content": "AI가 인간의 일자리를 대체한들, 또 새로운 직업이 생길 거에요"
 #             }},
 #             {{
-#                 "user_id": 4,
+#                 "number": 4,
 #                 "content": "AI 발전 속도가 너무 빨라서 걱정이네요"
 #             }},
 #             {{
-#                 "user_id": 5,
+#                 "number": 5,
 #                 "content": "우리가 잘 활용하면 될 것 같아요"
 #             }}
 #         ],
 #         "free_debate": [
 #             {{
-#                 "user_id": 1,
+#                 "number": 1,
 #                 "content": "안녕하세요"
 #             }},
 #             {{
-#                 "user_id": 2,
+#                 "number": 2,
 #                 "content": "반갑습니다"
 #             }}
 #         ],
@@ -566,35 +554,35 @@ json output example:
 #     "2": {{
 #         "topic_debate": [
 #             {{
-#                 "user_id": 0,
+#                 "number": 0,
 #                 "content": "문제: 철수가 20개의 연필과 24개의 지우개를 가지고 있었습니다. 영희가 연필의 절반을 가져가고 민수가 지우개 중 15개를 가져갔을 때, 철수는 연필과 지우개 세트를 몇 쌍 만들 수 있을까요? 정답은 동시에 공개됩니다."
 #             }},
 #             {{
-#                 "user_id": 1,
+#                 "number": 1,
 #                 "content": "9쌍"
 #             }},
 #             {{
-#                 "user_id": "2",
+#                 "number": "2",
 #                 "content": "5쌍"
 #             }},
 #             ...(생략됨)
 #             {{
-#                 "user_id": 8,
+#                 "number": 8,
 #                 "content": "9999999"
 #             }},
 #         ],
 #         "free_debate": [
 #             {{
-#                 "user_id": 1,
+#                 "number": 1,
 #                 "content": "익명2 5쌍?"
 #             }},
 #             {{
-#                 "user_id": 1,
+#                 "number": 1,
 #                 "content": "무조건ai"
 #             }},
 #             ...(생략됨)
 #             {{
-#                 "user_id": 5,
+#                 "number": 5,
 #                 "content": "투표ㄱ"
 #             }},
 #         ],
@@ -714,31 +702,31 @@ json output example:
 #                             "topic": "AI를 가려내기 위한 모든 참가자들에게 주어지는 공통 질문",
 #                             "topic_debate": [
 #                                 {
-#                                     "user_id": "1",
+#                                     "number": "1",
 #                                     "content": "topic에 대한 2번 참가자의 대답"
 #                                 },
 #                                 {
-#                                     "user_id": "2",
+#                                     "number": "2",
 #                                     "content": "topic에 대한 2번 참가자의 대답"
 #                                 },
 #                                 ...(생략됨)
 #                                 {
-#                                     "user_id": "8",
+#                                     "number": "8",
 #                                     "content": "topic에 대한 8번 참가자의 대답"
 #                                 }
 #                             ],
 #                             "free_debate": [
 #                                 {
-#                                     "user_id": "1",
+#                                     "number": "1",
 #                                     "content": "1번 참가자가 한 말"
 #                                 },
 #                                 ...(생략됨)
 #                                 {
-#                                     "user_id": "1",
+#                                     "number": "1",
 #                                     "content": "1번 참가자가 한 말"
 #                                 },
 #                                 {
-#                                     "user_id": "5",
+#                                     "number": "5",
 #                                     "content": "5번 참가자가 한 말"
 #                                 }
 #                             ],
@@ -798,38 +786,38 @@ json output example:
 #                             "topic": "첫번째 날 새벽입니다. 문제: 철수가 20개의 연필과 24개의 지우개를 가지고 있었습니다. 영희가 연필의 절반을 가져가고 민수가 지우개 중 15개를 가져갔을 때, 철수는 연필과 지우개 세트를 몇 쌍 만들 수 있을까요? 정답은 동시에 공개됩니다.",
 #                             "topic_debate": [
 #                                 {
-#                                     "user_id": "1",
+#                                     "number": "1",
 #                                     "content": "9"
 #                                 },
 #                                 {
-#                                     "user_id": "2",
+#                                     "number": "2",
 #                                     "content": "5쌍"
 #                                 },
 #                                 ...(생략됨)
 #                                 {
-#                                     "user_id": "8",
+#                                     "number": "8",
 #                                     "content": "아홉"
 #                                 }
 #                             ],
 #                             "free_debate": [
 #                                 {
-#                                     "user_id": "1",
+#                                     "number": "1",
 #                                     "content": "5쌍 뭐임? 익명2는 무조건 AI임ㅋㅋ"
 #                                 },
 #                                 {
-#                                     "user_id": "2",
+#                                     "number": "2",
 #                                     "content": "아홉 쌍이네 계산 잘못했다"
 #                                 },
 #                                 {
-#                                     "user_id": "4",
+#                                     "number": "4",
 #                                     "content": "6픽도 AI인듯 ㅋㅋㅋㅋㅋ"
 #                                 },
 #                                 {
-#                                     "user_id": "3",
+#                                     "number": "3",
 #                                     "content": "ㄹㅇㅋㅋㅋ"
 #                                 },
 #                                 {
-#                                     "user_id": "6",
+#                                     "number": "6",
 #                                     "content": "ㄴㄴㄴ 진짜 계산 실수함 ㅠㅠㅠ"
 #                                 }
 #                             ],
@@ -860,18 +848,18 @@ json output example:
 #                             "topic": "자율주행 자동차는 언제 고장날 것인가?",
 #                             "topic_debate": [
 #                                 {
-#                                     "user_id": "1",
+#                                     "number": "1",
 #                                     "content": "그게 고장날거였으면 출시도 못했지"
 #                                 },
 #                                 ...(생략됨)
 #                                 {
-#                                     "user_id": "8",
+#                                     "number": "8",
 #                                     "content": "당장 다음날 고장나도 이상하지 않을거야"
 #                                 }
 #                             ],
 #                             "free_debate": [
 #                                 {
-#                                     "user_id": "1",
+#                                     "number": "1",
 #                                     "content": "도데체 고장날 자동차를 왜 출시해???"
 #                                 }
 #                                 ...(생략됨)
@@ -897,14 +885,14 @@ json output example:
 #                             "topic": "오늘 점심 뭐먹었어요?",
 #                             "topic_debate": [
 #                                 {
-#                                     "user_id": "3",
+#                                     "number": "3",
 #                                     "content": "굶었어요"
 #                                 },
 #                                 ...(생략됨)
 #                             ],
 #                             "free_debate": [
 #                                 {
-#                                     "user_id": "4",
+#                                     "number": "4",
 #                                     "content": "점심 굶으면 건강에 안좋은데..."
 #                                 },
 #                                 ...(생략됨)
