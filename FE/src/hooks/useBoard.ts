@@ -6,31 +6,34 @@ import {
   useInfiniteQuery,
 } from "@tanstack/react-query";
 import { boardApi, AdminBoardApi } from "../api/boardApi";
-import { BoardRequest, Post, UpdatePostParams } from "../types/board";
+import {
+  BoardDetailResponse,
+  BoardRequest,
+  Post,
+  UpdatePostParams,
+} from "../types/board";
+import { boardRefreshState } from "../store/boardState";
+import { useRecoilValue } from "recoil";
 
 //all list
-
-export const useGetPosts = () => {
+export const useGetPosts = (categoryNum: number, currentPage: number) => {
   return useQuery({
-    queryKey: ["posts"],
+    queryKey: ["posts", categoryNum, currentPage],
     queryFn: async () => {
-      const response = await boardApi.getPosts();
+      const response = await boardApi.getPosts(categoryNum, currentPage);
       return response.data.data;
     },
-    staleTime: Infinity, // 데이터가 업데이트되더라도 리렌더링을 방지함함
   });
 };
 
 //상세페이지
 export const useGetPost = (id: number) => {
-  return useQuery<Post>({
+  return useQuery<BoardDetailResponse>({
     queryKey: ["post", id],
     queryFn: async () => {
       const response = await boardApi.getPost(id);
-      return response.data.data;
+      return response.data;
     },
-    enabled: !!id, //id가 있을때만 쿼리 실행
-    staleTime: 1000 * 60 * 5, //5분동안 데이터를 fresh하게 유지지
   });
 };
 

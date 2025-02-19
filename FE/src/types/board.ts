@@ -1,11 +1,11 @@
 export interface Post {
   boardId: number;
+  category: string;
   title: string;
   viewCnt: number;
-  content: string;
-  category: string;
-  createAt: string;
-  updateAt: string;
+  writerNickname: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface TableProps {
@@ -29,14 +29,15 @@ export interface PaginationProps {
   onPageChange: (page: number) => void;
 }
 
-export interface Category {
-  category: string;
-}
-
 export type CategoryType = "bugreport" | "notice" | "write";
+
 export interface BannerProps {
   category: CategoryType;
   bannerImage?: string;
+}
+
+export interface Category {
+  category: string;
 }
 
 export interface BoardRequest {
@@ -47,4 +48,30 @@ export interface BoardRequest {
 export interface UpdatePostParams {
   id: number;
   data: Partial<BoardRequest>;
+}
+
+// export interface BoardDetailResponse {
+//   boardId: number;
+//   title: string;
+//   content: string;
+//   writerNickname: string;
+//   category: number;
+//   createdAt: Date;
+//   updatedAt: Date;
+// }
+
+export interface BoardDetailResponse {
+  timeStamp: string;
+  isSuccess: boolean;
+  status: number;
+  message: string;
+  data: {
+    boardId: number;
+    title: string;
+    content: string;
+    writerNickname: string;
+    category: number;
+    createdAt: string;
+    updatedAt: string;
+  };
 }
