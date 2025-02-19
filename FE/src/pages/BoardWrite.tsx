@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { atom, useRecoilState } from "recoil";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { useForm, Controller, FieldValues } from "react-hook-form";
@@ -8,6 +8,8 @@ import bugReportImage from "../assets/board/bugReport.png";
 import { boardApi } from "../api/boardApi";
 import Banner from "./Board/components/Banner";
 import Header from "../components/Header";
+import { useCreatePost } from "../hooks/useBoard";
+import { BoardRequest } from "../types/board";
 
 const editorState = atom({
   key: "editorContent",
@@ -38,6 +40,23 @@ function BoardWrite() {
   const location = useLocation();
   const navigate = useNavigate();
   const prevPath = location.state?.from || "/board";
+
+  const createPost = useCreatePost();
+
+  const handleCreatePost = async (data: BoardRequest) => {
+    try {
+      await createPost.mutateAsync(data, {
+        onSuccess: () => {
+          navigate("/board");
+        },
+        onError: (error) => {
+          console.error("Post 생성 실패했습니다", error);
+        },
+      });
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
 
   const modules = {
     toolbar: [
