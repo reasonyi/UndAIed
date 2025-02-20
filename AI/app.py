@@ -42,7 +42,7 @@ async def chatgpt_api(request: Request):
     event = phase.get("event")
 
     if not topic:
-        logger.info("주제가 아직 주어지지 않았습니다")
+        logger.info("GPT: 주제가 아직 주어지지 않았습니다")
         return {"content": ""}
     elif not topic_debate:
         current_situation = f"현재 {round}라운드 주제토론[topic_debate] 시간입니다. output 구조에 맞춰서 주제에 대한 대답을 반드시 생성하세요.\n이번 라운드 주제 : {topic}"
@@ -98,7 +98,7 @@ async def chatgpt_api(request: Request):
         }
 
     # 최종 응답
-    logger.info(final_content)
+    logger.info(f"GPT: {final_content}")
     return {"content": final_content}
 
 
@@ -130,7 +130,7 @@ async def gemini_api(request: Request):
     event = phase.get("event")
 
     if not topic:
-        logger.info("주제가 아직 주어지지 않았습니다")
+        logger.info("GEMINI: 주제가 아직 주어지지 않았습니다")
         return {"content" : ""}
     elif not topic_debate:
         current_situation = f"현재 {round}라운드 주제토론[topic_debate] 시간입니다. output 구조에 맞춰서 주제에 대한 대답을 반드시 생성하세요.\n이번 라운드 주제 : {topic}"
@@ -174,5 +174,5 @@ async def gemini_api(request: Request):
         }
 
     # 최종 응답
-    logger.info(final_content)
+    logger.info(F"GEMINI: {final_content}")
     return {"content": final_content}

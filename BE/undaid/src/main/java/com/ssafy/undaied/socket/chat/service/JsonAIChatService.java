@@ -34,7 +34,6 @@ public class JsonAIChatService {
     private static final int MIN_CHAT_DELAY = 1000;  // 채팅 응답 최소 지연 시간 (1초)
     private static final int MAX_CHAT_DELAY = 2000;  // 채팅 응답 최대 지연 시간 (2초)
 
-    
     private static final int MIN_GEMINI_REQUEST_DELAY = 6000;  // Gemini 최소 요청 지연 시간 (8초)
     private static final int MAX_GEMINI_REQUEST_DELAY = 12000; // Gemini 최대 요청 지연 시간 (16초)
     
