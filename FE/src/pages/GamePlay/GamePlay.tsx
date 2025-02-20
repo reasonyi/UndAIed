@@ -3,19 +3,19 @@ import { useNavigate, useParams } from "react-router-dom";
 import PlayerIcon1 from "../../assets/player-icon/player-icon-1.svg";
 import PlayerIcon2 from "../../assets/player-icon/player-icon-2.svg";
 import PlayerIcon3 from "../../assets/player-icon/player-icon-3.svg";
-import PlayerIcon4 from "../../assets/player-icon/player-icon-4.svg";
-import PlayerIcon5 from "../../assets/player-icon/player-icon-5.svg";
-import PlayerIcon6 from "../../assets/player-icon/player-icon-1.svg";
-import PlayerIcon7 from "../../assets/player-icon/player-icon-2.svg";
-import PlayerIcon8 from "../../assets/player-icon/player-icon-3.svg";
-// import PlayerIcon1 from "../../assets/game-icon/1_mouse.webp";
-// import PlayerIcon2 from "../../assets/game-icon/2_cow.webp";
-// import PlayerIcon3 from "../../assets/game-icon/3_tiger.webp";
-// import PlayerIcon4 from "../../assets/game-icon/4_rabbit.webp";
-// import PlayerIcon5 from "../../assets/game-icon/5_dragon.webp";
-// import PlayerIcon6 from "../../assets/game-icon/6_snake.webp";
-// import PlayerIcon7 from "../../assets/game-icon/7_chiken.webp";
-// import PlayerIcon8 from "../../assets/game-icon/8_pig.webp";
+import PlayerIcon4 from "../../assets/player-icon/player-green.svg";
+import PlayerIcon5 from "../../assets/player-icon/player-icon-4.svg";
+import PlayerIcon6 from "../../assets/player-icon/player-icon-5.svg";
+import PlayerIcon7 from "../../assets/player-icon/player-white.svg";
+import PlayerIcon8 from "../../assets/player-icon/player-pink.svg";
+// import PlayerIcon1 from "../../assets/game-icon/1.webp";
+// import PlayerIcon2 from "../../assets/game-icon/2.webp";
+// import PlayerIcon3 from "../../assets/game-icon/3.webp";
+// import PlayerIcon4 from "../../assets/game-icon/4.webp";
+// import PlayerIcon5 from "../../assets/game-icon/5.webp";
+// import PlayerIcon6 from "../../assets/game-icon/6.webp";
+// import PlayerIcon7 from "../../assets/game-icon/7.webp";
+// import PlayerIcon8 from "../../assets/game-icon/8.webp";
 import ChatBubble from "./components/ChatBuble";
 import SystemBubble from "./components/SystemBubble";
 import ChatForm from "./components/ChatForm";
@@ -364,6 +364,7 @@ function GamePlay() {
                         key={index}
                         message={msg}
                         playerName={`익명${msg.player}`}
+                        iconArr={iconArr}
                       />
                     );
                   }
@@ -377,6 +378,7 @@ function GamePlay() {
                     isDead={playerInfo ? playerInfo.died : true}
                     socket={socket}
                     onSendChat={handleGameChat}
+                    isVote={gameInfo?.stage === "vote"}
                   />
                 </div>
               </div>

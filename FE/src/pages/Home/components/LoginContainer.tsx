@@ -120,17 +120,15 @@ function LoginContainer({ userInfo }: ILoginContainer) {
         .game-button {
           position: relative;
           width: 22.5rem;
-          height: 9rem;
+          height: 7rem;
           display: flex;
           justify-content: center;
           align-items: center;
-          margin-bottom: 2rem;
           background-color: black;
           color: rgba(255,255,255,0.95);
           font-family: sans-serif;
           font-size: 1.875rem;
           font-weight: normal;
-          border: 1px solid white;
           cursor: pointer;
           text-shadow: 1px 1px rgba(246, 0, 153,0.8),
                       -1px -1px rgba(15, 210, 255,0.8),
@@ -153,7 +151,6 @@ function LoginContainer({ userInfo }: ILoginContainer) {
         }
 
         .game-button:hover {
-           border:none;
           -webkit-animation: wiggle 0.2s 4;
           text-shadow: 15px 13px rgba(246, 0, 153,0.8),
                       -18px -4px rgba(15, 210, 255,0.8);
@@ -170,9 +167,11 @@ function LoginContainer({ userInfo }: ILoginContainer) {
             onDecline={handlePolicyDecline}
           />
         )}
-        <button onClick={handleGameStart} className="game-button">
-          GAME START
-        </button>
+        <div className="overflow-hidden border mb-8 bg-black">
+          <button onClick={handleGameStart} className="game-button">
+            GAME START
+          </button>
+        </div>
         <div className="w-[22.5rem] h-[10rem] flex justify-center items-center bg-black text-white border-2 border-[#822424] rounded-sm">
           <div className="w-24 h-24 flex justify-center items-center mr-5">
             <img

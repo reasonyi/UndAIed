@@ -94,14 +94,18 @@ ILeftGameSideBarProps) {
           </div>
         </div>
         <div className="flex flex-col items-center justify-center profile w-52 h-52 border-2 border-solid border-[rgba(255,255,255,0.35)] bg-[#07070a4d]">
-          <img className="filter brightness-75 w-28 h-28 mb-3" src={icon} />
+          <img
+            className="filter brightness-75 w-28 h-28 mb-3 rounded-sm"
+            src={icon}
+          />
           <span className="text-base font-bold justify-center text-[#cccccc] mb-1">
             {nickname}
           </span>
         </div>
 
         <div className="w-full">
-          {/* <div className="config-container w-[3rem] h-[16rem] bg-[#ff3939]/10 rounded-xl flex flex-col justify-between py-4">
+
+          <div className="config-container w-[3rem] h-[12rem] bg-[#ff3939]/10 rounded-xl flex flex-col justify-between py-4">
             <button>
               <FontAwesomeIcon
                 icon={bell}
@@ -111,12 +115,6 @@ ILeftGameSideBarProps) {
             <button>
               <FontAwesomeIcon
                 icon={gear}
-                className="text-white p-1 w-[1.25rem] h-[1.25rem]"
-              />
-            </button>
-            <button>
-              <FontAwesomeIcon
-                icon={userGroup}
                 className="text-white p-1 w-[1.25rem] h-[1.25rem]"
               />
             </button>

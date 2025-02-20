@@ -81,17 +81,15 @@ function LogoutContainer() {
         .game-button {
           position: relative;
           width: 22.5rem;
-          height: 9rem;
+          height: 7rem;
           display: flex;
           justify-content: center;
           align-items: center;
-          margin-bottom: 2rem;
           background-color: black;
           color: rgba(255,255,255,0.95);
           font-family: sans-serif;
           font-size: 1.875rem;
           font-weight: normal;
-          border: 1px solid white;
           cursor: pointer;
           text-shadow: 1px 1px rgba(246, 0, 153,0.8),
                       -1px -1px rgba(15, 210, 255,0.8),
@@ -114,7 +112,6 @@ function LogoutContainer() {
         }
 
         .game-button:hover {
-           border:none;
           -webkit-animation: wiggle 0.2s 4;
           text-shadow: 15px 13px rgba(246, 0, 153,0.8),
                       -18px -4px rgba(15, 210, 255,0.8);
@@ -123,10 +120,11 @@ function LogoutContainer() {
       </style>
       <div id="login" className="flex flex-col w-full items-center">
         <HashLink to="/#login" smooth></HashLink>
-
-        <button onClick={() => navigate("/game")} className="game-button">
-          GAME START
-        </button>
+        <div className="overflow-hidden border mb-8 bg-black">
+          <button onClick={() => navigate("/game")} className="game-button">
+            GAME START
+          </button>
+        </div>
         <GoogleLoginButton2 onTokenReceive={handleTokenReceive} />
         {/* <GoogleLoginButton onTokenReceive={handleTokenReceive} /> */}
         {/* <button className="w-[22.5rem] h-9 border border-[#dadce0] bg-white rounded-[20px] flex items-center justify-between px-3 mt-5">
