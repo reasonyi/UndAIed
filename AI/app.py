@@ -4,7 +4,7 @@ from fastapi import FastAPI, status, HTTPException
 from pydantic import BaseModel
 from openai import OpenAI
 from environs import Env
-from models.prompt import load_prompt
+from prompt.prompt import load_prompt
 
 app = FastAPI()
 env = Env()
