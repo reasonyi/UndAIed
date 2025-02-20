@@ -30,11 +30,17 @@ import static com.ssafy.undaied.socket.common.constant.SocketRoom.GAME_KEY_PREFI
 @RequiredArgsConstructor
 public class JsonAIChatService {
 
-    private static final long EXPIRE_TIME = 7200;
-    private static final long MIN_DELAY = 3000;  // 스케줄링 최소 지연 시간
-    private static final long MAX_DELAY = 3000;  // 스케줄링 최대 지연 시간
-    private static final int MIN_CHAT_DELAY = 1000;  // 채팅 응답 최소 지연 시간
-    private static final int MAX_CHAT_DELAY = 10000;  // 채팅 응답 최대 지연 시간
+    private static final long EXPIRE_TIME = 7200;  // Redis 데이터 만료 시간 (2시간)
+    private static final int MIN_CHAT_DELAY = 1000;  // 채팅 응답 최소 지연 시간 (1초)
+    private static final int MAX_CHAT_DELAY = 2000;  // 채팅 응답 최대 지연 시간 (2초)
+
+    
+    private static final int MIN_GEMINI_REQUEST_DELAY = 6000;  // Gemini 최소 요청 지연 시간 (8초)
+    private static final int MAX_GEMINI_REQUEST_DELAY = 12000; // Gemini 최대 요청 지연 시간 (16초)
+    
+    private static final int MIN_CHATGPT_REQUEST_DELAY = 10000; // ChatGPT 최소 요청 지연 시간 (10초)
+    private static final int MAX_CHATGPT_REQUEST_DELAY = 16000; // ChatGPT 최대 요청 지연 시간 (20초)
+    
     private static final Random random = new Random();
 
     private final WebClient webClient;
@@ -43,10 +49,11 @@ public class JsonAIChatService {
     private final TaskScheduler taskScheduler;
     private final JsonSendService jsonSendService;
 
+    // 게임별 AI 스케줄러 관리
     private final Map<Integer, Map<String, ScheduledFuture<?>>> aiGameSchedulers = new ConcurrentHashMap<>();
+    // AI 요청 처리 상태 관리 (멀티스레드 환경 대비)
     private final Map<Integer, Boolean> isProcessingGemini = new ConcurrentHashMap<>();
     private final Map<Integer, Boolean> isProcessingChatGPT = new ConcurrentHashMap<>();
-
 
     public void startGameMessageScheduling(int gameId) {
         log.info("AI 메시지 스케쥴링이 시작됩니다.: {}", gameId);
@@ -55,23 +62,45 @@ public class JsonAIChatService {
         // 해당 게임의 스케줄러 Map 생성
         Map<String, ScheduledFuture<?>> schedulers = new ConcurrentHashMap<>();
 
-        // Gemini 스케줄링
-        ScheduledFuture<?> geminiTask = taskScheduler.scheduleWithFixedDelay(
+        // Gemini 초기 스케줄링
+        ScheduledFuture<?> geminiTask = taskScheduler.schedule(
                 () -> processGeminiMessages(gameId),
-                Instant.now().plusMillis(MIN_DELAY),
-                Duration.ofMillis(MAX_DELAY)
+                Instant.now().plusMillis(MIN_GEMINI_REQUEST_DELAY)
         );
 
-        // ChatGPT 스케줄링 (2.5초 딜레이)
-        ScheduledFuture<?> chatgptTask = taskScheduler.scheduleWithFixedDelay(
+        // ChatGPT 초기 스케줄링 (시작 시간을 약간 지연시켜 분산)
+        ScheduledFuture<?> chatgptTask = taskScheduler.schedule(
                 () -> processChatGPTMessages(gameId),
-                Instant.now().plusMillis(MIN_DELAY + 2500),
-                Duration.ofMillis(MAX_DELAY)
+                Instant.now().plusMillis(MIN_CHATGPT_REQUEST_DELAY + 1500)
         );
 
         schedulers.put("gemini", geminiTask);
         schedulers.put("chatgpt", chatgptTask);
         aiGameSchedulers.put(gameId, schedulers);
+    }
+
+    private void scheduleNextGeminiRequest(int gameId) {
+        if (aiGameSchedulers.containsKey(gameId)) {
+            long nextDelay = MIN_GEMINI_REQUEST_DELAY + random.nextInt(MAX_GEMINI_REQUEST_DELAY - MIN_GEMINI_REQUEST_DELAY);
+            ScheduledFuture<?> nextTask = taskScheduler.schedule(
+                    () -> processGeminiMessages(gameId),
+                    Instant.now().plusMillis(nextDelay)
+            );
+            aiGameSchedulers.get(gameId).put("gemini", nextTask);
+            log.info("다음 Gemini 요청이 {}ms 후에 예약되었습니다. gameId: {}", nextDelay, gameId);
+        }
+    }
+
+    private void scheduleNextChatGPTRequest(int gameId) {
+        if (aiGameSchedulers.containsKey(gameId)) {
+            long nextDelay = MIN_CHATGPT_REQUEST_DELAY + random.nextInt(MAX_CHATGPT_REQUEST_DELAY - MIN_CHATGPT_REQUEST_DELAY);
+            ScheduledFuture<?> nextTask = taskScheduler.schedule(
+                    () -> processChatGPTMessages(gameId),
+                    Instant.now().plusMillis(nextDelay)
+            );
+            aiGameSchedulers.get(gameId).put("chatgpt", nextTask);
+            log.info("다음 ChatGPT 요청이 {}ms 후에 예약되었습니다. gameId: {}", nextDelay, gameId);
+        }
     }
 
     public void stopGameMessageScheduling(int gameId) {
@@ -130,13 +159,21 @@ public class JsonAIChatService {
 
     private void sendGeminiRequest(int gameId) {
         if (!isValidStage(gameId, "subject_debate")) {
+            scheduleNextGeminiRequest(gameId);
             return;
         }
-
-        AIRequestDto aiRequestDto = createAIRequest(gameId, true);  // Gemini용
+    
+        synchronized (isProcessingGemini) {
+            if (isProcessingGemini.getOrDefault(gameId, false)) {
+                log.info("🚨 Gemini AI가 현재 응답 중입니다 - gameId: {}", gameId);
+                return;
+            }
+            isProcessingGemini.put(gameId, true);
+        }
+    
+        AIRequestDto aiRequestDto = createAIRequest(gameId, true);  
         if (aiRequestDto != null) {
             final int aiNumber = aiRequestDto.getAi_num();
-            log.info("ai에 보내는 요청 {}", aiRequestDto);
             webClient.post()
                     .uri("/api/ai/gemini/{gameId}/", gameId)
                     .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -150,21 +187,40 @@ public class JsonAIChatService {
                     })
                     .delayElement(Duration.ofMillis(MIN_CHAT_DELAY + random.nextInt(MAX_CHAT_DELAY - MIN_CHAT_DELAY)))
                     .subscribe(
-                            response -> handleAIResponse(gameId, response, "subject_debate"),
-                            error -> log.error("Gemini 요청 실패 - gameId: {}", gameId, error)
+                            response -> {
+                                handleAIResponse(gameId, response, "subject_debate");
+                                isProcessingGemini.put(gameId, false);
+                                scheduleNextGeminiRequest(gameId);
+                            },
+                            error -> {
+                                log.error("Gemini 요청 실패 - gameId: {}", gameId, error);
+                                isProcessingGemini.put(gameId, false);
+                                scheduleNextGeminiRequest(gameId);
+                            }
                     );
+        } else {
+            isProcessingGemini.put(gameId, false);
+            scheduleNextGeminiRequest(gameId);
         }
     }
 
     private void sendChatGPTRequest(int gameId) {
         if (!isValidStage(gameId, "subject_debate")) {
+            scheduleNextChatGPTRequest(gameId);
             return;
         }
-
-        AIRequestDto aiRequestDto = createAIRequest(gameId, false);  // ChatGPT용
+    
+        synchronized (isProcessingChatGPT) {
+            if (isProcessingChatGPT.getOrDefault(gameId, false)) {
+                log.info("🚨 ChatGPT AI가 현재 응답 중입니다 - gameId: {}", gameId);
+                return;
+            }
+            isProcessingChatGPT.put(gameId, true);
+        }
+    
+        AIRequestDto aiRequestDto = createAIRequest(gameId, false);  
         if (aiRequestDto != null) {
             final int aiNumber = aiRequestDto.getAi_num();
-            log.info("ai에 보내는 요청 {}", aiRequestDto);
             webClient.post()
                     .uri("/api/ai/chatgpt/{gameId}/", gameId)
                     .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -178,18 +234,30 @@ public class JsonAIChatService {
                     })
                     .delayElement(Duration.ofMillis(MIN_CHAT_DELAY + random.nextInt(MAX_CHAT_DELAY - MIN_CHAT_DELAY)))
                     .subscribe(
-                            response -> handleAIResponse(gameId, response, "subject_debate"),
-                            error -> log.error("ChatGPT 요청 실패 - gameId: {}", gameId, error)
+                            response -> {
+                                handleAIResponse(gameId, response, "subject_debate");
+                                isProcessingChatGPT.put(gameId, false);
+                                scheduleNextChatGPTRequest(gameId);
+                            },
+                            error -> {
+                                log.error("ChatGPT 요청 실패 - gameId: {}", gameId, error);
+                                isProcessingChatGPT.put(gameId, false);
+                                scheduleNextChatGPTRequest(gameId);
+                            }
                     );
+        } else {
+            isProcessingChatGPT.put(gameId, false);
+            scheduleNextChatGPTRequest(gameId);
         }
     }
+    
 
     private void handleGeminiFreeDebate(int gameId) {
         if (!isValidStage(gameId, "free_debate")) {
+            scheduleNextGeminiRequest(gameId);
             return;
         }
 
-        // 🚨 이미 처리 중이면 요청하지 않음 (멀티스레드 보호)
         synchronized (isProcessingGemini) {
             if (isProcessingGemini.getOrDefault(gameId, false)) {
                 log.info("🚨 Gemini AI가 현재 응답 중입니다 - gameId: {}", gameId);
@@ -198,7 +266,7 @@ public class JsonAIChatService {
             isProcessingGemini.put(gameId, true);
         }
 
-        AIRequestDto aiRequestDto = createAIRequest(gameId, true);  // Gemini용
+        AIRequestDto aiRequestDto = createAIRequest(gameId, true);
         if (aiRequestDto != null) {
             final int aiNumber = aiRequestDto.getAi_num();
             webClient.post()
@@ -216,25 +284,28 @@ public class JsonAIChatService {
                     .subscribe(
                             response -> {
                                 handleAIResponse(gameId, response, "free_debate");
-                                isProcessingGemini.put(gameId, false); // ✅ 처리 완료 후 다시 false 설정
+                                isProcessingGemini.put(gameId, false);
+                                scheduleNextGeminiRequest(gameId);
                             },
                             error -> {
                                 log.error("Gemini 요청 실패 - gameId: {}", gameId, error);
-                                isProcessingGemini.put(gameId, false); // 🚨 오류 발생해도 다시 false 설정
+                                isProcessingGemini.put(gameId, false);
+                                scheduleNextGeminiRequest(gameId);
                             }
                     );
         } else {
-            isProcessingGemini.put(gameId, false); // 🚨 요청 실패 시에도 다시 false 설정
+            isProcessingGemini.put(gameId, false);
+            scheduleNextGeminiRequest(gameId);
         }
     }
 
 
     private void handleChatGPTFreeDebate(int gameId) {
         if (!isValidStage(gameId, "free_debate")) {
+            scheduleNextChatGPTRequest(gameId);
             return;
         }
 
-        // 🚨 이미 처리 중이면 요청하지 않음 (멀티스레드 보호)
         synchronized (isProcessingChatGPT) {
             if (isProcessingChatGPT.getOrDefault(gameId, false)) {
                 log.info("🚨 ChatGPT AI가 현재 응답 중입니다 - gameId: {}", gameId);
@@ -243,7 +314,7 @@ public class JsonAIChatService {
             isProcessingChatGPT.put(gameId, true);
         }
 
-        AIRequestDto aiRequestDto = createAIRequest(gameId, false);  // ChatGPT용
+        AIRequestDto aiRequestDto = createAIRequest(gameId, false);
         if (aiRequestDto != null) {
             final int aiNumber = aiRequestDto.getAi_num();
             webClient.post()
@@ -261,15 +332,18 @@ public class JsonAIChatService {
                     .subscribe(
                             response -> {
                                 handleAIResponse(gameId, response, "free_debate");
-                                isProcessingChatGPT.put(gameId, false); // ✅ 처리 완료 후 다시 false 설정
+                                isProcessingChatGPT.put(gameId, false);
+                                scheduleNextChatGPTRequest(gameId);
                             },
                             error -> {
                                 log.error("ChatGPT 요청 실패 - gameId: {}", gameId, error);
-                                isProcessingChatGPT.put(gameId, false); // 🚨 오류 발생해도 다시 false 설정
+                                isProcessingChatGPT.put(gameId, false);
+                                scheduleNextChatGPTRequest(gameId);
                             }
                     );
         } else {
-            isProcessingChatGPT.put(gameId, false); // 🚨 요청 실패 시에도 다시 false 설정
+            isProcessingChatGPT.put(gameId, false);
+            scheduleNextChatGPTRequest(gameId);
         }
     }
 
@@ -429,3 +503,4 @@ public class JsonAIChatService {
         return roundsMap;
     }
 }
+
