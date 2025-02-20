@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
-import ChatBubble from "../GamePlay/components/ChatBuble";
 import SystemBubble from "../GamePlay/components/SystemBubble";
 import ChatForm from "./components/ChatForm";
 import { useSocket } from "../../hooks/useSocket";
@@ -11,6 +10,7 @@ import { IMessage, IPlayer } from "../../types/gameroom";
 import AudioPlayer from "../../util/AudioPlayer";
 import gameRoomBgm from "../../assets/bgm/game-room.mp3";
 import { getPlayerIcon } from "../../util/PlayerIcon";
+import ChatBubble from "./components/ChatBuble";
 import Settings from "../../util/Setting";
 
 interface IRoomInfo {
@@ -360,7 +360,11 @@ function GameRoom() {
                               (user) => user.enterId === msg.player
                             )?.nickname
                           }
-                          iconArr={[]}
+                          icon={
+                            roomInfo?.currentPlayers.find(
+                              (user) => user.enterId === msg.player
+                            )?.profileImage
+                          }
                         />
                       );
                     }
