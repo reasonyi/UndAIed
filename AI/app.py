@@ -60,7 +60,7 @@ async def chatgpt_api(request: Request):
             client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
-                    {"role": "system", "content": load_prompt(request.ai_num)},
+                    {"role": "system", "content": load_prompt(request.ai_num, request.ai_assist)},
                     {
                         "role": "user",
                         "content": f"- 게임 진행 상황:\n{game_progress}\n\n- 현재 상황:\n{current_situation}",
