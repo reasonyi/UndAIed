@@ -90,6 +90,14 @@ public class Users {
         this.updatedAt = LocalDateTime.now();
     }
 
+    public void win() {
+        totalWin++;
+    }
+
+    public void lose() {
+        totalLose++;
+    }
+
     public void deleteUser() {
         isDeleted = true;
     }
