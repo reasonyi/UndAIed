@@ -49,7 +49,7 @@ function GameRoomList() {
           }
         `}
       </style>
-      <div className="flex-1 flex flex-col px-7 py-4 bg-[#0000008f] rounded-[5px] border border-[#f74a5c]/60">
+      <div className="z-10 flex-1 flex flex-col px-7 py-4 bg-[#0000008f] rounded-[5px] border border-[#f74a5c]/60">
         <div className="grid md:grid-cols-[6rem,1fr,8rem] grid-cols-[4rem,1fr,5rem] px-2 text-white mb-4">
           <span>No.</span>
           <span>Title</span>

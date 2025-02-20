@@ -56,7 +56,7 @@ export function GameUserInfo() {
             alt="Player Icon"
           />
         </div>
-        <div className="text-center text-lg md:text-xl text-white">
+        <div className="text-center z-10 text-lg md:text-xl text-white">
           {userInfo.nickname}
         </div>
       </div>
