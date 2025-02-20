@@ -138,7 +138,7 @@ public class JsonAIChatService {
             final int aiNumber = aiRequestDto.getAi_num();
             log.info("ai에 보내는 요청 {}", aiRequestDto);
             webClient.post()
-                    .uri("/api/ai/gemini/{gameId}", gameId)
+                    .uri("/api/ai/gemini/{gameId}/", gameId)
                     .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                     .contentType(MediaType.APPLICATION_JSON)
                     .bodyValue(aiRequestDto)
