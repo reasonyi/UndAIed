@@ -83,7 +83,7 @@ const GamePlayDetail = ({
       .map((chat) => {
         // Chat format: {sequence} [userId] <number> (message) timestamp
         const regex =
-          /\{(\d+)\}\s*\[([^\]]+)\]\s*<(\d+)>\s*\(([^)]+)\)\s*([\d\-T:.]+)/;
+          /\{(-?\d+)\}\s*\[([^\]]+)\]\s*<(\d+)>\s*\(([^)]+)\)\s*([\d\-T:.]+)/;
         const match = chat.trim().match(regex);
 
         console.log("Chat match:", match);
@@ -91,9 +91,9 @@ const GamePlayDetail = ({
         if (!match || match.length !== 6) return null;
 
         return {
-          sequence: match[1]?.trim() || "",
+          sequence: match[3]?.trim() || "",
           userId: match[2]?.trim() || "",
-          number: match[3]?.trim() || "",
+          number: match[1]?.trim() || "",
           message: match[4]?.trim() || "",
           timestamp: match[5]?.trim() || "",
         };
