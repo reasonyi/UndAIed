@@ -160,6 +160,7 @@ Temporary Items
 .apdisk
 
 # Configuration
+/BE/undaid/src/main/resources/
 /BE/undaid/src/main/resources/application-secrets.properties
 /BE/undaid/src/main/resources/application.properties
 .pypirc

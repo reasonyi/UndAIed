@@ -3,6 +3,7 @@ package com.ssafy.undaied.socket.chat.service;
 import com.corundumstudio.socketio.SocketIONamespace;
 import com.ssafy.undaied.socket.chat.dto.request.AIRequestDto;
 import com.ssafy.undaied.socket.chat.dto.response.GameChatResponseDto;
+import com.ssafy.undaied.socket.common.util.GameTimer;
 import com.ssafy.undaied.socket.json.dto.JsonRoundInfoDto;
 import com.ssafy.undaied.socket.json.service.JsonSendService;
 import lombok.RequiredArgsConstructor;
@@ -47,6 +48,7 @@ public class JsonAIChatService {
     private final SocketIONamespace namespace;
     private final TaskScheduler taskScheduler;
     private final JsonSendService jsonSendService;
+    private final GameTimer gameTimer;
 
     // 게임별 AI 스케줄러 관리
     private final Map<Integer, Map<String, ScheduledFuture<?>>> aiGameSchedulers = new ConcurrentHashMap<>();
@@ -364,6 +366,7 @@ public class JsonAIChatService {
         }
         log.info("🚀 AI 응답 전송 준비 - gameId: {}, stage: {}, response: {}", gameId, originalStage, response);
         String currentRound = redisTemplate.opsForValue().get(GAME_KEY_PREFIX + gameId + ":round");
+        if (gameTimer.isMainStage(gameId)) {
         if ("subject_debate".equals(originalStage)) {
             // 주제토론에서 중복 발언 체크
             String spokenUsersKey = String.format("%s%d:round:%s:subject_speakers",
@@ -393,6 +396,7 @@ public class JsonAIChatService {
                         gameId, response.getNumber(), response.getContent());
             }
         }
+    }
     }
 
     private AIRequestDto createAIRequest(int gameId, boolean isGemini) {

@@ -12,8 +12,6 @@ import {
   Post,
   UpdatePostParams,
 } from "../types/board";
-import { boardRefreshState } from "../store/boardState";
-import { useRecoilValue } from "recoil";
 
 //all list
 export const useGetPosts = (categoryNum: number, currentPage: number) => {
@@ -22,23 +20,15 @@ export const useGetPosts = (categoryNum: number, currentPage: number) => {
     queryFn: async () => {
       try {
         const response = await boardApi.getPosts(categoryNum, currentPage);
-        if (!response.data || !response.data.data) {
-          console.log("데이터 호출 성공");
-          return []; // 데이터가 없는 경우 빈 배열 반환
-        }
-        return response.data.data;
+        return response.data.data || [];
       } catch (error) {
         console.error("Failed to fetch posts:", error);
         throw error;
       }
     },
-    // 추가 옵션
-    retry: 1, // 실패시 재시도 횟수
-    staleTime: 5 * 60 * 1000, // 5분
-    // undefined 반환 방지를 위한 초기값 설정
-    initialData: [],
   });
 };
+
 //상세페이지
 export const useGetPost = (id: number) => {
   return useQuery<BoardDetailResponse>({

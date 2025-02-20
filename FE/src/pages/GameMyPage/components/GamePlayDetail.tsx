@@ -13,23 +13,21 @@ interface GameRecord {
 }
 
 interface ChatMessage {
+  sequence: string;
   userId: string;
-  nickname: string;
-  number: number;
-  content: string;
+  number: string;
+  message: string;
   timestamp: string;
 }
 
 interface GameEvent {
   type: string;
-  actor: string | null;
-  actorNumber: number;
+  actor: string;
   target: string;
-  targetNumber: number;
+  userId: string;
+  sequence: number;
   timestamp: string;
 }
-
-// 스크롤바 스타일을 위한 전역 CSS
 
 const scrollbarStyles = `
   .custom-scrollbar::-webkit-scrollbar {
@@ -51,7 +49,7 @@ const scrollbarStyles = `
   }
 `;
 
-const GameHistoryModal = ({
+const GamePlayDetail = ({
   isOpen,
   onClose,
   gameId,
@@ -69,45 +67,63 @@ const GameHistoryModal = ({
     queryKey: ["gameRecords", gameId],
     queryFn: async () => {
       const response = await apiClient.get(`/api/v1/game/${gameId}`);
+      console.log("Game Records:", response.data.data);
       return response.data.data.gameRecords;
     },
   });
 
   const parseChat = (chatString: string | undefined): ChatMessage[] => {
-    if (!chatString) return [];
+    if (!chatString || chatString.trim() === " " || chatString.trim() === "")
+      return [];
+
+    console.log("Parsing chat string:", chatString);
+
     return chatString
       .split("|")
       .map((chat) => {
-        const regex = /\{(\d+)\}\s*\[([^\]]+)\]\s*\(([^)]+)\)\s*([\d-T:]+)/;
+        // Chat format: {sequence} [userId] <number> (message) timestamp
+        const regex =
+          /\{(-?\d+)\}\s*\[([^\]]+)\]\s*<(\d+)>\s*\(([^)]+)\)\s*([\d\-T:.]+)/;
         const match = chat.trim().match(regex);
-        if (!match) return null;
+
+        console.log("Chat match:", match);
+
+        if (!match || match.length !== 6) return null;
+
         return {
-          userId: match[1],
-          nickname: match[2],
-          content: match[3],
-          timestamp: match[4],
+          sequence: match[3]?.trim() || "",
+          userId: match[2]?.trim() || "",
+          number: match[1]?.trim() || "",
+          message: match[4]?.trim() || "",
+          timestamp: match[5]?.trim() || "",
         };
       })
-      .filter(Boolean) as ChatMessage[];
+      .filter((chat): chat is ChatMessage => chat !== null);
   };
 
   const parseEvents = (eventString: string): GameEvent[] => {
+    if (!eventString || eventString.trim() === " " || eventString.trim() === "")
+      return [];
+
     return eventString
       .split("|")
       .map((event) => {
-        const regex = /\{(\w+)\}\s*\[([^\]]+)\]\s*\(([^)]+)\)\s*([\d-T:]+)/;
+        const regex =
+          /\{([^}]+)\}\s*\[([^\]]+)\]\s*<([^>]+)>\s*\(([^)]+)\)\s*~(\d+)~\s*([\d\-T:.]+)/;
         const match = event.trim().match(regex);
-        if (!match) return null;
+
+        if (!match || match.length !== 7) return null;
+
         return {
-          type: match[1],
-          actor: match[2] || null,
-          actorNumber: parseInt(match[3]) || 0,
-          target: match[4],
-          targetNumber: parseInt(match[5]) || 0,
-          timestamp: match[6] || null,
+          type: match[1]?.trim() || "",
+          actor: match[2]?.trim() || "",
+          target: match[3]?.trim() || "",
+          userId: match[4]?.trim() || "",
+          sequence: parseInt(match[5]?.trim() || "0"),
+          timestamp: match[6]?.trim() || "",
         };
       })
-      .filter(Boolean) as GameEvent[];
+      .filter((event): event is GameEvent => event !== null);
   };
 
   if (!isOpen) return null;
@@ -116,7 +132,6 @@ const GameHistoryModal = ({
 
   return (
     <>
-      {/* 스크롤바 스타일 적용 */}
       <style>{scrollbarStyles}</style>
 
       <div className="fixed inset-0 flex items-center justify-center z-50">
@@ -126,7 +141,7 @@ const GameHistoryModal = ({
         />
 
         <div
-          className={`custom-scrollbar relative w-full max-w-2xl max-h-[85vh] overflow-y-auto m-4 ${blockStyle} border-2 px-5 py-3 shadow-[0_0_12px_0_#f74a5c] `}
+          className={`custom-scrollbar relative w-full max-w-2xl max-h-[85vh] overflow-y-auto m-4 ${blockStyle} border-2 px-5 py-3 shadow-[0_0_12px_0_#f74a5c]`}
         >
           {/* 헤더 영역 */}
           <div className="sticky top-0 z-10 bg-black/70 backdrop-blur-xl border-b border-rose-500/40 px-4 py-5 flex justify-between items-center">
@@ -137,7 +152,7 @@ const GameHistoryModal = ({
           </div>
 
           {/* 라운드 선택 탭 */}
-          <div className="sticky top-[72px] z-10 bg-black/50 backdrop-blur-lg p-4 ">
+          <div className="sticky top-[72px] z-10 bg-black/50 backdrop-blur-lg p-4">
             <div className="flex space-x-3">
               {gameRecords.map((record: GameRecord) => (
                 <button
@@ -169,8 +184,8 @@ const GameHistoryModal = ({
                       <h3 className="text-xl font-semibold text-white">
                         라운드 {record.roundNumber}
                       </h3>
-                      <div className="flex items-center justify-center text-[1.3rem] border-2 border-[#414040]  space-x-3 bg-black/30 p-3 rounded-lg">
-                        <span className="text-rose-400 font-medium ">주제</span>
+                      <div className="flex items-center justify-center text-[1.3rem] border-2 border-[#414040] space-x-3 bg-black/30 p-3 rounded-lg">
+                        <span className="text-rose-400 font-medium">주제</span>
                         <span className="text-white">{record.subject}</span>
                       </div>
                     </div>
@@ -182,19 +197,21 @@ const GameHistoryModal = ({
                         <div className="flex-1 h-px bg-rose-500/30"></div>
                       </h4>
                       <div className="space-y-2 max-h-[300px] overflow-y-auto px-2">
-                        {parseChat(record.subjectTalk).map((chat, idx) => (
+                        {parseChat(record.subjectTalk)?.map((chat, idx) => (
                           <div
                             key={idx}
                             className="text-sm group hover:bg-white/10 py-0.5 rounded-lg transition-all duration-200"
                           >
                             <span className="text-rose-400 font-medium">
-                              익명{chat.number}
+                              {chat.userId.startsWith("AI-")
+                                ? chat.userId
+                                : `익명${chat.sequence}`}
                             </span>
                             <span className="mx-3 text-white">
-                              {chat.content}
+                              {chat.message}
                             </span>
                           </div>
-                        ))}
+                        )) || []}
                       </div>
                     </div>
 
@@ -205,19 +222,21 @@ const GameHistoryModal = ({
                         <div className="flex-1 h-px bg-rose-500/30"></div>
                       </h4>
                       <div className="space-y-2 max-h-[300px] overflow-y-auto custom-scrollbar px-2">
-                        {parseChat(record.freeTalk).map((chat, idx) => (
+                        {parseChat(record.freeTalk)?.map((chat, idx) => (
                           <div
                             key={idx}
                             className="text-sm group hover:bg-white/10 px-3 py-0.5 rounded-lg transition-all duration-200"
                           >
                             <span className="text-rose-400 font-medium">
-                              익명{chat.number}
+                              {chat.userId.startsWith("AI-")
+                                ? chat.userId
+                                : `익명${chat.sequence}`}
                             </span>
                             <span className="mx-3 text-white">
-                              {chat.content}
+                              {chat.message}
                             </span>
                           </div>
-                        ))}
+                        )) || []}
                       </div>
                     </div>
 
@@ -228,7 +247,7 @@ const GameHistoryModal = ({
                         <div className="flex-1 h-px bg-rose-500/30"></div>
                       </h4>
                       <div className="space-y-3">
-                        {parseEvents(record.events).map((event, idx) => (
+                        {parseEvents(record.events)?.map((event, idx) => (
                           <div
                             key={idx}
                             className="text-sm bg-black/30 px-4 py-0.5 rounded-lg transition-all duration-200 hover:bg-black/40"
@@ -236,24 +255,28 @@ const GameHistoryModal = ({
                             {event.type === "vote" ? (
                               <span className="text-white">
                                 <span className="text-rose-400 font-medium">
-                                  익명{event.actorNumber}
+                                  {event.actor}
                                 </span>{" "}
                                 이(가){" "}
                                 <span className="text-rose-400 font-medium">
-                                  익명{event.targetNumber}
+                                  익명{event.target}
                                 </span>
                                 에게 투표했습니다
                               </span>
-                            ) : (
+                            ) : event.type === "vote_result" ? (
+                              <span className="text-white">
+                                투표가 완료되었습니다
+                              </span>
+                            ) : event.type === "infection" ? (
                               <span className="text-white">
                                 <span className="text-rose-400 font-medium">
-                                  익명{event.targetNumber}
+                                  {event.userId}
                                 </span>
                                 이(가) 감염되었습니다
                               </span>
-                            )}
+                            ) : null}
                           </div>
-                        ))}
+                        )) || []}
                       </div>
                     </div>
                   </div>
@@ -266,4 +289,4 @@ const GameHistoryModal = ({
   );
 };
 
-export default GameHistoryModal;
+export default GamePlayDetail;

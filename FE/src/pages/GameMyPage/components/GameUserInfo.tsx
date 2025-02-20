@@ -44,25 +44,25 @@ export function GameUserInfo() {
   }
 
   return (
-    <div className="space-y-4 md:space-y-10 flex md:flex-col items-center gap-4">
+    <div className="flex flex-col items-center ">
       {/* User ID Section */}
       <div className="w-44 p-4 md:p-6 flex flex-col items-center justify-center">
         <div
-          className={`${blockStyle} flex items-center justify-center p-1 md:h-44 md:w-44 mb-3 md:mb-4`}
+          className={`${blockStyle} flex items-center justify-center p-1 md:h-40 md:w-40 mb-3 md:mb-4`}
         >
           <img
             src={getPlayerIcon(userInfo.profileImage)}
-            className="md:w-44"
+            className="md:w-32"
             alt="Player Icon"
           />
         </div>
-        <div className="text-center text-lg md:text-xl text-white">
+        <div className="text-center z-10 text-lg md:text-xl text-white">
           {userInfo.nickname}
         </div>
       </div>
 
       {/* Stats Section */}
-      <div className={`${blockStyle} px-6 md:px-10 pb-10 pt-8`}>
+      <div className={`${blockStyle} py-8 px-10  `}>
         <div className="text-center">전적</div>
         <div className="flex justify-center items-center w-36 h-36 md:mb-10 md:mt-10 md:w-48 md:h-48 mx-auto">
           <DonutChart percent={winningRate} />
