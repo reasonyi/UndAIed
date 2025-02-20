@@ -15,10 +15,7 @@ import { CategoryType } from "../../types/board";
 function Board() {
   const [currentPage, setCurrentPage] = useRecoilState(currentPageState);
   const { category } = useParams<{ category: string }>();
-  console.log(category, "카테고리 넘엉모");
-  useEffect(() => {
-    console.log("board 넘어옴");
-  });
+
   const [boardRefresh] = useRecoilState(boardRefreshState);
 
   const validateCategory = (cat: string | undefined): CategoryType => {

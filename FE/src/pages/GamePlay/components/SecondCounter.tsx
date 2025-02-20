@@ -9,7 +9,6 @@ interface ISecondsProps {
 function SecondCounter({ initialSeconds, maxSeconds, stage }: ISecondsProps) {
   const [seconds, setSeconds] = useState(initialSeconds);
   const circleRef = useRef<SVGCircleElement | null>(null);
-  console.log("타이머 관련 정보: ", initialSeconds, maxSeconds, seconds);
 
   useEffect(() => {
     if (maxSeconds === 0) {

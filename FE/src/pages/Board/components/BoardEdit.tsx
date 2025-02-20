@@ -69,7 +69,6 @@ function BoardEdit() {
   const onSubmit = async (data: BoardRequest) => {
     try {
       if (!number) return;
-      console.log(data);
       await updatePost.mutateAsync({
         id: Number(number),
         data: {

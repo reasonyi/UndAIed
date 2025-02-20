@@ -27,13 +27,10 @@ function LoginContainer({ userInfo }: ILoginContainer) {
       const userId = userData.userState.email; // 현재 로그인된 사용자의 ID
 
       const policyData = localStorage.getItem(`policy`);
-      console.log(policyData);
       if (policyData) {
         const policyEmailData = JSON.parse(policyData);
         const policyEmail = policyEmailData.userEmail;
-        console.log(policyData, "??? 뭐임");
         if (policyEmail === userId && policyEmailData.agreed) {
-          console.log("뚫림");
           return true;
         } else {
           return false;

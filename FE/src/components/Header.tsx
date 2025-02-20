@@ -15,7 +15,6 @@ function Header({ scrollRatio }: IHeaderProps) {
   const handleScroll = (event: React.UIEvent<HTMLDivElement>) => {
     const currentScrollTop = event.currentTarget.scrollTop;
     setScrollTop(currentScrollTop);
-    console.log(scrollTop);
   };
 
   const navigate = useNavigate();

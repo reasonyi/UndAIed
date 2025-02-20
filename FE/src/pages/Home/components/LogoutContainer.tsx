@@ -18,7 +18,6 @@ function LogoutContainer() {
         { token }
       );
       // 서버 응답 확인
-      console.log("서버 응답:", response.data);
 
       // 응답이 성공인 경우
       if (response.data.isSuccess) {

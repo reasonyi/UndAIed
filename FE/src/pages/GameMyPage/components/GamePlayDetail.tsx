@@ -67,7 +67,6 @@ const GamePlayDetail = ({
     queryKey: ["gameRecords", gameId],
     queryFn: async () => {
       const response = await apiClient.get(`/api/v1/game/${gameId}`);
-      console.log("Game Records:", response.data.data);
       return response.data.data.gameRecords;
     },
   });
@@ -76,8 +75,6 @@ const GamePlayDetail = ({
     if (!chatString || chatString.trim() === " " || chatString.trim() === "")
       return [];
 
-    console.log("Parsing chat string:", chatString);
-
     return chatString
       .split("|")
       .map((chat) => {
@@ -85,8 +82,6 @@ const GamePlayDetail = ({
         const regex =
           /\{(-?\d+)\}\s*\[([^\]]+)\]\s*<(\d+)>\s*\(([^)]+)\)\s*([\d\-T:.]+)/;
         const match = chat.trim().match(regex);
-
-        console.log("Chat match:", match);
 
         if (!match || match.length !== 6) return null;
 

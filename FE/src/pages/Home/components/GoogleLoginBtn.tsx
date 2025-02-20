@@ -13,7 +13,6 @@ const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
     response: google.accounts.id.CredentialResponse
   ) => {
     const token = response.credential;
-    //console.log("Google Token: ", token);
     onTokenReceive(token);
   };
 
