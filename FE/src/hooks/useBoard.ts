@@ -20,7 +20,6 @@ export const useGetPosts = (categoryNum: number, currentPage: number) => {
     queryFn: async () => {
       try {
         const response = await boardApi.getPosts(categoryNum, currentPage);
-        console.log(response);
         return response.data.data || [];
       } catch (error) {
         console.error("Failed to fetch posts:", error);
