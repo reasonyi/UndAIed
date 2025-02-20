@@ -8,6 +8,7 @@ import com.corundumstudio.socketio.annotation.OnEvent;
 import com.ssafy.undaied.socket.chat.dto.request.GameChatRequestDto;
 import com.ssafy.undaied.socket.chat.service.GameChatService;
 import com.ssafy.undaied.socket.common.exception.SocketException;
+import com.ssafy.undaied.socket.common.util.GameTimer;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +30,7 @@ public class GameChatHandler {
     private final SocketIONamespace namespace;
     private final GameChatService gameChatService;
     private final RedisTemplate<String, String> redisTemplate;
+    private final GameTimer gameTimer;
 
     @PostConstruct
     private void init() {
@@ -46,7 +48,7 @@ public class GameChatHandler {
                             throw new SocketException(USER_INFO_NOT_FOUND);
                         }
 
-                        if(gameId==null){
+                        if (gameId == null) {
                             throw new SocketException(GAME_NOT_FOUND);
                         }
 
@@ -72,12 +74,14 @@ public class GameChatHandler {
                         String currentStage = redisTemplate.opsForValue().get(stageKey);
                         log.info("현재 stage: {}", currentStage);
 
-                        if ("subject_debate".equals(currentStage)) {
-                            String errorMessage = gameChatService.storeSubjectChat(gameId, client, userId, data);
-                            sendResponse(ackRequest, errorMessage == null, errorMessage);
-                        } else if("free_debate".equals(currentStage)) {
-                            String errorMessage = gameChatService.processFreeChat(gameId, client, userId, data);
-                            sendResponse(ackRequest, errorMessage == null, errorMessage);
+                        if (gameTimer.isMainStage(gameId)) {
+                            if ("subject_debate".equals(currentStage)) {
+                                String errorMessage = gameChatService.storeSubjectChat(gameId, client, userId, data);
+                                sendResponse(ackRequest, errorMessage == null, errorMessage);
+                            } else if ("free_debate".equals(currentStage)) {
+                                String errorMessage = gameChatService.processFreeChat(gameId, client, userId, data);
+                                sendResponse(ackRequest, errorMessage == null, errorMessage);
+                            }
                         } else {
                             sendResponse(ackRequest, false, "지금은 토론 시간이 아닙니다.");
                         }

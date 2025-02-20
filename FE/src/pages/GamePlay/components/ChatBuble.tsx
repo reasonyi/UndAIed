@@ -1,30 +1,24 @@
-import PlayerIcon1 from "../../../assets/player-icon/player-icon-1.svg";
-import PlayerIcon2 from "../../../assets/player-icon/player-icon-2.svg";
-import PlayerIcon3 from "../../../assets/player-icon/player-icon-3.svg";
-import PlayerIcon4 from "../../../assets/player-icon/player-icon-4.svg";
-import PlayerIcon5 from "../../../assets/player-icon/player-icon-5.svg";
-import PlayerIcon6 from "../../../assets/player-icon/player-icon-1.svg";
-import PlayerIcon7 from "../../../assets/player-icon/player-icon-2.svg";
-import PlayerIcon8 from "../../../assets/player-icon/player-icon-3.svg";
 import { IMessage } from "../../../types/gameroom";
 
 interface ChatBubbleProps {
   message: IMessage;
   playerName: string | undefined;
+  iconArr: string[];
 }
 
-function ChatBubble({ message, playerName }: ChatBubbleProps) {
+function ChatBubble({ message, playerName, iconArr }: ChatBubbleProps) {
   const isMine = message.isMine;
 
   const playerColor = [
-    ["253", "60", "47", PlayerIcon1],
-    ["252", "158", "37", PlayerIcon2],
-    ["250", "255", "144", PlayerIcon3],
-    ["59", "140", "51", PlayerIcon4],
-    ["45", "58", "201", PlayerIcon5],
-    ["176", "65", "253", PlayerIcon6],
-    ["253", "99", "206", PlayerIcon7],
-    ["255", "255", "255", PlayerIcon8],
+    "",
+    ["253", "60", "47", iconArr[1]],
+    ["252", "158", "37", iconArr[2]],
+    ["250", "255", "144", iconArr[3]],
+    ["59", "140", "51", iconArr[4]],
+    ["45", "58", "201", iconArr[5]],
+    ["176", "65", "253", iconArr[6]],
+    ["255", "255", "255", iconArr[7]],
+    ["253", "99", "206", iconArr[8]],
   ];
 
   // message.player가 유효하지 않은 경우 기본값 사용

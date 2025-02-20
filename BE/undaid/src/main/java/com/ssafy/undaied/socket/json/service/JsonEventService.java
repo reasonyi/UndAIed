@@ -37,8 +37,13 @@ public class JsonEventService {
                     log.debug("🍳Convert to Json Vote Result data...");
                     String[] parts = event.split("\\s+");   // 공백 기준으로 나누기
                     String targetPart = parts[4];
-                    Integer targetNumber = Integer.parseInt(targetPart.substring(1, targetPart.length() - 1));
-
+                    String targetStr = targetPart.substring(1, targetPart.length() -1);
+                    Integer targetNumber;
+                    if (targetStr.equals("null")) {
+                        targetNumber = -1;
+                    } else {
+                        targetNumber = Integer.parseInt(targetPart.substring(1, targetPart.length() - 1));
+                    }
                     vote_result = targetNumber;
                 }
                 else if (event.trim().startsWith("{infection}")) {

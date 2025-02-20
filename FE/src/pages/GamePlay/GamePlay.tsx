@@ -3,19 +3,19 @@ import { useNavigate, useParams } from "react-router-dom";
 import PlayerIcon1 from "../../assets/player-icon/player-icon-1.svg";
 import PlayerIcon2 from "../../assets/player-icon/player-icon-2.svg";
 import PlayerIcon3 from "../../assets/player-icon/player-icon-3.svg";
-import PlayerIcon4 from "../../assets/player-icon/player-icon-4.svg";
-import PlayerIcon5 from "../../assets/player-icon/player-icon-5.svg";
-import PlayerIcon6 from "../../assets/player-icon/player-icon-1.svg";
-import PlayerIcon7 from "../../assets/player-icon/player-icon-2.svg";
-import PlayerIcon8 from "../../assets/player-icon/player-icon-3.svg";
-// import PlayerIcon1 from "../../assets/game-icon/1_mouse.webp";
-// import PlayerIcon2 from "../../assets/game-icon/2_cow.webp";
-// import PlayerIcon3 from "../../assets/game-icon/3_tiger.webp";
-// import PlayerIcon4 from "../../assets/game-icon/4_rabbit.webp";
-// import PlayerIcon5 from "../../assets/game-icon/5_dragon.webp";
-// import PlayerIcon6 from "../../assets/game-icon/6_snake.webp";
-// import PlayerIcon7 from "../../assets/game-icon/7_chiken.webp";
-// import PlayerIcon8 from "../../assets/game-icon/8_pig.webp";
+import PlayerIcon4 from "../../assets/player-icon/player-green.svg";
+import PlayerIcon5 from "../../assets/player-icon/player-icon-4.svg";
+import PlayerIcon6 from "../../assets/player-icon/player-icon-5.svg";
+import PlayerIcon7 from "../../assets/player-icon/player-white.svg";
+import PlayerIcon8 from "../../assets/player-icon/player-pink.svg";
+// import PlayerIcon1 from "../../assets/game-icon/1.webp";
+// import PlayerIcon2 from "../../assets/game-icon/2.webp";
+// import PlayerIcon3 from "../../assets/game-icon/3.webp";
+// import PlayerIcon4 from "../../assets/game-icon/4.webp";
+// import PlayerIcon5 from "../../assets/game-icon/5.webp";
+// import PlayerIcon6 from "../../assets/game-icon/6.webp";
+// import PlayerIcon7 from "../../assets/game-icon/7.webp";
+// import PlayerIcon8 from "../../assets/game-icon/8.webp";
 import ChatBubble from "./components/ChatBuble";
 import SystemBubble from "./components/SystemBubble";
 import ChatForm from "./components/ChatForm";
@@ -26,13 +26,14 @@ import { IMessage } from "../../types/gameroom";
 import { IAnonimus, IGameResultSend } from "../../types/gameplay";
 import { toast } from "sonner";
 import { STAGE_INFO } from "./components/info";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useResetRecoilState } from "recoil";
 import {
   isGameEndState,
   isUserDiedState,
   userMemoState,
 } from "../../store/gamePlayState";
 import GameEndModal from "./components/GameEndModal";
+import Settings from "../../util/Setting";
 
 interface IChatSend {
   number: number;
@@ -83,6 +84,13 @@ function GamePlay() {
   const [isUserDead, setIsUserDead] = useRecoilState<boolean>(isUserDiedState);
 
   const [isGameEnd, setIsGameEnd] = useRecoilState(isGameEndState);
+
+  const resetUserMemo = useResetRecoilState(userMemoState);
+
+  useEffect(() => {
+    // 컴포넌트가 마운트될 때(즉, 페이지가 로드될 때) state 초기화
+    resetUserMemo();
+  }, [resetUserMemo]);
 
   //유저 아이콘
   const iconArr = [
@@ -327,6 +335,7 @@ function GamePlay() {
     // 새로운 메시지가 추가될 때 스크롤을 아래로 이동
     scrollToBottom();
   }, [messages]);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   return (
     <div className="bg-[#07070a]">
@@ -348,6 +357,7 @@ function GamePlay() {
           timer={gameInfo?.timer}
           stage={gameInfo?.stage}
           round={gameInfo?.round}
+          onSettingsClick={() => setIsSettingsOpen(true)}
           // onLeaveRoom={handleLeaveRoom}
         />
         <div className="lg:pl-[19.5rem]">
@@ -364,6 +374,7 @@ function GamePlay() {
                         key={index}
                         message={msg}
                         playerName={`익명${msg.player}`}
+                        iconArr={iconArr}
                       />
                     );
                   }
@@ -377,6 +388,9 @@ function GamePlay() {
                     isDead={playerInfo ? playerInfo.died : true}
                     socket={socket}
                     onSendChat={handleGameChat}
+                    isVote={gameInfo?.stage === "vote"}
+                    isSubjectDebate={gameInfo?.stage === "subject_debate"}
+                    isFreeDebate={gameInfo?.stage === "free_debate"}
                   />
                 </div>
               </div>
@@ -391,6 +405,15 @@ function GamePlay() {
           </div>
         </div>
       </div>
+      {isSettingsOpen && (
+        <Settings
+          title="설정"
+          first={false}
+          setFirst={() => {}}
+          onClose={() => setIsSettingsOpen(false)}
+          isSettingsOpen={isSettingsOpen}
+        />
+      )}
     </div>
   );
 }

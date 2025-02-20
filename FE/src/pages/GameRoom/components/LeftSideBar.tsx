@@ -12,6 +12,7 @@ import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Socket } from "socket.io-client";
 import { IPlayer } from "../../../types/gameroom";
+import { toast } from "sonner";
 
 interface ILeftSideBarProps {
   roomId?: number;
@@ -22,6 +23,7 @@ interface ILeftSideBarProps {
   onLeaveRoom: () => void;
   onGameStart: () => void;
   player?: IPlayer;
+  onSettingsClick: () => void;
 }
 
 //아이콘
@@ -42,9 +44,23 @@ function LeftSideBar({
   onLeaveRoom,
   onGameStart,
   player,
+  onSettingsClick,
 }: ILeftSideBarProps) {
   const [isOpen, setIsOpen] = useState(false);
   console.log("프로필 이미지 번호: ", player?.profileImage);
+
+  const copyCurrentURL = () => {
+    const url = window.location.href;
+    navigator.clipboard
+      .writeText(url)
+      .then(() => {
+        toast.success("URL이 복사되었습니다!");
+      })
+      .catch((err) => {
+        toast.error("URL 복사 실패: ", err);
+      });
+  };
+
   return (
     <>
       <button
@@ -112,25 +128,25 @@ function LeftSideBar({
         )}
 
         <div className="w-full">
-          <div className="config-container w-[3rem] h-[16rem] bg-[#ff3939]/10 rounded-xl flex flex-col justify-between py-4">
-            <button>
+          <div className="config-container w-[3rem] h-[9rem] bg-[#ff3939]/10 rounded-xl flex flex-col justify-between py-4">
+            {/* <button>
               <FontAwesomeIcon
                 icon={bell}
                 className="text-white p-1 w-[1.25rem] h-[1.25rem]"
               />
-            </button>
-            <button>
+            </button> */}
+            <button onClick={onSettingsClick}>
               <FontAwesomeIcon
                 icon={gear}
                 className="text-white p-1 w-[1.25rem] h-[1.25rem]"
               />
             </button>
-            <button>
+            {/* <button onClick={copyCurrentURL}>
               <FontAwesomeIcon
                 icon={userGroup}
                 className="text-white p-1 w-[1.25rem] h-[1.25rem]"
               />
-            </button>
+            </button> */}
             <button
               onClick={(event) => {
                 event.preventDefault();

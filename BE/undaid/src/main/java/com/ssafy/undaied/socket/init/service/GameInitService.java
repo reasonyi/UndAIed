@@ -99,13 +99,11 @@ public class GameInitService {
         Object roomObj = jsonRedisTemplate.opsForValue().get(roomKey);
 
         if (roomObj == null) {
-            log.warn("Room not found in Redis - roomId: {}", roomId);
             throw new SocketException(SocketErrorCode.ROOM_NOT_FOUND);
         }
 
         Room room = objectMapper.convertValue(roomObj, Room.class);
         if (room.getCurrentPlayers() == null || room.getCurrentPlayers().isEmpty()) {
-            log.warn("No players in room - roomId: {}", roomId);
             throw new SocketException(SocketErrorCode.INVALID_PLAYER_COUNT);
         }
 
@@ -264,11 +262,10 @@ public class GameInitService {
 
         // 연결된 클라이언트 확인
         Collection<SocketIOClient> clients = namespace.getRoomOperations(GAME_KEY_PREFIX + gameId).getClients();
-        log.info("Clients in game room {}: {}", GAME_KEY_PREFIX + gameId, clients.size());
+        log.debug("Clients in game room {}: {}", GAME_KEY_PREFIX + gameId, clients.size());
         
         namespace.getRoomOperations(GAME_KEY_PREFIX + gameId)
                 .sendEvent(EventType.GAME_INIT_SEND.getValue(), responseDto);
-                log.info("Broadcast sent with responseDto: {}", responseDto);
     }
 
     public void updatePlayerStatus(int gameId, int number, boolean isDied, boolean isInGame) {
@@ -291,7 +288,7 @@ public class GameInitService {
         String stage = (stageValue == null) ? "start" : stageValue;
 
         Integer remainingTime = gameTimer.getRemainingTime(gameId);
-        log.info("타이머 동작 확인: gameId={}, remainingTime={}", gameId, remainingTime);
+        log.debug("타이머 동작 확인: gameId={}, remainingTime={}", gameId, remainingTime);
 
         List<PlayerInfoDto> players = allStatus.entrySet().stream()
                 .map(entry -> {

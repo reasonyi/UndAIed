@@ -14,6 +14,8 @@ import com.ssafy.undaied.domain.game.entity.Subjects;
 import com.ssafy.undaied.domain.game.entity.respository.GameRecordsRepository;
 import com.ssafy.undaied.domain.game.entity.respository.GamesRepository;
 import com.ssafy.undaied.domain.game.entity.respository.SubjectsRepository;
+import com.ssafy.undaied.domain.user.entity.Users;
+import com.ssafy.undaied.domain.user.entity.repository.UserRepository;
 import com.ssafy.undaied.socket.chat.service.JsonAIChatService;
 import com.ssafy.undaied.socket.common.exception.SocketErrorCode;
 import com.ssafy.undaied.socket.common.exception.SocketException;
@@ -50,6 +52,7 @@ public class GameResultService {
     private final AIRepository aiRepository;
     private final SocketIONamespace namespace;
     private final JsonAIChatService jsonAIChatService;
+    private final UserRepository userRepository;
 
     public String checkGameResult(int gameId) throws SocketException {
         try {
@@ -126,7 +129,7 @@ public class GameResultService {
 
     public void gameEnd(int gameId, String winner) throws SocketException {
         try {
-            log.info("게임 종료 과정이 시행됩니다.: {}", gameId);
+            log.debug("게임 종료 과정이 시행됩니다.: {}", gameId);
 
             updateGameEndStatus(gameId, winner);
             // 게임 결과 발표
@@ -136,7 +139,7 @@ public class GameResultService {
 
             // AI 메시지 스케줄링 중지
             jsonAIChatService.stopGameMessageScheduling(gameId);
-            log.info("Stopped AI message scheduling for game: {}", gameId);
+            log.info("AI 메시지 스케줄링 중지: {}", gameId);
 
             // 플레이어 로비로 이동
             movePlayersToLobby(gameId);
@@ -144,7 +147,7 @@ public class GameResultService {
 
             saveGameResult(gameId);
 
-            log.info("게임 종료가 성공적으로 진행됐습니다.: {}", gameId);
+            log.debug("게임 종료가 성공적으로 진행됐습니다.: {}", gameId);
         } catch (Exception e) {
             log.error("게임 종료 과정 중 에러가 발생했습니다. {}: {}", gameId, e.getMessage());
             throw new SocketException(GAME_END_PROCESS_FAILED);
@@ -239,7 +242,7 @@ public class GameResultService {
                 client.leaveRoom(GAME_KEY_PREFIX + gameId);
                 client.joinRoom(LOBBY_ROOM);
             }
-            log.info("백엔드상 게임방 나가기 처리됩니다");
+            log.debug("백엔드상 게임방 나가기 처리됩니다");
         } catch (Exception e) {
             log.error("백엔드상 게임방 나가기 처리 중 에러가 발생했습니다. {}: {}", gameId, e.getMessage());
             throw new SocketException(ROOM_OPERATION_FAILED);
@@ -288,30 +291,58 @@ public class GameResultService {
             gamesRepository.save(game);
             log.debug("Games 객체 성공적으로 저장");
 
-            // AI 죽은 결과 저장.
-            // AI 죽은 결과 저장.
-            String aiDeadKey = GAME_KEY_PREFIX + gameId + ":ai_died";
-            Object aiDeadObj = jsonRedisTemplate.opsForValue().get(aiDeadKey);
-            if(aiDeadObj == null) {
-                log.info("AI가 제거되지 않고 진행된 게임. (벤치마크 테이블에 데이터 저장 X) - roomId: {}", roomId);
-                return;
+
+            // 유저 전적 업데이트
+            log.debug("게임에 참여한 유저 승패 저장중...");
+            String ingameUserKey = GAME_KEY_PREFIX + gameId + ":user_nickname";
+            Map<Object, Object> ingameUserData = jsonRedisTemplate.opsForHash().entries(ingameUserKey);
+
+            log.debug("Redis key: {}", ingameUserKey);
+            log.debug("Retrieved data: {}", ingameUserData);  // 데이터 확인용 로그
+
+            if (ingameUserData.isEmpty()) {
+                log.error("redis에서 게임에 참여한 유저를 찾을 수 없어 승패 저장 실패 - roomId: {}", roomId);
+            } else {
+                for (Map.Entry<Object, Object> entry : ingameUserData.entrySet()) {
+                    String keyStr = entry.getKey().toString();
+                    String mapValue = entry.getValue().toString();
+
+                    Integer mapKey = Integer.parseInt(keyStr);
+
+                    if(mapKey > 0) {
+                        Users ingameUser = userRepository.findById(mapKey)
+                                .orElse(null);
+
+                        if(ingameUser == null) {
+                            log.error("{} 아이디값으로 유저를 찾을 수 없어 승패 저장에 실패", mapKey);
+                        } else {
+                            if((Boolean) gameData.get("humanWin")) {
+                                ingameUser.lose();
+                            } else {
+                                ingameUser.win();
+                            }
+                            userRepository.save(ingameUser);
+                            log.debug("{}유저의 승패 저장 성공", mapValue);
+                        }
+                    }
+                }
             }
 
-            if(aiDeadObj != null) {  // null이 아닐 때만 처리
-                // Object를 Map으로 변환
-                Map<String, Object> aiDeadResult = objectMapper.convertValue(aiDeadObj, new TypeReference<Map<String, Object>>() {});
+            // AI 죽은 결과 저장.
+            log.debug("AI 죽은 결과 저장 시도중...");
+            String aiDeadKey = GAME_KEY_PREFIX + gameId + ":ai_died";   // game:1:ai_died
+            Map<Object, Object> aiDeadResult = redisTemplate.opsForHash().entries(aiDeadKey);
 
-                // AI 탈락 결과를 순회하면서 처리
-                aiDeadResult.forEach((aiId, eliminatedRound) -> {
+            // AI 탈락 결과를 순회하면서 처리
+            aiDeadResult.forEach((aiId, eliminatedRound) -> {
+                log.debug("AI 탈락 결과 순회중");
 
-                    AIs ai = aiRepository.findById(Integer.parseInt(aiId))
-                            .orElse(null);
+                AIs ai = aiRepository.findById(Integer.parseInt(aiId.toString()))
+                        .orElse(null);
 
-                    if (ai == null) {
-                        log.error("AI를 찾을 수 없어 데이터 저장 실패");
-                        return;
-                    }
-
+                if (ai == null) {
+                    log.error("AI를 찾을 수 없어 데이터 저장 실패");
+                } else {
                     AIBenchmarks aiBenchmarks = AIBenchmarks.builder()
                             .game(game)
                             .ai(ai)
@@ -319,12 +350,9 @@ public class GameResultService {
                             .build();
 
                     aiBenchmarksRepository.save(aiBenchmarks);
-                });
-
-                log.debug("AI 탈락 결과 성공적으로 저장");
-            } else {
-                log.debug("AI 탈락 데이터가 없습니다 - gameId: {}", gameId);
-            }
+                    log.debug("AI 탈락 결과 성공적으로 저장");
+                }
+            });
 
             // 레코드마다 저장....
 
@@ -337,36 +365,48 @@ public class GameResultService {
             }
             int gameRoundNum = Integer.parseInt(gameRoundNumStr);
 
-            for (int i = 1; i <= gameRoundNum; i++) {
+            String subjectKey = GAME_KEY_PREFIX + gameId + ":subjects"; // game:{gameId}:subjects
+            Map<Object, Object> subject = redisTemplate.opsForHash().entries(subjectKey);
+//            System.out.println("Redis 해시 전체 데이터: " + subject);
+//
+//            // 각 엔트리 순회하면서 키와 값 출력
+//            subject.forEach((keykey, value) -> {
+//                System.out.println("키: " + keykey + ", 값: " + value + ", 타입: " + value.getClass());
+//            });
+
+            for (int i = 1; i <= subject.size(); i++) {
+                log.debug("게임 레코드 저장 시도중...");
 
                 // 여기에 subject 찾는 코드.
-                String subjectKey = GAME_KEY_PREFIX + gameId + ":round:" + i +":used_subjects";
-                String subjectId = redisTemplate.opsForValue().get(subjectKey);
+                Integer subjectId = Integer.parseInt((String) subject.get(String.valueOf(i)));
 
-                Subjects subject = subjectsRepository.findById(Integer.parseInt(subjectId))
+                Subjects subject1 = subjectsRepository.findById(subjectId)
                         .orElse(null);
 
-                if (subject == null) {
+                if (subject1 == null) {
                     log.error("주제를 찾을 수 없어 데이터 저장 실패");
                     return;
                 }
+//                else {
+//                    System.out.println(i+"라운드 주제: "+subject1.getItem());
+//                }
 
-                String subjectTalkKey = GAME_KEY_PREFIX + gameId + ":round:" + i +":subjectchats";
+                String subjectTalkKey = GAME_KEY_PREFIX + gameId + ":round:" + i +":subjectchats";  // 키  game:{gameId}:round:{roundNum}:subjectchats
                 String subjectTalks = redisTemplate.opsForValue().get(subjectTalkKey);
 
-                String freeTalkKey = GAME_KEY_PREFIX + gameId + ":round:" + i +":freechats";
+                String freeTalkKey = GAME_KEY_PREFIX + gameId + ":round:" + i +":freechats";    // 키  game:{gameId}:round:{roundNum}:freechats
                 String freeTalks = redisTemplate.opsForValue().get(freeTalkKey);
 
-                String eventKey = GAME_KEY_PREFIX + gameId + ":round:" + i +":freechats";
+                String eventKey = GAME_KEY_PREFIX + gameId + ":round:" + i +":events";  // 키  game:{gameId}:round:{roundNumber}:events
                 String events = redisTemplate.opsForValue().get(eventKey);
 
                 GameRecords gameRecord = GameRecords.builder()
                         .game(game)
-                        .subject(subject)
-                        .roundNumber(gameRoundNum)
-                        .subjectTalk(subjectTalks)
-                        .freeTalk(freeTalks)
-                        .events(events)
+                        .subject(subject1)
+                        .roundNumber(i)
+                        .subjectTalk(subjectTalks != null ? subjectTalks : " ")  // 빈 배열 문자열로 기본값 설정
+                        .freeTalk(freeTalks != null ? freeTalks : " ")
+                        .events(events != null ? events : " ")
                         .build();
 
                 gameRecordsRepository.save(gameRecord);

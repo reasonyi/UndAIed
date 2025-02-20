@@ -25,6 +25,12 @@ import myPageBgm from "../../assets/bgm/my-page.mp3";
 import introBgm from "../../assets/bgm/intro.mp3";
 import slideSound from "../../assets/bgm/slide.mp3";
 
+import Img1 from "../../assets/tutorial/1.png";
+import Img2 from "../../assets/tutorial/2.png";
+import Img3 from "../../assets/tutorial/3.png";
+import Img4 from "../../assets/tutorial/4.png";
+import Img5 from "../../assets/tutorial/5.png";
+
 interface IBoard {
   id: number;
   tag: string;
@@ -135,8 +141,8 @@ function Home() {
           <div className="w-[1px] h-[300vh] primary-bg-black"></div>
           <div className="grow flex flex-col sticky top-[3.5rem] overflow-hidden h-[calc(100vh-3.5rem)] primary-bg-black">
             <div className="flex flex-col flex-grow h-full w-full max-w-screen-md self-start pt-8 pb-4 px-14">
-              <span className="text-white mb-8 text-4xl font-extrabold leading-none tracking-tight">
-                누가 인간이고 누가 AI인가..
+              <span className="text-gray-100 mb-10 text-4xl font-extrabold leading-none tracking-tight">
+                실시간 채팅 기반 AI 추론 게임
               </span>
               <div className="grow relative">
                 <div
@@ -148,20 +154,29 @@ function Home() {
                   }}
                 >
                   <InfoContainer
-                    title="1."
-                    context="6명의 플레이어들과 한 방에서 게임을 시작합니다."
+                    title="1. 게임 참가"
+                    context="우측에 GAME START 버튼을 눌러, 게임 로비로 이동합니다. 방을 만들거나 만들어진 방에 참여할 수 있습니다."
+                    img={Img1}
                   />
                   <InfoContainer
-                    title="2."
-                    context="2명의 AI가 추가되어 8명이 실시간 채팅을 시작합니다."
+                    title="2. 게임 시작"
+                    context="참가자가 6명이 되면 방장이 게임을 시작할 수 있습니다. 게임이 시작되면, 2명의 AI가 여러분 사이에 숨게 됩니다."
+                    img={Img2}
                   />
                   <InfoContainer
-                    title="3."
-                    context="주어진 퀴즈에 답변하고 자유 토론을 진행합니다."
+                    title="3. 주제 토론 시간"
+                    context="주어진 질문에 맞게, 자신의 생각을 답변하세요. 한번만 답변할 수 있습니다."
+                    img={Img3}
                   />
                   <InfoContainer
-                    title="4."
-                    context="가장 AI같은 플레이어에게 투표합니다."
+                    title="4. 자유 토론 시간"
+                    context="주제 토론의 답변을 근거로 자유롭게 토론을 진행합니다. 물론 주제와 관련 없는 이야기로도 대화를 나누어보세요."
+                    img={Img4}
+                  />
+                  <InfoContainer
+                    title="5. 투표 시간 / 밤 시간"
+                    context="AI 같은 사람에게 투표하세요! 가장 많은 투표를 받은 참가자가 처형됩니다. 밤 시간이 되면 AI가 인간 한 명을 처형합니다. 여러분은 AI를 모두 찾아낼 수 있을까요?"
+                    img={Img5}
                   />
                 </div>
               </div>

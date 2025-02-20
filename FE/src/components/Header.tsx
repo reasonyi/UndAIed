@@ -7,51 +7,11 @@ import Logo from "../assets/svg-icon/game_logo.svg";
 import { useRecoilValue } from "recoil";
 import { userState } from "../store/userState";
 import { HashLink } from "react-router-hash-link";
->>>>>>> release
 
-function Header(){
-    const navigate = useNavigate()
-    const onBoardClick = () => {
-        navigate("/board")
-    }
-    return (
-        <header>
-            <ul className="flex">
-                <li className="mr-6">
-                    <Link to={"/"}>Home으로</Link>
-                </li>
-                <li className="mr-6">
-                    <Link to={"/policy"}>Policy로</Link>
-                </li>
-                <li className="mr-6">
-                    <Link to={"/gamerooms"}>Game rooms으로</Link>
-                </li>
-                <li className="mr-6">
-                    <Link to={"/gamelobby/1"}>1번 gamelobby로</Link>
-                </li>
-                <li className="mr-6">
-                    <Link to={"/gamechats/2"}>2번 game chats로</Link>
-                </li>
-                <li className="mr-6">
-                    <Link to={"/user/3"}>3번 user로</Link>
-                </li>
-                <li className="mr-6">
-                    <Link to={"/log/4"}>4번 log로</Link>
-                </li>
-                <li className="mr-6">
-                    <button onClick={onBoardClick}>board로</button>
-                </li>
-                <li className="mr-6">
-                    <Link to={"/write"}>게시글작성으로</Link>
-                </li>
-            </ul>
-        </header>
-    )
+interface IHeaderProps {
+  scrollRatio: number;
 }
 
-<<<<<<< HEAD
-export default Header;
-=======
 function Header({ scrollRatio }: IHeaderProps) {
   const [scrollTop, setScrollTop] = useState(0);
 
@@ -62,6 +22,7 @@ function Header({ scrollRatio }: IHeaderProps) {
   };
 
   const navigate = useNavigate();
+
   const onBoardClick = () => {
     navigate("/board");
   };
@@ -75,32 +36,48 @@ function Header({ scrollRatio }: IHeaderProps) {
   return (
     <header
       onScroll={handleScroll}
-      className="flex flex-col pt-4  header-style w-screen h-14 fixed primary-bg-black z-40"
+      className="fixed z-40 flex flex-col w-screen h-14 pt-4 primary-bg-black header-style"
     >
-      <ul className="flex justify-between">
-        <li className="ml-12 w-56 mr-4">
-          <Link to={"/"}>
-            <img src={Logo} />
-          </Link>
-        </li>
-        {!isLogin ? (
-          <li onClick={goToLogin} className=" ml-4 mr-8  font-semibold">
-            <HashLink to="/#login" smooth>
-              로그인
-            </HashLink>
+      <nav>
+        <ul className="flex justify-between">
+          <div className="flex items-center">
+            <li className="ml-12">
+              <Link to="/">
+                <img src={Logo} alt="로고" />
+              </Link>
+            </li>
+            <li className="ml-12">
+              <Link to="/board/notice" className="font-medium text-gray-300">
+                공지사항
+              </Link>
+            </li>
+            <li className="ml-12">
+              <Link to="/board/bugreport" className="font-medium text-gray-300">
+                버그리포트
+              </Link>
+            </li>
+          </div>
+
+          <li className="mr-8 text-gray-300">
+            {!isLogin ? (
+              <HashLink to="/#login" smooth className="font-semibold">
+                로그인
+              </HashLink>
+            ) : (
+              <span className="font-semibold">
+                {userData.nickname}님 환영합니다!
+              </span>
+            )}
           </li>
-        ) : (
-          <li onClick={goToLogin} className=" ml-4 mr-8  font-semibold">
-            {userData.nickname}님 환영합니다!
-          </li>
-        )}
-      </ul>
+        </ul>
+      </nav>
+
       <div
         className="header-bottom-style"
         style={{
           background: `linear-gradient(to right, #eee, #eee ${scrollRatio}%, #333 ${scrollRatio}%)`,
         }}
-      ></div>
+      />
     </header>
   );
 }

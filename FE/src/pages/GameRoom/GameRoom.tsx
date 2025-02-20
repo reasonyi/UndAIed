@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
-import ChatBubble from "../GamePlay/components/ChatBuble";
 import SystemBubble from "../GamePlay/components/SystemBubble";
 import ChatForm from "./components/ChatForm";
 import { useSocket } from "../../hooks/useSocket";
@@ -11,6 +10,8 @@ import { IMessage, IPlayer } from "../../types/gameroom";
 import AudioPlayer from "../../util/AudioPlayer";
 import gameRoomBgm from "../../assets/bgm/game-room.mp3";
 import { getPlayerIcon } from "../../util/PlayerIcon";
+import ChatBubble from "./components/ChatBuble";
+import Settings from "../../util/Setting";
 
 interface IRoomInfo {
   roomId: number;
@@ -322,9 +323,12 @@ function GameRoom() {
     // 새로운 메시지가 추가될 때 스크롤을 아래로 이동
     scrollToBottom();
   }, [messages]);
+
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   return (
     <>
       <AudioPlayer src={gameRoomBgm} isPlaying={true} shouldLoop={true} />
+
       <div className="bg-[#07070a]">
         <div className="background-gradient max-w-[90rem] mx-auto px-4 sm:px-4 md:px-6">
           <LeftSideBar
@@ -336,6 +340,7 @@ function GameRoom() {
             onLeaveRoom={handleLeaveRoom}
             onGameStart={handleGameStart}
             player={playerInfo}
+            onSettingsClick={() => setIsSettingsOpen(true)}
           />
           <div className="lg:pl-[19.5rem]">
             <div className="max-w-3xl mx-auto xl:max-w-none xl:ml-0 xl:mr-[32rem]">
@@ -354,6 +359,11 @@ function GameRoom() {
                             roomInfo?.currentPlayers.find(
                               (user) => user.enterId === msg.player
                             )?.nickname
+                          }
+                          icon={
+                            roomInfo?.currentPlayers.find(
+                              (user) => user.enterId === msg.player
+                            )?.profileImage
                           }
                         />
                       );
@@ -383,6 +393,16 @@ function GameRoom() {
           </div>
         </div>
       </div>
+
+      {isSettingsOpen && (
+        <Settings
+          title="설정"
+          first={false}
+          setFirst={() => {}}
+          onClose={() => setIsSettingsOpen(false)}
+          isSettingsOpen={isSettingsOpen}
+        />
+      )}
     </>
   );
 }

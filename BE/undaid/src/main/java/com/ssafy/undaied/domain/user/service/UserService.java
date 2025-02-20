@@ -157,7 +157,7 @@ public class UserService{
         }
         if(nickname.matches(".*[^a-zA-Z0-9가-힣].*")) {
             log.error("닉네임에 특수문자 사용 시도");
-            throw new BaseException(NOT_ALLOW_NICKNAME);
+            throw new BaseException(NOT_ALLOW_SPECIAL_CHARACTERS);
         }
     }
 

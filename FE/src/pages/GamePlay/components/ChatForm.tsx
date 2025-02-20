@@ -10,12 +10,22 @@ interface IFormProps {
   socket: Socket | null; // 부모에서 전달받을 소켓 인스턴스
   isDead: boolean;
   onSendChat: (input: string) => void;
+  isVote: boolean;
+  isSubjectDebate: boolean;
+  isFreeDebate: boolean;
 }
 interface IForm {
   chat: string;
 }
 
-function ChatForm({ socket, isDead, onSendChat }: IFormProps) {
+function ChatForm({
+  socket,
+  isDead,
+  onSendChat,
+  isVote,
+  isSubjectDebate,
+  isFreeDebate,
+}: IFormProps) {
   const paperPlane: IconDefinition = faPaperPlane;
   const {
     register,
@@ -45,6 +55,9 @@ function ChatForm({ socket, isDead, onSendChat }: IFormProps) {
       resetField("chat");
       // 마지막 채팅 시간 갱신
       lastChatTimeRef.current = currentTime;
+      if (isSubjectDebate) {
+        toast.success("주제 토론 답변이 제출되었습니다.");
+      }
     } catch (error) {
       // 에러 처리
       console.error(error);
@@ -73,12 +86,20 @@ function ChatForm({ socket, isDead, onSendChat }: IFormProps) {
           required: "빈 채팅을 입력할 수 없습니다.",
           maxLength: {
             value: 200,
-            message: "최대 200자리까지 입력할 수 있습니다다",
+            message: "최대 200자리까지 입력할 수 있습니다",
           },
         })}
         className="bg-transparent text-[#848484] focus:text-[#dddddd] w-full"
-        placeholder={isDead ? "죽은 자는 말이 없다." : "채팅 입력하기"}
-        disabled={isDead}
+        placeholder={
+          isDead
+            ? "죽은 자는 말이 없다."
+            : isVote
+            ? "우측 초상화에서 투표하기."
+            : isSubjectDebate || isFreeDebate
+            ? "채팅 입력하기"
+            : "토론 시간에 채팅을 작성할 수 있습니다"
+        }
+        disabled={isDead || !(isSubjectDebate || isFreeDebate)}
         type="text"
         autoComplete="off"
       />

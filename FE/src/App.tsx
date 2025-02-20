@@ -18,10 +18,9 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 function App() {
   return (
     <>
-      <Toaster />
+      <Toaster richColors={true} theme="dark" />
       <Outlet />
->>>>>>> release
-      <ReactQueryDevtools initialIsOpen={false} />
+      {/* <ReactQueryDevtools initialIsOpen={false} /> */}
     </>
   )
 }
