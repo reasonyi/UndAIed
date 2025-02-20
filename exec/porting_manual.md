@@ -168,6 +168,9 @@
     spring.data.redis.lettuce.pool.min-idle=5
     spring.data.redis.lettuce.pool.time-between-eviction-runs=60000
     spring.data.redis.lettuce.shutdown-timeout=1000ms
+
+    # Spring에서 AI서버 연동용 주소
+    ai.server.url=https://i12b212.p.ssafy.io
      ```
     `S12P11B212/BE/undaid/src/main/resources/application-secrets.properties`
      ```properties
@@ -200,7 +203,7 @@
 
     FRONTEND_PORTS=5173:5173
 
-    JWT_SECRET=8BMhtPMhfL6HVn8u89yk4lKfUEu+X/CTevQwHpyAuc7Tehb7glMZGMn+H5kiyvzZ+JR/IrvX1t3CJuL6+1UJ6Q==
+    JWT_SECRET=your_JWT_SWCRET
 
     SPRING_DATA_REDIS_HOST=redis
     SPRING_DATA_REDIS_PORT=6379
