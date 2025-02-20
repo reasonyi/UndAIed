@@ -13,7 +13,7 @@ const GoogleLoginButton2: React.FC<GoogleLoginButtonProps> = ({
   ) => {
     // 구글에서 발급해준 JWT
     const token = response.credential;
-    console.log("Google Token: ", token);
+    // console.log("Google Token: ", token);
 
     // 부모 컴포넌트나 상위 로직으로 토큰 전달
     onTokenReceive(token);
@@ -22,7 +22,11 @@ const GoogleLoginButton2: React.FC<GoogleLoginButtonProps> = ({
   useEffect(() => {
     // window 전역에서 google 객체에 접근
     /* global google */
-    if (typeof google !== "undefined") {
+    if (
+      typeof google !== "undefined" &&
+      google.accounts &&
+      google.accounts.id
+    ) {
       google.accounts.id.initialize({
         client_id:
           "795412424002-h96s44dm1b7junqvntu384qk2otab42n.apps.googleusercontent.com", // 환경 변수에서 가져오기
