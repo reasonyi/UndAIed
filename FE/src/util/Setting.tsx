@@ -25,7 +25,15 @@ function SettingIcon() {
   return <img src={setting} alt="settings" className="w-7" />;
 }
 
-function Settings({ title, first, setFirst }: SettingProps) {
+function Settings({
+  title,
+  first,
+  setFirst,
+  onClose,
+  isSettingsOpen,
+}: SettingProps) {
+  console.log("열림");
+
   const [isOpen, setIsOpen] = useState(false);
   const [settings, setSettings] = useRecoilState(settingsState);
   const [showIntro, setShowIntro] = useRecoilState(setShowIntroState);
@@ -116,7 +124,7 @@ function Settings({ title, first, setFirst }: SettingProps) {
   return (
     <>
       {/* 설정 아이콘만 반환 */}
-      {!first && (
+      {!first && !isSettingsOpen && (
         <button
           onClick={() => setIsOpen(true)}
           className="flex justify-center items-center"
@@ -127,16 +135,19 @@ function Settings({ title, first, setFirst }: SettingProps) {
 
       {/* 모달 */}
 
-      {(isOpen || first) && (
+      {(isOpen || first || isSettingsOpen) && (
         <>
           {first && (
             <div className="fixed inset-0 bg-black z-50 flex items-center justify-center"></div>
           )}
-          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+          <div className="overflow-hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
             <div className={`${blockStyle} ${blockHover} relative`}>
               {!first && (
                 <button
-                  onClick={() => setIsOpen(false)}
+                  onClick={() => {
+                    setIsOpen(false);
+                    onClose();
+                  }}
                   className="absolute top-2 right-2 p-2 rounded-full hover:bg-[#ffffff1a] transition-colors"
                   aria-label="Close settings"
                 >
