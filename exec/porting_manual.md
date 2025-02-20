@@ -64,8 +64,8 @@
 - 접속 정보
   ```properties
   spring.datasource.url=jdbc:mysql://mysql:3306/${MYSQL_DATABASE}?serverTimezone=Asia/Seoul&useSSL=false&allowPublicKeyRetrieval=true&characterEncoding=UTF-8
-  spring.datasource.username=minsunnyjjang
-  spring.datasource.password=dongficial
+  spring.datasource.username=YOUR_DB_ID
+  spring.datasource.password=YOUR_DB_PW
   ```
 
 #### 2.2.5 Redis 데이터베이스 접속 정보
@@ -74,7 +74,7 @@
   ```properties
   spring.data.redis.host=redis
   spring.data.redis.port=6379
-  spring.data.redis.password=yunbaessword
+  spring.data.redis.password=YOUR_DB_ROOT_PW
   ```
 
 #### 2.2.6 환경변수 정보
@@ -192,10 +192,10 @@
      ```
   - 프로젝트 환경변수 : `S12P11B212/.env`
      ```env
-    MYSQL_ROOT_PASSWORD=yunbaessword
+    MYSQL_ROOT_PASSWORD=YOUR_DB_ROOT_PW
     MYSQL_DATABASE=undaied
-    MYSQL_USER=minsunnyjjang
-    MYSQL_PASSWORD=dongficial
+    MYSQL_USER=YOUR_DB_ID
+    MYSQL_PASSWORD=YOUR_DB_PW
 
     FRONTEND_PORTS=5173:5173
 
@@ -204,7 +204,7 @@
     SPRING_DATA_REDIS_HOST=redis
     SPRING_DATA_REDIS_PORT=6379
 
-    REDIS_PASSWORD=yunbaessword
+    REDIS_PASSWORD=YOUR_DB_ROOT_PW
      ```
 
 
@@ -858,7 +858,7 @@ server {
 ### 5.1 MySQL 접속 방법
 #### 5.1.1 MySQL 쉘로 컨테이너에 접속
 ```bash
-$ docker exec -it mysql mysql -u minsunnyjjang -p
+$ docker exec -it mysql mysql -u YOUR_DB_ID -p
 # docker exec -it 컨테이너명 쉘 -u 사용자 -p
 ```
 
