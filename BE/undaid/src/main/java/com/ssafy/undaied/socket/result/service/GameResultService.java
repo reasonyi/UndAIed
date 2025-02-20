@@ -14,6 +14,8 @@ import com.ssafy.undaied.domain.game.entity.Subjects;
 import com.ssafy.undaied.domain.game.entity.respository.GameRecordsRepository;
 import com.ssafy.undaied.domain.game.entity.respository.GamesRepository;
 import com.ssafy.undaied.domain.game.entity.respository.SubjectsRepository;
+import com.ssafy.undaied.domain.user.entity.Users;
+import com.ssafy.undaied.domain.user.entity.repository.UserRepository;
 import com.ssafy.undaied.socket.chat.service.JsonAIChatService;
 import com.ssafy.undaied.socket.common.exception.SocketErrorCode;
 import com.ssafy.undaied.socket.common.exception.SocketException;
@@ -50,6 +52,7 @@ public class GameResultService {
     private final AIRepository aiRepository;
     private final SocketIONamespace namespace;
     private final JsonAIChatService jsonAIChatService;
+    private final UserRepository userRepository;
 
     public String checkGameResult(int gameId) throws SocketException {
         try {
@@ -287,6 +290,37 @@ public class GameResultService {
 
             gamesRepository.save(game);
             log.debug("Games 객체 성공적으로 저장");
+
+
+            // 유저 전적 업데이트
+            log.debug("게임에 참여한 유저 승패 저장중...");
+            String ingameUserKey = GAME_KEY_PREFIX + gameId + ":user_nickname";
+            Map<Object, Object> ingameUserData = jsonRedisTemplate.opsForHash().entries(ingameUserKey);
+            if (ingameUserData == null) {
+                log.error("redis에서 게임에 참여한 유저를 찾을 수 없어 승패 저장 실패 - roomId: {}", roomId);
+            } else {
+                for (Map.Entry<Object, Object> entry : ingameUserData.entrySet()) {
+                    Integer mapKey = (Integer) entry.getKey();
+                    String mapValue = (String) entry.getValue();
+
+                    if(mapKey > 0) {
+                        Users ingameUser = userRepository.findById(mapKey)
+                                .orElse(null);
+
+                        if(ingameUser == null) {
+                            log.debug("{} 아이디값으로 유저를 찾을 수 없어 승패 저장에 실패", mapKey);
+                        } else {
+                            if((Boolean) gameData.get("humanWin")) {
+                                ingameUser.lose();
+                            } else {
+                                ingameUser.win();
+                            }
+                            userRepository.save(ingameUser);
+                            log.debug("{}유저의 승패 저장 성공", mapValue);
+                        }
+                    }
+                }
+            }
 
             // AI 죽은 결과 저장.
             log.debug("AI 죽은 결과 저장 시도중...");
