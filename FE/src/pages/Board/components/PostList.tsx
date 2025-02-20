@@ -20,34 +20,27 @@ function PostList({
   }
 
   const userData = localStorage.getItem("userPersist");
-  const token = JSON.parse(userData!).userState.token;
-  const decodeToken = (token: string) => {
+  const token = userData ? JSON.parse(userData)?.userState?.token : null;
+  const decodeToken = (token: string | null) => {
     if (!token) return null;
     try {
       return jwtDecode<JWTPayload>(token);
     } catch (error) {
       console.log("jwt decode error", error);
+      return null;
     }
   };
 
   const { category } = useParams<{ category: string }>();
   const userRole = decodeToken(token)?.roles;
   console.log(userRole);
+
   useEffect(() => {}, [boardRefresh]);
+
   return (
     <main className="w-full max-w-[1260px] mx-auto">
       <div className="bg-white overflow-x-auto ">
         <table className="w-full min-w-[768px]">
-          {/* <thead className="border-t-2 border-t-black bg-[#ededed27]">
-            <tr className="border-b">
-              <th className="py-4 px-6 text-center w-[10%]">공지</th>
-              <th className="py-4 px-6 text-left w-[55%] min-w-[200px]">
-                제목
-              </th>
-              <th className="py-4 px-6 text-center w-[7%]">조회수</th>
-              <th className="py-4 px-6 text-center w-[13%]">게시일</th>
-            </tr>
-          </thead> */}
           <tbody>
             {currentPosts.map((post: Post, index: number) => (
               <tr
@@ -71,12 +64,10 @@ function PostList({
           </tbody>
         </table>
       </div>
-      {userRole === "ROLE_ADMIN" && category !== "bugreport" ? (
+      {(token && userRole === "ROLE_ADMIN" && category !== "bugreport") ||
+      category === "bugreport" ? (
         <WriteButton />
-      ) : (
-        <></>
-      )}
-      {category === "bugreport" && <WriteButton />}
+      ) : null}
     </main>
   );
 }
