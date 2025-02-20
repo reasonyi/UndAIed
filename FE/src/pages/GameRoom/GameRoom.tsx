@@ -355,6 +355,7 @@ function GameRoom() {
                               (user) => user.enterId === msg.player
                             )?.nickname
                           }
+                          iconArr={[]}
                         />
                       );
                     }

@@ -6,7 +6,6 @@ import Policy from "../pages/Policy";
 import GameRoom from "../pages/GameRoom/GameRoom";
 import GamePlay from "../pages/GamePlay/GamePlay";
 import GameMain from "../pages/GameMain/GameMain";
-import BoardDetails from "../pages/BoardDetails";
 import Board from "../pages/Board/Board";
 import User from "../pages/User";
 import Log from "../pages/Log";
@@ -15,6 +14,8 @@ import Friends from "../pages/Friends/Friends";
 import Game from "../pages/Game/Game";
 import GameMyPage from "../pages/GameMyPage/GameMyPage";
 import Signup from "../pages/Signup";
+import BoardDetail from "../pages/Board/BoardDetail";
+import BoardEdit from "../pages/Board/components/BoardEdit";
 
 const router = createBrowserRouter([
   {
@@ -53,8 +54,8 @@ const router = createBrowserRouter([
         ],
       },
       {
-        path: "/board/:category/:number",
-        element: <BoardDetails />,
+        path: "/board/detail/:number",
+        element: <BoardDetail />,
       },
       {
         path: "/board/:category",
@@ -68,6 +69,11 @@ const router = createBrowserRouter([
         path: "/write",
         element: <BoardWrite />,
       },
+      {
+        path: "/board/edit/:number",
+        element: <BoardEdit />,
+      },
+
       {
         path: "/user/:userId",
         element: <User />,

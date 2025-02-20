@@ -48,6 +48,7 @@ function RightSideBar({ players, messages }: RightSideBarProps) {
             <div className="row-start-1 px-2 py-1">
               {players[0] ? (
                 <ReadyProfile
+                  isHost={players[0].isHost}
                   nickname={players[0].nickname}
                   playerNum={players[0].enterId}
                   icon={getPlayerIcon(players[0].profileImage)}
@@ -59,6 +60,7 @@ function RightSideBar({ players, messages }: RightSideBarProps) {
             <div className="row-start-1 px-2 py-1">
               {players[1] ? (
                 <ReadyProfile
+                  isHost={players[1].isHost}
                   nickname={players[1].nickname}
                   playerNum={players[1].enterId}
                   icon={getPlayerIcon(players[1].profileImage)}
@@ -70,6 +72,7 @@ function RightSideBar({ players, messages }: RightSideBarProps) {
             <div className="row-start-1 px-2 py-1">
               {players[2] ? (
                 <ReadyProfile
+                  isHost={players[2].isHost}
                   nickname={players[2].nickname}
                   playerNum={players[2].enterId}
                   icon={getPlayerIcon(players[2].profileImage)}
@@ -81,6 +84,7 @@ function RightSideBar({ players, messages }: RightSideBarProps) {
             <div className="row-start-2 px-2 py-1">
               {players[3] ? (
                 <ReadyProfile
+                  isHost={players[3].isHost}
                   nickname={players[3].nickname}
                   playerNum={players[3].enterId}
                   icon={getPlayerIcon(players[3].profileImage)}
@@ -92,6 +96,7 @@ function RightSideBar({ players, messages }: RightSideBarProps) {
             <div className="row-start-2 px-2 py-1">
               {players[4] ? (
                 <ReadyProfile
+                  isHost={players[4].isHost}
                   nickname={players[4].nickname}
                   playerNum={players[4].enterId}
                   icon={getPlayerIcon(players[4].profileImage)}
@@ -103,6 +108,7 @@ function RightSideBar({ players, messages }: RightSideBarProps) {
             <div className="row-start-2 px-2 py-1">
               {players[5] ? (
                 <ReadyProfile
+                  isHost={players[5].isHost}
                   nickname={players[5].nickname}
                   playerNum={players[5].enterId}
                   icon={getPlayerIcon(players[5].profileImage)}

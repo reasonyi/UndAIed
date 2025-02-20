@@ -10,7 +10,7 @@ export const settingsState = atom<SettingsStateType>({
     }
     return {
       isFullscreen: false,
-      isMuted: false,
+      isMuted: true,
       volume: 1.0,
     };
   })(),
