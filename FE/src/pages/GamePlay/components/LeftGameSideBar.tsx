@@ -23,6 +23,7 @@ interface ILeftGameSideBarProps {
   round?: number;
   socket: Socket | null;
   // onLeaveRoom: () => void;
+  onSettingsClick: () => void;
 }
 
 //아이콘
@@ -42,6 +43,7 @@ function LeftGameSideBar({
   stage,
   round,
   socket,
+  onSettingsClick,
 }: // onLeaveRoom,
 ILeftGameSideBarProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -104,19 +106,25 @@ ILeftGameSideBarProps) {
         </div>
 
         <div className="w-full">
-          <div className="config-container w-[3rem] h-[12rem] bg-[#ff3939]/10 rounded-xl flex flex-col justify-between py-4">
-            <button>
-              <FontAwesomeIcon
-                icon={bell}
-                className="text-white p-1 w-[1.25rem] h-[1.25rem]"
-              />
-            </button>
-            <button>
+          <div className="config-container w-[3rem] h-[9rem] bg-[#ff3939]/10 rounded-xl flex flex-col justify-between py-4">
+            {/* <button>
+                      <FontAwesomeIcon
+                        icon={bell}
+                        className="text-white p-1 w-[1.25rem] h-[1.25rem]"
+                      />
+                    </button> */}
+            <button onClick={onSettingsClick}>
               <FontAwesomeIcon
                 icon={gear}
                 className="text-white p-1 w-[1.25rem] h-[1.25rem]"
               />
             </button>
+            {/* <button onClick={copyCurrentURL}>
+                      <FontAwesomeIcon
+                        icon={userGroup}
+                        className="text-white p-1 w-[1.25rem] h-[1.25rem]"
+                      />
+                    </button> */}
             <button
               onClick={(event) => {
                 event.preventDefault();
@@ -132,9 +140,7 @@ ILeftGameSideBarProps) {
                 className="text-white p-1 w-[1.25rem] h-[1.25rem]"
               />
             </button>
-            <button
-            // onClick={onLeaveRoom}
-            >
+            <button>
               <FontAwesomeIcon
                 icon={doorOpen}
                 className="text-white p-1 w-[1.25rem] h-[1.25rem]"

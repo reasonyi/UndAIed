@@ -23,6 +23,7 @@ interface ILeftSideBarProps {
   onLeaveRoom: () => void;
   onGameStart: () => void;
   player?: IPlayer;
+  onSettingsClick: () => void;
 }
 
 //아이콘
@@ -43,6 +44,7 @@ function LeftSideBar({
   onLeaveRoom,
   onGameStart,
   player,
+  onSettingsClick,
 }: ILeftSideBarProps) {
   const [isOpen, setIsOpen] = useState(false);
   console.log("프로필 이미지 번호: ", player?.profileImage);
@@ -126,25 +128,25 @@ function LeftSideBar({
         )}
 
         <div className="w-full">
-          <div className="config-container w-[3rem] h-[16rem] bg-[#ff3939]/10 rounded-xl flex flex-col justify-between py-4">
-            <button>
+          <div className="config-container w-[3rem] h-[9rem] bg-[#ff3939]/10 rounded-xl flex flex-col justify-between py-4">
+            {/* <button>
               <FontAwesomeIcon
                 icon={bell}
                 className="text-white p-1 w-[1.25rem] h-[1.25rem]"
               />
-            </button>
-            <button>
+            </button> */}
+            <button onClick={onSettingsClick}>
               <FontAwesomeIcon
                 icon={gear}
                 className="text-white p-1 w-[1.25rem] h-[1.25rem]"
               />
             </button>
-            <button onClick={copyCurrentURL}>
+            {/* <button onClick={copyCurrentURL}>
               <FontAwesomeIcon
                 icon={userGroup}
                 className="text-white p-1 w-[1.25rem] h-[1.25rem]"
               />
-            </button>
+            </button> */}
             <button
               onClick={(event) => {
                 event.preventDefault();

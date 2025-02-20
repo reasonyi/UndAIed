@@ -6,6 +6,8 @@ export interface SettingsStateType {
 
 export interface SettingProps {
   title: string;
-  first: boolean;
-  setFirst: (value: boolean) => void;
+  first: boolean | null;
+  setFirst: (value: boolean) => void | null;
+  onClose: () => void;
+  isSettingsOpen: boolean;
 }
