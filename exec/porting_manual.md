@@ -60,6 +60,7 @@
 | Proxy      | 443  | Nginx       |
 
 #### 2.2.4 MySQL 데이터베이스 접속 정보
+> 주의사항 : DB접속 ID, PW는 유추하기 어려운 것으로 설정할 것
 - 데이터베이스명: undaied
 - 접속 정보
   ```properties
