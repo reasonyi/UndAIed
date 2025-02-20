@@ -379,6 +379,8 @@ function GamePlay() {
                     socket={socket}
                     onSendChat={handleGameChat}
                     isVote={gameInfo?.stage === "vote"}
+                    isSubjectDebate={gameInfo?.stage === "subject_debate"}
+                    isFreeDebate={gameInfo?.stage === "free_debate"}
                   />
                 </div>
               </div>
