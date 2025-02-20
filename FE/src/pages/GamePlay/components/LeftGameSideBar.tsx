@@ -104,7 +104,6 @@ ILeftGameSideBarProps) {
         </div>
 
         <div className="w-full">
-
           <div className="config-container w-[3rem] h-[12rem] bg-[#ff3939]/10 rounded-xl flex flex-col justify-between py-4">
             <button>
               <FontAwesomeIcon
@@ -141,7 +140,7 @@ ILeftGameSideBarProps) {
                 className="text-white p-1 w-[1.25rem] h-[1.25rem]"
               />
             </button>
-          </div> */}
+          </div>
         </div>
       </div>
     </>
