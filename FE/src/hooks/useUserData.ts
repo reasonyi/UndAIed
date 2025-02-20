@@ -29,7 +29,7 @@ export const useUpdateProfile = () => {
     onSuccess: (data) => {
       // 에러 객체가 반환된 경우
       if (data.error) {
-        toast.error(data.message);
+        toast.error("프로필 업데이트 오류");
         return;
       }
 
