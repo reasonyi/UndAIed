@@ -1,4 +1,4 @@
-import json, re
+import json, re, logging
 import google.generativeai as genai
 from fastapi import FastAPI, status, HTTPException
 from pydantic import BaseModel
@@ -10,6 +10,8 @@ app = FastAPI()
 env = Env()
 env.read_env()
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class Request(BaseModel):
     ai_num: int
@@ -40,7 +42,8 @@ async def chatgpt_api(request: Request):
     event = phase.get("event")
 
     if not topic:
-        return {"content": "주제가 아직 주어지지 않았습니다.", "flag": False}
+        logger.info("주제가 아직 주어지지 않았습니다")
+        return {"content": ""}
     elif not topic_debate:
         current_situation = f"현재 {round}라운드 주제토론[topic_debate] 시간입니다. output 구조에 맞춰서 주제에 대한 대답을 반드시 생성하세요.\n이번 라운드 주제 : {topic}"
     else:
@@ -95,6 +98,7 @@ async def chatgpt_api(request: Request):
         }
 
     # 최종 응답
+    logger.info(final_content)
     return {"content": final_content}
 
 
@@ -126,7 +130,8 @@ async def gemini_api(request: Request):
     event = phase.get("event")
 
     if not topic:
-        return {"content": "주제가 아직 주어지지 않았습니다.", "flag": False}
+        logger.info("주제가 아직 주어지지 않았습니다")
+        return {"content" : ""}
     elif not topic_debate:
         current_situation = f"현재 {round}라운드 주제토론[topic_debate] 시간입니다. output 구조에 맞춰서 주제에 대한 대답을 반드시 생성하세요.\n이번 라운드 주제 : {topic}"
     else :
@@ -169,4 +174,5 @@ async def gemini_api(request: Request):
         }
 
     # 최종 응답
+    logger.info(final_content)
     return {"content": final_content}
