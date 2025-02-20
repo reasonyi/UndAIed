@@ -29,9 +29,9 @@ CREATE TABLE games (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE ais (
-   ai_id INT PRIMARY KEY,
+   ai_id INT AUTO_INCREMENT PRIMARY KEY,
    ai_name VARCHAR(50) NOT NULL,
-   created_at DATETIME NOT NULL
+   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE game_participants (
@@ -113,3 +113,5 @@ INSERT INTO subjects (subject_id, item) VALUES
 (28, '''사실1: 도윤이는 파랗다. 사실2: 도윤이는 어리다.'' 라는 사실과, ''규칙1: 조용한 사람은 친절하다. 규칙2: 누군가 파랗고 붉지 않다면, 그 사람은 조용하다.'' 라는 규칙을 이용해 도윤이가 어린지 말해줄 수 있나요?'),
 (29, '''사실1: 아라는 차갑다. 사실2: 아라는 친절하다. 사실3: 아라는 거칠다. 사실4: 철수는 차갑다.'' 이 때, 철수가 친절한지 알 수 있나요?'),
 (30, '동전이 앞면을 보이고 있습니다. 영민이가 동전을 한 번 뒤집었습니다. 동전은 여전히 앞면인가요?');
+
+INSERT INTO ais (ai_name) VALUES ('DeepSeek'),('Gemini-2.0-flash-exp'), ('ChatGPT-4o');
