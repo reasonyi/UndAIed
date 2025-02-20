@@ -26,7 +26,7 @@ import { IMessage } from "../../types/gameroom";
 import { IAnonimus, IGameResultSend } from "../../types/gameplay";
 import { toast } from "sonner";
 import { STAGE_INFO } from "./components/info";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useResetRecoilState } from "recoil";
 import {
   isGameEndState,
   isUserDiedState,
@@ -84,6 +84,13 @@ function GamePlay() {
   const [isUserDead, setIsUserDead] = useRecoilState<boolean>(isUserDiedState);
 
   const [isGameEnd, setIsGameEnd] = useRecoilState(isGameEndState);
+
+  const resetUserMemo = useResetRecoilState(userMemoState);
+
+  useEffect(() => {
+    // 컴포넌트가 마운트될 때(즉, 페이지가 로드될 때) state 초기화
+    resetUserMemo();
+  }, [resetUserMemo]);
 
   //유저 아이콘
   const iconArr = [
