@@ -9,7 +9,7 @@ export const updateProfile = async (data: ProfileUpdate) => {
     console.log("에러 잘 들어왓어요");
     return {
       error: true,
-      message: "중복된 닉네임입니다",
+      message: "프로필 업데이트 에러",
     };
   }
 

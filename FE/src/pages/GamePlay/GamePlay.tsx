@@ -33,6 +33,7 @@ import {
   userMemoState,
 } from "../../store/gamePlayState";
 import GameEndModal from "./components/GameEndModal";
+import Settings from "../../util/Setting";
 
 interface IChatSend {
   number: number;
@@ -327,73 +328,86 @@ function GamePlay() {
     // 새로운 메시지가 추가될 때 스크롤을 아래로 이동
     scrollToBottom();
   }, [messages]);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   return (
-    <div className="bg-[#07070a]">
-      {isGameEnd && gameResult !== undefined ? (
-        <GameEndModal gameResult={gameResult} />
-      ) : (
-        <></>
-      )}
-      <div className="background-gradient max-w-[90rem] mx-auto px-4 sm:px-4 md:px-6">
-        <LeftGameSideBar
-          nickname={
-            playerInfo
-              ? `익명${String(playerInfo.number)}`
-              : "연결이 끊겼습니다."
-          }
-          icon={iconArr[playerInfo ? playerInfo.number : 1]}
-          socket={socket}
-          title={`Game No. ${gameInfo?.gameId}`}
-          timer={gameInfo?.timer}
-          stage={gameInfo?.stage}
-          round={gameInfo?.round}
-          // onLeaveRoom={handleLeaveRoom}
-        />
-        <div className="lg:pl-[19.5rem]">
-          <div className="max-w-3xl mx-auto xl:max-w-none xl:ml-0 xl:mr-[32rem]">
-            <div className="chat-container flex flex-col h-screen overflow-auto">
-              {/* 메시지 리스트 영역 */}
-              <div className="flex-1 px-5 pt-4">
-                {messages.map((msg: IMessage, index) => {
-                  if (msg.player === 0) {
-                    return <SystemBubble key={index} message={msg} />;
-                  } else {
-                    return (
-                      <ChatBubble
-                        key={index}
-                        message={msg}
-                        playerName={`익명${msg.player}`}
-                        iconArr={iconArr}
-                      />
-                    );
-                  }
-                })}
-                <div
-                  ref={scrollRef}
-                  className="chat-input-temp h-[4.5rem] w-full"
-                ></div>
-                <div className="chat-input fixed h-10 bottom-4 w-[calc(90rem-21rem-33.5rem-2rem)]">
-                  <ChatForm
-                    isDead={playerInfo ? playerInfo.died : true}
-                    socket={socket}
-                    onSendChat={handleGameChat}
-                    isVote={gameInfo?.stage === "vote"}
-                  />
+    <>
+      <div className="bg-[#07070a]">
+        {isGameEnd && gameResult !== undefined ? (
+          <GameEndModal gameResult={gameResult} />
+        ) : (
+          <></>
+        )}
+        <div className="background-gradient max-w-[90rem] mx-auto px-4 sm:px-4 md:px-6">
+          <LeftGameSideBar
+            nickname={
+              playerInfo
+                ? `익명${String(playerInfo.number)}`
+                : "연결이 끊겼습니다."
+            }
+            icon={iconArr[playerInfo ? playerInfo.number : 1]}
+            socket={socket}
+            title={`Game No. ${gameInfo?.gameId}`}
+            timer={gameInfo?.timer}
+            stage={gameInfo?.stage}
+            round={gameInfo?.round}
+            onSettingsClick={() => setIsSettingsOpen(true)}
+            // onLeaveRoom={handleLeaveRoom}
+          />
+          <div className="lg:pl-[19.5rem]">
+            <div className="max-w-3xl mx-auto xl:max-w-none xl:ml-0 xl:mr-[32rem]">
+              <div className="chat-container flex flex-col h-screen overflow-auto">
+                {/* 메시지 리스트 영역 */}
+                <div className="flex-1 px-5 pt-4">
+                  {messages.map((msg: IMessage, index) => {
+                    if (msg.player === 0) {
+                      return <SystemBubble key={index} message={msg} />;
+                    } else {
+                      return (
+                        <ChatBubble
+                          key={index}
+                          message={msg}
+                          playerName={`익명${msg.player}`}
+                          iconArr={iconArr}
+                        />
+                      );
+                    }
+                  })}
+                  <div
+                    ref={scrollRef}
+                    className="chat-input-temp h-[4.5rem] w-full"
+                  ></div>
+                  <div className="chat-input fixed h-10 bottom-4 w-[calc(90rem-21rem-33.5rem-2rem)]">
+                    <ChatForm
+                      isDead={playerInfo ? playerInfo.died : true}
+                      socket={socket}
+                      onSendChat={handleGameChat}
+                      isVote={gameInfo?.stage === "vote"}
+                    />
+                  </div>
                 </div>
+                <RightGameSideBar
+                  messages={messages}
+                  players={gameInfo?.players}
+                  iconArr={iconArr}
+                  onVoteSubmit={handleVoteSubmit}
+                  stage={gameInfo?.stage}
+                />
               </div>
-              <RightGameSideBar
-                messages={messages}
-                players={gameInfo?.players}
-                iconArr={iconArr}
-                onVoteSubmit={handleVoteSubmit}
-                stage={gameInfo?.stage}
-              />
             </div>
           </div>
         </div>
       </div>
-    </div>
+      {isSettingsOpen && (
+        <Settings
+          title="설정"
+          first={false}
+          setFirst={() => {}}
+          onClose={() => setIsSettingsOpen(false)}
+          isSettingsOpen={isSettingsOpen}
+        />
+      )}
+    </>
   );
 }
 
