@@ -386,14 +386,14 @@ function GamePlay() {
                     isFreeDebate={gameInfo?.stage === "free_debate"}
                   />
                 </div>
-                <RightGameSideBar
-                  messages={messages}
-                  players={gameInfo?.players}
-                  iconArr={iconArr}
-                  onVoteSubmit={handleVoteSubmit}
-                  stage={gameInfo?.stage}
-                />
               </div>
+              <RightGameSideBar
+                messages={messages}
+                players={gameInfo?.players}
+                iconArr={iconArr}
+                onVoteSubmit={handleVoteSubmit}
+                stage={gameInfo?.stage}
+              />
             </div>
           </div>
         </div>
