@@ -22,7 +22,7 @@ async def create_message(request: Request):
     return request.message
 
 
-@app.post("/api/chatgpt/{game_id}", status_code=status.HTTP_201_CREATED)
+@app.post("/api/ai/chatgpt/{game_id}/", status_code=status.HTTP_201_CREATED)
 async def chatgpt_api(request: Request):
     # 환경변수 로딩 및 클라이언트 생성
     client = OpenAI(api_key=env.str("OPENAI_API_KEY"))
@@ -50,7 +50,7 @@ async def chatgpt_api(request: Request):
         # 2) ChatGPT API 호출 및 응답
         response = (
             client.chat.completions.create(
-                model="gpt-4o-mini",
+                model="gpt-4o",
                 messages=[
                     {"role": "system", "content": load_prompt(request.ai_num, request.ai_assist)},
                     {
@@ -98,7 +98,7 @@ async def chatgpt_api(request: Request):
     return {"content": final_content}
 
 
-@app.post("/api/gemini/{game_id}", status_code=status.HTTP_201_CREATED)
+@app.post("/api/ai/gemini/{game_id}/", status_code=status.HTTP_201_CREATED)
 async def gemini_api(request: Request):
     # 환경변수 로딩 및 클라이언트 생성
     genai.configure(api_key=env.str("GEMINI_API_KEY"))
@@ -113,7 +113,7 @@ async def gemini_api(request: Request):
             "max_output_tokens": 8192,
             "response_mime_type": "application/json",
         },
-        system_instruction=load_prompt(request.ai_num),
+        system_instruction=load_prompt(request.ai_num, request.ai_assist),
     )
 
     # user_prompt와 round 번호
@@ -170,10 +170,3 @@ async def gemini_api(request: Request):
 
     # 최종 응답
     return {"content": final_content}
-
-
-"""
-{
-    "content": "어휴.. 제가 뭘 그렇게 잘못했습니까"
-}
-"""
