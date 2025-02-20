@@ -31,7 +31,7 @@ function GameSidebar() {
     <>
       <AudioPlayer src={slideSound} isPlaying={true} shouldLoop={false} />
       <aside
-        className={`mx-8 w-80 h-full ${blockStyle} flex-col items-center bg-[#00000040] hidden md:flex`}
+        className={`mx-8 w-80 h-full min-h-[730px] ${blockStyle} flex-col items-center bg-[#00000040] hidden md:flex`}
       >
         {isLoading ? (
           <div className="flex items-center justify-center h-full">

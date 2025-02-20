@@ -113,19 +113,21 @@ function Character() {
 
   return (
     <>
-      <div className=" ">
-        <div className="-z-1 relative md:w-[725px] justify-around items-center min-h-[300px] md:min-h-0 hidden md:flex flex-col">
-          <div className=" w-[50rem] h-full flex items-center  justify-center">
+      <div className="flex justify-center">
+        <div className="z-10 w-[40rem] items-center flex-col  hidden md:flex ">
+          <div className="w-[40rem]">
+            {" "}
             <img
+              className="mb-6"
               src={getCharacterImage(avatar)}
               alt={`Character ${avatar}`}
-              className="w-full md:pb-24 object-contain"
             />
           </div>
+
           <button
             onClick={() => setIsModalOpen(true)}
             onMouseDown={clickSound}
-            className={`${blockStyle} ${blockHover} ${blockActive} text-center py-4 mb-5 text-sm md:text-base md:w-44 absolute bottom-0 left-1/2 transform -translate-x-1/2`}
+            className={`${blockStyle} ${blockHover} ${blockActive} px-10 py-3 `}
           >
             캐릭터 선택
           </button>

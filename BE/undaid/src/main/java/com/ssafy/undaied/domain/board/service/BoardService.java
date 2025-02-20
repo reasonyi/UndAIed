@@ -11,11 +11,12 @@ import com.ssafy.undaied.domain.board.entity.repository.BoardRepository;
 import com.ssafy.undaied.domain.user.entity.Users;
 import com.ssafy.undaied.domain.user.entity.repository.UserRepository;
 import com.ssafy.undaied.global.common.exception.BaseException;
-import jakarta.transaction.Transactional;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
 
@@ -27,6 +28,7 @@ public class BoardService {
 
     private final BoardRepository boardRepository;
     private final UserRepository userRepository;
+    
 
 
     // 게시글 생성
@@ -59,6 +61,7 @@ public class BoardService {
     }
 
     // 게시글 리스트 조회
+    @Transactional(readOnly = true)
     public Page<BoardListResponseDto> getAllBoards(Byte category, Pageable pageable) {
         if (category == null) {
             return boardRepository.findAll(pageable)
