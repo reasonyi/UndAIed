@@ -44,9 +44,9 @@ function DiedProfile({ nickname, icon, playerNum }: IDiedProfileProps) {
   return (
     <div className="shadow-[0px_0px_16px_rgba(255,255,255,0.25)] border-2 border-solid border-[rgba(255,255,255,0.35)] w-full h-full">
       {/* <div className="hover:shadow-[0px_0px_16px_rgba(255,0,0,0.45)] w-full h-full hover:animate-ping text-white"></div> */}
-      <div className="flex justify-center items-center px-4 py-1">
+      <div className="flex justify-center items-center px-4 py-2">
         <img
-          className="filter opacity-70 grayscale sepia brightness-75 contrast-125 w-3/4 h-3/4"
+          className="filter opacity-70 grayscale sepia brightness-75 contrast-125 w-3/4 h-3/4 rounded-sm"
           src={icon}
         />
       </div>

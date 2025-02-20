@@ -62,7 +62,7 @@ public class GameChatService {
         Map<Integer, String> subjects = SubjectUtil.SUBJECTS;
         List<Integer> availableSubjects = new ArrayList<>();
         for (int i = 1; i <= subjects.size(); i++) {
-            if (!usedSubjects.contains(String.valueOf(i))) {
+            if (!usedSubjects.contains(i)) {
                 availableSubjects.add(i);
             }
         }
