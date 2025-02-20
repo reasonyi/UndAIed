@@ -218,12 +218,13 @@ public class GameInitService {
             int originalAiId = Integer.parseInt(aiIdStr);
             int negativeAiId = -originalAiId;  // AI ID를 음수로 변환
             int aiNumber = availableNumbers.remove(0);
+            String AIName = AI_POOL.get(String.valueOf(originalAiId));
 
 
             // Redis에 음수 AI ID로 정보 저장
             redisTemplate.opsForHash().put(mappingKey, String.valueOf(negativeAiId), String.valueOf(aiNumber));
-            redisTemplate.opsForHash().put(userNicknameKey, String.valueOf(negativeAiId), "AI" + negativeAiId);
-            redisTemplate.opsForHash().put(numberNicknameKey, String.valueOf(aiNumber), "AI" + negativeAiId);
+            redisTemplate.opsForHash().put(userNicknameKey, String.valueOf(negativeAiId), AIName);
+            redisTemplate.opsForHash().put(numberNicknameKey, String.valueOf(aiNumber), AIName);
             savePlayerStatus(statusKey, String.valueOf(aiNumber), false, true);
 
             // AI 번호를 Redis Set에 추가
