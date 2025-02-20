@@ -33,6 +33,7 @@ import {
   userMemoState,
 } from "../../store/gamePlayState";
 import GameEndModal from "./components/GameEndModal";
+import Settings from "../../util/Setting";
 
 interface IChatSend {
   number: number;
@@ -327,6 +328,7 @@ function GamePlay() {
     // 새로운 메시지가 추가될 때 스크롤을 아래로 이동
     scrollToBottom();
   }, [messages]);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   return (
     <div className="bg-[#07070a]">
@@ -348,6 +350,7 @@ function GamePlay() {
           timer={gameInfo?.timer}
           stage={gameInfo?.stage}
           round={gameInfo?.round}
+          onSettingsClick={() => setIsSettingsOpen(true)}
           // onLeaveRoom={handleLeaveRoom}
         />
         <div className="lg:pl-[19.5rem]">
@@ -383,18 +386,27 @@ function GamePlay() {
                     isFreeDebate={gameInfo?.stage === "free_debate"}
                   />
                 </div>
+                <RightGameSideBar
+                  messages={messages}
+                  players={gameInfo?.players}
+                  iconArr={iconArr}
+                  onVoteSubmit={handleVoteSubmit}
+                  stage={gameInfo?.stage}
+                />
               </div>
-              <RightGameSideBar
-                messages={messages}
-                players={gameInfo?.players}
-                iconArr={iconArr}
-                onVoteSubmit={handleVoteSubmit}
-                stage={gameInfo?.stage}
-              />
             </div>
           </div>
         </div>
       </div>
+      {isSettingsOpen && (
+        <Settings
+          title="설정"
+          first={false}
+          setFirst={() => {}}
+          onClose={() => setIsSettingsOpen(false)}
+          isSettingsOpen={isSettingsOpen}
+        />
+      )}
     </div>
   );
 }
