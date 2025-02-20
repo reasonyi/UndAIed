@@ -15,32 +15,27 @@ function GameMyPage() {
   const isFullscreen = settingData.isFullscreen;
 
   return (
-    <div className="relative min-h-screen w-full bg-black overflow-hidden">
-      <div className="absolute bg-[#00000063] inset-0 bg-gradient-to-r from-black via-transparent to-black z-0" />
-      <AudioPlayer src={slideSound} isPlaying={true} shouldLoop={false} />
-      <AudioPlayer src={myPageBgm} isPlaying={true} shouldLoop={true} />
+    <div className="bg-black flex flex-col items-center h-screen min-h-[900px]">
       <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat min-h-[900px]"
         style={{ backgroundImage: `url(${gameMyPageBackground})` }}
       />
-      <div className="absolute inset-0 bg-black opacity-40" />{" "}
-      <div className="absolute inset-0 bg-gradient-to-r from-black via-transparent to-black opacity-70" />{" "}
-      <div className="absolute inset-0 bg-[#00000063]" />
-      <div className="relative h-full min-h-screen flex flex-col max-w-[1440px] mx-auto px-4">
-        <div className="py-4">
-          <GameHeader />
-        </div>
+      <div className="absolute bg-[#00000063] min-h-[900px] inset-0 bg-gradient-to-r from-black via-transparent to-black z-0" />
+      <AudioPlayer src={slideSound} isPlaying={true} shouldLoop={false} />
+      <AudioPlayer src={myPageBgm} isPlaying={true} shouldLoop={true} />
 
-        <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
-          <div className="slide-in-left flex justify-center">
-            <GameUserInfo />
-          </div>
-          <div className="slide-in-center flex justify-center">
-            <Character />
-          </div>
-          <div className="slide-in-right flex justify-center">
-            <GamePlayList />
-          </div>
+      <div className="flex-none w-full z-10">
+        <GameHeader />
+      </div>
+      <div className="flex-1 grid grid-cols-1 max-w-[1440px] content-center md:grid-cols-3 gap-4 md:gap-8">
+        <div className="slide-in-left">
+          <GameUserInfo />
+        </div>
+        <div className="slide-in-center">
+          <Character />
+        </div>
+        <div className="slide-in-right ">
+          <GamePlayList />
         </div>
       </div>
     </div>
