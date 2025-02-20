@@ -2,6 +2,7 @@ package com.ssafy.undaied.socket.vote.service;
 
 import com.ssafy.undaied.socket.common.exception.SocketErrorCode;
 import com.ssafy.undaied.socket.common.exception.SocketException;
+import com.ssafy.undaied.socket.common.util.GameTimer;
 import com.ssafy.undaied.socket.stage.constant.StageType;
 import com.ssafy.undaied.socket.vote.dto.request.VoteSubmitRequestDto;
 import com.ssafy.undaied.socket.vote.dto.response.VoteResultResponseDto;
@@ -20,6 +21,7 @@ import java.util.*;
 public class VoteService {
 
     private final RedisTemplate<String, String> redisTemplate;
+    private final GameTimer gameTimer;
     private final int PLAYER = 8;
 
     // 투표 제출
@@ -67,7 +69,7 @@ public class VoteService {
             String currentStage = redisTemplate.opsForValue().get(stageKey);
             log.debug("🍳currentRound: "+ currentRound+ ", currentStage: " + currentStage + ", VOTE in redis: " + StageType.VOTE.getRedisValue());
 
-            if (!currentStage.equals(StageType.VOTE.getRedisValue()))
+            if (!currentStage.equals(StageType.VOTE.getRedisValue()) || !gameTimer.isMainStage(gameId))
                 throw new SocketException(SocketErrorCode.VOTE_STAGE_INVALID);
 
             String eventKey = "game:" + gameId + ":round:" + currentRound + ":events";

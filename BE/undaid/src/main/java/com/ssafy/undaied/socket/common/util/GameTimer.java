@@ -52,6 +52,23 @@ public class GameTimer {
         return currentKey != null ? timerInfos.getOrDefault(currentKey, 0) : 0;
     }
 
+    public Integer getCurrentTimerId(Integer gameId) {
+        String currentKey = currentTimerKeys.get(gameId);
+        if (currentKey != null) {
+            // timerKey : "gameId_timerId"
+            String[] parts = currentKey.split("_");
+            if (parts.length == 2) {
+                return Integer.parseInt(parts[1]);
+            }
+        }
+        return null;
+    }
+
+    public boolean isMainStage(Integer gameId) {
+        Integer currentTimerId = getCurrentTimerId(gameId);
+        return currentTimerId != null && currentTimerId.equals(GameTimerConstants.STAGE_MAIN);
+    }
+
     // 게임 종료 시 해당 게임의 모든 타이머 정리
     public void cleanupGame(Integer gameId) {
         // 게임의 모든 타이머 찾아서 취소
