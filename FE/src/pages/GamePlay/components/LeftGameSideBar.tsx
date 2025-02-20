@@ -13,6 +13,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Socket } from "socket.io-client";
 import SecondCounter from "./SecondCounter";
 import { STAGE_INFO } from "./info";
+import { useNavigate } from "react-router";
 
 interface ILeftGameSideBarProps {
   nickname: string;
@@ -45,6 +46,8 @@ function LeftGameSideBar({
 }: // onLeaveRoom,
 ILeftGameSideBarProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
+
   return (
     <>
       <button
@@ -133,7 +136,9 @@ ILeftGameSideBarProps) {
               />
             </button>
             <button
-            // onClick={onLeaveRoom}
+              onClick={() => {
+                navigate("/game");
+              }}
             >
               <FontAwesomeIcon
                 icon={doorOpen}
