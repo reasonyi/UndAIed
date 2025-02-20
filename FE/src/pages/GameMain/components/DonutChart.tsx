@@ -35,7 +35,6 @@ function DonutChart({
     ? circumference - (circumference * percent) / 100
     : circumference;
 
-  console.log(size);
   return (
     <div className="relative inline-block text-gray-500" ref={chartRef}>
       <div className="relative">

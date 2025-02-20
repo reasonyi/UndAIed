@@ -6,7 +6,6 @@ export const updateProfile = async (data: ProfileUpdate) => {
 
   // status가 400인 경우 에러 객체 반환
   if (response.data.status === 400) {
-    console.log("에러 잘 들어왓어요");
     return {
       error: true,
       message: "프로필 업데이트 에러",

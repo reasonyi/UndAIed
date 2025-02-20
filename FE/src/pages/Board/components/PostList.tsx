@@ -13,7 +13,6 @@ function PostList({
   formatDate,
 }: PostListProps) {
   const boardRefresh = useRecoilValue(boardRefreshState);
-  console.log(currentPosts);
 
   interface JWTPayload {
     roles: string;
@@ -26,7 +25,6 @@ function PostList({
     try {
       return jwtDecode<JWTPayload>(token);
     } catch (error) {
-      console.log("jwt decode error", error);
       return null;
     }
   };

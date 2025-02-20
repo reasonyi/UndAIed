@@ -22,7 +22,6 @@ export const useGetPosts = (categoryNum: number, currentPage: number) => {
         const response = await boardApi.getPosts(categoryNum, currentPage);
         return response.data.data || [];
       } catch (error) {
-        console.error("Failed to fetch posts:", error);
         throw error;
       }
     },
@@ -79,7 +78,6 @@ export const useAdminUpdatePost = () => {
 
     onSuccess: (_, { id }) => {
       // 수정 성공 시 해당 게시글의 캐시를 무효화
-      console.log("업데이트 성공");
       queryClient.invalidateQueries({ queryKey: ["posts", id] });
       // 게시글 목록 캐시도 무효화 (필요한 경우)
       queryClient.invalidateQueries({ queryKey: ["posts"] });
@@ -94,7 +92,6 @@ export const useDeletePost = () => {
     mutationFn: (postId: number) => boardApi.deletePost(postId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["posts"] });
-      console.log("삭제 완료");
     },
   });
 };

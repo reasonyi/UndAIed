@@ -37,22 +37,19 @@ function CreateRoomButton() {
   const navigate = useNavigate();
   const handleSubmit = (e: React.FormEvent) => {
     if (!socket) {
-      console.log("socket이 없습니다");
       return;
     }
     e.preventDefault();
     socket.emit("lobby:room:create", roomInfo, (response: CreateResponse) => {
-      console.log("응답입니다.", response);
       if (response.success) {
         //에러 발생 처리
-        console.log("들어왔어");
+
         if (roomInfo.isPrivate) {
           navigate(`room/${response.data}?pwd=${roomInfo.roomPassword}`);
         } else {
           navigate(`room/${response.data}`);
         }
       } else {
-        console.log("방 생성 에러 발생", response.errorMessage, response);
         toast.error(response.errorMessage);
       }
     });
