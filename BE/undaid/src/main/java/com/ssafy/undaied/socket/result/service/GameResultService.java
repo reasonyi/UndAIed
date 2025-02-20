@@ -294,21 +294,27 @@ public class GameResultService {
 
             // 유저 전적 업데이트
             log.debug("게임에 참여한 유저 승패 저장중...");
-            String ingameUserKey = GAME_KEY_PREFIX + gameId + ":user_nicknames";
+            String ingameUserKey = GAME_KEY_PREFIX + gameId + ":user_nickname";
             Map<Object, Object> ingameUserData = jsonRedisTemplate.opsForHash().entries(ingameUserKey);
-            if (ingameUserData == null) {
+
+            log.debug("Redis key: {}", ingameUserKey);
+            log.debug("Retrieved data: {}", ingameUserData);  // 데이터 확인용 로그
+
+            if (ingameUserData.isEmpty()) {
                 log.error("redis에서 게임에 참여한 유저를 찾을 수 없어 승패 저장 실패 - roomId: {}", roomId);
             } else {
                 for (Map.Entry<Object, Object> entry : ingameUserData.entrySet()) {
-                    Integer mapKey = Integer.parseInt((String) entry.getKey());
-                    String mapValue = (String) entry.getValue();
+                    String keyStr = entry.getKey().toString();
+                    String mapValue = entry.getValue().toString();
+
+                    Integer mapKey = Integer.parseInt(keyStr);
 
                     if(mapKey > 0) {
                         Users ingameUser = userRepository.findById(mapKey)
                                 .orElse(null);
 
                         if(ingameUser == null) {
-                            log.debug("{} 아이디값으로 유저를 찾을 수 없어 승패 저장에 실패", mapKey);
+                            log.error("{} 아이디값으로 유저를 찾을 수 없어 승패 저장에 실패", mapKey);
                         } else {
                             if((Boolean) gameData.get("humanWin")) {
                                 ingameUser.lose();
