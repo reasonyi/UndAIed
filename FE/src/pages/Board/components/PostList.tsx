@@ -64,9 +64,7 @@ function PostList({
           </tbody>
         </table>
       </div>
-      {(token !== null &&
-        userRole === "ROLE_ADMIN" &&
-        category !== "bugreport") ||
+      {(token && userRole === "ROLE_ADMIN" && category !== "bugreport") ||
       category === "bugreport" ? (
         <WriteButton />
       ) : null}
