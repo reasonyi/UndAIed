@@ -11,7 +11,7 @@ function GameHeader() {
   };
 
   return (
-    <header className="p-4 md:p-6  border-black flex justify-between items-center px-6">
+    <header className="z-50 md:p-6  border-black flex justify-between items-center px-6">
       <Link to="/game">
         <img src={logo} alt="로고" className="h-6" />
       </Link>

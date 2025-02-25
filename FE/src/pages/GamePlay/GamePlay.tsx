@@ -26,7 +26,7 @@ import { IMessage } from "../../types/gameroom";
 import { IAnonimus, IGameResultSend } from "../../types/gameplay";
 import { toast } from "sonner";
 import { STAGE_INFO } from "./components/info";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useResetRecoilState } from "recoil";
 import {
   isGameEndState,
   isUserDiedState,
@@ -85,6 +85,13 @@ function GamePlay() {
 
   const [isGameEnd, setIsGameEnd] = useRecoilState(isGameEndState);
 
+  const resetUserMemo = useResetRecoilState(userMemoState);
+
+  useEffect(() => {
+    // 컴포넌트가 마운트될 때(즉, 페이지가 로드될 때) state 초기화
+    resetUserMemo();
+  }, [resetUserMemo]);
+
   //유저 아이콘
   const iconArr = [
     "",
@@ -131,14 +138,11 @@ function GamePlay() {
 
   useEffect(() => {
     if (!socket) {
-      console.log("소켓 없음!");
       return;
     }
-    console.log("소켓 생김!");
 
     //여기서 받는 데이터는 data.아래에 바로 데이터 존재
     socket.on("game:info:send", (data: IGameInfoSend) => {
-      console.log("game:info:send 발생! data 수신:", data);
       if (data) {
         setGameInfo(data);
       }
@@ -148,7 +152,6 @@ function GamePlay() {
     //useEffect로 gameResult가 초기 값이 아니면 결과 화면 출력하게 하자
     //IGameResultSend
     socket.on("game:result:send", (data: any) => {
-      console.log("game:result:send 발생! data 수신:", data);
       setIsGameEnd(true);
       if (data) {
         setGameResult(data);
@@ -163,13 +166,10 @@ function GamePlay() {
 
   useEffect(() => {
     if (!socket) {
-      console.log("소켓 없음!");
       return;
     }
-    console.log("소켓 생김!");
 
     socket.on("game:chat:send", (data: IChatSend) => {
-      console.log("chat:send 발생! data 수신:", data);
       debugger;
       if (data) {
         if (data.number === 0) {
@@ -199,7 +199,6 @@ function GamePlay() {
 
     //주제 토론에서 모아두었던 채팅 한번에 주기
     socket.on("chat:subject:send", (data: IChatSend[]) => {
-      console.log("chat:subject:send 발생! data 수신:", data);
       debugger;
       if (data) {
         setMessages((prevMessages) => [
@@ -224,10 +223,8 @@ function GamePlay() {
   const handleGameInfo = useCallback(() => {
     // 방 입장 요청
     if (!socket) {
-      console.log("enter: socket이 존재하지 않습니다");
       return;
     }
-    console.log("emit 발생!");
 
     socket.emit(
       "game:info:emit",
@@ -239,7 +236,6 @@ function GamePlay() {
           setPlayerEnterId(data.number);
           return;
         } else {
-          console.log("game:info:emit error:", data.errorMessage);
           toast.error(data.errorMessage);
           return;
         }
@@ -272,7 +268,6 @@ function GamePlay() {
     (input: string) => {
       debugger;
       if (!socket || !playerEnterId) {
-        console.log("enter: socket 또는 playerEnterId이 존재하지 않습니다");
         return;
       }
       socket.emit(
@@ -297,7 +292,6 @@ function GamePlay() {
     (target: number) => {
       debugger;
       if (!socket) {
-        console.log("enter: socket 이 존재하지 않습니다");
         return;
       }
       socket.emit(

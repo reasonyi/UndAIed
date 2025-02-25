@@ -37,22 +37,19 @@ function CreateRoomButton() {
   const navigate = useNavigate();
   const handleSubmit = (e: React.FormEvent) => {
     if (!socket) {
-      console.log("socket이 없습니다");
       return;
     }
     e.preventDefault();
     socket.emit("lobby:room:create", roomInfo, (response: CreateResponse) => {
-      console.log("응답입니다.", response);
       if (response.success) {
         //에러 발생 처리
-        console.log("들어왔어");
+
         if (roomInfo.isPrivate) {
           navigate(`room/${response.data}?pwd=${roomInfo.roomPassword}`);
         } else {
           navigate(`room/${response.data}`);
         }
       } else {
-        console.log("방 생성 에러 발생", response.errorMessage, response);
         toast.error(response.errorMessage);
       }
     });
@@ -72,7 +69,7 @@ function CreateRoomButton() {
       <button
         onClick={() => setIsOpen(true)}
         onMouseDown={clickSound}
-        className="w-32 justify-start px-6 py-2 bg-black border-2 border-[#bf8f5b] text-white rounded hover:bg-[#211b05] hover:border-[#dea569] hover:shadow-[0_0_10px_0] hover:shadow-[#f99f3e] active:border-[#906639] active:bg-black active:shadow-none duration-100 "
+        className="z-10 w-32 justify-start px-6 py-2 bg-black border-2 border-[#bf8f5b] text-white rounded hover:bg-[#211b05] hover:border-[#dea569] hover:shadow-[0_0_10px_0] hover:shadow-[#f99f3e] active:border-[#906639] active:bg-black active:shadow-none duration-100 "
       >
         방 만들기
       </button>

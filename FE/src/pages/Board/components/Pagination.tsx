@@ -11,12 +11,10 @@ function Pagination({
 }: PaginationProps) {
   const movePrevPage = () => {
     onPageChange(Math.max(currentPage - 1, 1));
-    console.log(currentPage);
   };
 
   const moveNextPage = () => {
     onPageChange(Math.max(currentPage + 1, 1));
-    console.log(currentPage);
   };
 
   return (

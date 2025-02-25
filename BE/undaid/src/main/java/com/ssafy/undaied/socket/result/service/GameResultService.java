@@ -8,12 +8,16 @@ import com.ssafy.undaied.domain.ai.entity.AIBenchmarks;
 import com.ssafy.undaied.domain.ai.entity.AIs;
 import com.ssafy.undaied.domain.ai.entity.repository.AIBenchmarksRepository;
 import com.ssafy.undaied.domain.ai.entity.repository.AIRepository;
+import com.ssafy.undaied.domain.game.entity.GameParticipants;
 import com.ssafy.undaied.domain.game.entity.GameRecords;
 import com.ssafy.undaied.domain.game.entity.Games;
 import com.ssafy.undaied.domain.game.entity.Subjects;
+import com.ssafy.undaied.domain.game.entity.respository.GameParticipantsRepository;
 import com.ssafy.undaied.domain.game.entity.respository.GameRecordsRepository;
 import com.ssafy.undaied.domain.game.entity.respository.GamesRepository;
 import com.ssafy.undaied.domain.game.entity.respository.SubjectsRepository;
+import com.ssafy.undaied.domain.user.entity.Users;
+import com.ssafy.undaied.domain.user.entity.repository.UserRepository;
 import com.ssafy.undaied.socket.chat.service.JsonAIChatService;
 import com.ssafy.undaied.socket.common.exception.SocketErrorCode;
 import com.ssafy.undaied.socket.common.exception.SocketException;
@@ -50,6 +54,8 @@ public class GameResultService {
     private final AIRepository aiRepository;
     private final SocketIONamespace namespace;
     private final JsonAIChatService jsonAIChatService;
+    private final UserRepository userRepository;
+    private final GameParticipantsRepository gameParticipantsRepository;
 
     public String checkGameResult(int gameId) throws SocketException {
         try {
@@ -288,6 +294,64 @@ public class GameResultService {
             gamesRepository.save(game);
             log.debug("Games 객체 성공적으로 저장");
 
+            // 게임 참여자 정보 저장 및
+            // 유저 승패 업데이트
+            log.debug("게임에 참여한 유저 승패 저장중...");
+            String ingameUserKey = GAME_KEY_PREFIX + gameId + ":user_nicknames";
+            Map<Object, Object> ingameUserData = redisTemplate.opsForHash().entries(ingameUserKey);
+
+            log.debug("Redis key: {}", ingameUserKey);
+            log.debug("Retrieved data: {}", ingameUserData);  // 데이터 확인용 로그
+
+            if (ingameUserData.isEmpty()) {
+                log.error("redis에서 게임에 참여한 유저를 찾을 수 없어 승패 저장 실패 - roomId: {}", roomId);
+            } else {
+                for (Map.Entry<Object, Object> entry : ingameUserData.entrySet()) {
+                    String keyStr = entry.getKey().toString();
+                    String mapValue = entry.getValue().toString();
+
+                    Integer mapKey = Integer.parseInt(keyStr);
+
+                    if(mapKey > 0) {
+//                        log.debug("음수는 패스하고 양수인 유저 아이디값이어서 여기 잘 들어옴");
+                        Users ingameUser = userRepository.findById(mapKey)
+                                .orElse(null);
+
+                        if(ingameUser == null) {
+                            log.error("{} 아이디값으로 유저를 찾을 수 없어 승패 저장에 실패", mapKey);
+                        } else {
+                            if((Boolean) gameData.get("humanWin")) {
+                                ingameUser.win();
+                            } else {
+                                ingameUser.lose();
+                            }
+                            userRepository.save(ingameUser);
+                            log.debug("{}유저의 승패 저장 성공", mapValue);
+
+                            GameParticipants gp = new GameParticipants();
+                            gp.setGame(game);
+                            gp.setUser(ingameUser);
+
+                            gameParticipantsRepository.save(gp);
+                            log.debug("{}유저의 게임 참여 정보 저장 성공", mapValue);
+                        }
+                    } else {
+                        Integer aiId = mapKey * -1;
+                        AIs ais = aiRepository.findById(aiId)
+                                .orElse(null);
+
+                        if(ais != null) {
+                            GameParticipants gp = new GameParticipants();
+                            gp.setGame(game);
+                            gp.setAi(ais);
+
+                            gameParticipantsRepository.save(gp);
+                            log.debug("{}의 게임 참여 정보 저장 성공", ais.getAiName());
+                        }
+                    }
+                }
+            }
+
             // AI 죽은 결과 저장.
             log.debug("AI 죽은 결과 저장 시도중...");
             String aiDeadKey = GAME_KEY_PREFIX + gameId + ":ai_died";   // game:1:ai_died
@@ -345,20 +409,26 @@ public class GameResultService {
 
                 if (subject1 == null) {
                     log.error("주제를 찾을 수 없어 데이터 저장 실패");
-                    return;
+                    break;
                 }
-//                else {
-//                    System.out.println(i+"라운드 주제: "+subject1.getItem());
-//                }
+                else {
+                    System.out.println(gameId+ "번 게임의 "+i+"라운드 주제: "+subject1.getItem());
+                }
 
                 String subjectTalkKey = GAME_KEY_PREFIX + gameId + ":round:" + i +":subjectchats";  // 키  game:{gameId}:round:{roundNum}:subjectchats
                 String subjectTalks = redisTemplate.opsForValue().get(subjectTalkKey);
+                System.out.println("조회하려는 주제토론 키: " + subjectTalkKey);
+                System.out.println("주제토론 내용: " + subjectTalks);
 
                 String freeTalkKey = GAME_KEY_PREFIX + gameId + ":round:" + i +":freechats";    // 키  game:{gameId}:round:{roundNum}:freechats
                 String freeTalks = redisTemplate.opsForValue().get(freeTalkKey);
+                System.out.println("조회하려는 자유토론 키: " + freeTalkKey);
+                System.out.println("자유토론 내용: " + freeTalks);
 
                 String eventKey = GAME_KEY_PREFIX + gameId + ":round:" + i +":events";  // 키  game:{gameId}:round:{roundNumber}:events
                 String events = redisTemplate.opsForValue().get(eventKey);
+                System.out.println("조회하려는 이벤트 키: " + eventKey);
+                System.out.println("이벤트 내용: " + events);
 
                 GameRecords gameRecord = GameRecords.builder()
                         .game(game)

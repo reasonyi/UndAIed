@@ -1,3 +1,6 @@
+<<<<<<< HEAD
+import { Link, useNavigate } from "react-router-dom"
+=======
 import { Link, useNavigate } from "react-router-dom";
 import React, { useState } from "react";
 import Logo from "../assets/svg-icon/game_logo.svg";
@@ -15,7 +18,6 @@ function Header({ scrollRatio }: IHeaderProps) {
   const handleScroll = (event: React.UIEvent<HTMLDivElement>) => {
     const currentScrollTop = event.currentTarget.scrollTop;
     setScrollTop(currentScrollTop);
-    console.log(scrollTop);
   };
 
   const navigate = useNavigate();
@@ -80,3 +82,4 @@ function Header({ scrollRatio }: IHeaderProps) {
 }
 
 export default Header;
+>>>>>>> release

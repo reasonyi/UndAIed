@@ -113,23 +113,26 @@ function Character() {
 
   return (
     <>
-      <div className="-z-1 relative md:w-[725px] justify-around items-center min-h-[300px] md:min-h-0 hidden md:flex flex-col">
-        <div className="relative w-full h-full flex items-center justify-center">
-          <img
-            src={getCharacterImage(avatar)}
-            alt={`Character ${avatar}`}
-            className="h-full w-full md:pb-24 object-contain"
-          />
-        </div>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          onMouseDown={clickSound}
-          className={`${blockStyle} ${blockHover} ${blockActive} text-center py-4 mb-5 text-sm md:text-base md:w-44 absolute bottom-0 left-1/2 transform -translate-x-1/2`}
-        >
-          캐릭터 선택
-        </button>
-      </div>
+      <div className="flex justify-center">
+        <div className="z-10 w-[40rem] items-center flex-col  hidden md:flex ">
+          <div className="w-[40rem]">
+            {" "}
+            <img
+              className="mb-6"
+              src={getCharacterImage(avatar)}
+              alt={`Character ${avatar}`}
+            />
+          </div>
 
+          <button
+            onClick={() => setIsModalOpen(true)}
+            onMouseDown={clickSound}
+            className={`${blockStyle} ${blockHover} ${blockActive} px-10 py-3 `}
+          >
+            캐릭터 선택
+          </button>
+        </div>
+      </div>
       {/* Character Selection Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center z-50">

@@ -1,0 +1,65 @@
+BE     | 2025-02-18T21:21:42.966+09:00 TRACE 1 --- [undaid] [ntLoopGroup-5-5] i.n.h.c.h.w.WebSocket08FrameEncoder      : Encoding WebSocket Frame opCode=1 length=65
+BE     | 2025-02-18T21:21:42.966+09:00 TRACE 1 --- [undaid] [ntLoopGroup-5-7] i.n.h.c.h.w.WebSocket08FrameEncoder      : Encoding WebSocket Frame opCode=1 length=74
+BE     | 2025-02-18T21:21:42.966+09:00 TRACE 1 --- [undaid] [ntLoopGroup-5-8] i.n.h.c.h.w.WebSocket08FrameEncoder      : Encoding WebSocket Frame opCode=1 length=65
+BE     | 2025-02-18T21:21:42.966+09:00 TRACE 1 --- [undaid] [ntLoopGroup-5-5] c.c.socketio.handler.EncoderHandler      : Out message: 42/socket.io,["game:result:send",{"winner":"HUMAN","message":"인간 승리","players":[{"number":1,"nickname":"hevysite99","died":false,"inGame":true},{"number":2,"nickname":"AI-2","died":true,"inGame":true},{"number":3,"nickname":"dummyhoon1","died":true,"inGame":true},{"number":4,"nickname":"kwondhl9","died":false,"inGame":true},{"number":5,"nickname":"imjh990614","died":true,"inGame":true},{"number":6,"nickname":"AI-3","died":true,"inGame":true},{"number":7,"nickname":"enderstream00","died":false,"inGame":true},{"number":8,"nickname":"timothy.jubo","died":true,"inGame":true}]}] sessionId: 17823dea-879e-4f33-a318-9a88c74f424e
+BE     | 2025-02-18T21:21:42.967+09:00 TRACE 1 --- [undaid] [ntLoopGroup-5-5] i.n.h.c.h.w.WebSocket08FrameEncoder      : Encoding WebSocket Frame opCode=1 length=164
+BE     | 2025-02-18T21:21:42.967+09:00 TRACE 1 --- [undaid] [ntLoopGroup-5-2] c.c.socketio.handler.EncoderHandler      : Out message: 42/socket.io,["game:result:send",{"winner":"HUMAN","message":"인간 승리","players":[{"number":1,"nickname":"hevysite99","died":false,"inGame":true},{"number":2,"nickname":"AI-2","died":true,"inGame":true},{"number":3,"nickname":"dummyhoon1","died":true,"inGame":true},{"number":4,"nickname":"kwondhl9","died":false,"inGame":true},{"number":5,"nickname":"imjh990614","died":true,"inGame":true},{"number":6,"nickname":"AI-3","died":true,"inGame":true},{"number":7,"nickname":"enderstream00","died":false,"inGame":true},{"number":8,"nickname":"timothy.jubo","died":true,"inGame":true}]}] sessionId: 7bedb990-a771-4f47-a1f9-165bfff3af67
+BE     | 2025-02-18T21:21:42.967+09:00 TRACE 1 --- [undaid] [ntLoopGroup-5-1] c.c.socketio.handler.EncoderHandler      : Out message: 42/socket.io,["game:result:send",{"winner":"HUMAN","message":"인간 승리","players":[{"number":1,"nickname":"hevysite99","died":false,"inGame":true},{"number":2,"nickname":"AI-2","died":true,"inGame":true},{"number":3,"nickname":"dummyhoon1","died":true,"inGame":true},{"number":4,"nickname":"kwondhl9","died":false,"inGame":true},{"number":5,"nickname":"imjh990614","died":true,"inGame":true},{"number":6,"nickname":"AI-3","died":true,"inGame":true},{"number":7,"nickname":"enderstream00","died":false,"inGame":true},{"number":8,"nickname":"timothy.jubo","died":true,"inGame":true}]}] sessionId: 819162a8-c21d-458e-a439-82c7dd45318b
+BE     | 2025-02-18T21:21:42.967+09:00 TRACE 1 --- [undaid] [ntLoopGroup-5-3] c.c.socketio.handler.EncoderHandler      : Out message: 42/socket.io,["game:result:send",{"winner":"HUMAN","message":"인간 승리","players":[{"number":1,"nickname":"hevysite99","died":false,"inGame":true},{"number":2,"nickname":"AI-2","died":true,"inGame":true},{"number":3,"nickname":"dummyhoon1","died":true,"inGame":true},{"number":4,"nickname":"kwondhl9","died":false,"inGame":true},{"number":5,"nickname":"imjh990614","died":true,"inGame":true},{"number":6,"nickname":"AI-3","died":true,"inGame":true},{"number":7,"nickname":"enderstream00","died":false,"inGame":true},{"number":8,"nickname":"timothy.jubo","died":true,"inGame":true}]}] sessionId: 724d8559-0bd7-4212-9ed2-b43a564ad106
+BE     | 2025-02-18T21:21:42.967+09:00 TRACE 1 --- [undaid] [ntLoopGroup-5-1] i.n.h.c.h.w.WebSocket08FrameEncoder      : Encoding WebSocket Frame opCode=1 length=74
+BE     | 2025-02-18T21:21:42.967+09:00 TRACE 1 --- [undaid] [ntLoopGroup-5-3] i.n.h.c.h.w.WebSocket08FrameEncoder      : Encoding WebSocket Frame opCode=1 length=74
+BE     | 2025-02-18T21:21:42.967+09:00 TRACE 1 --- [undaid] [ntLoopGroup-5-2] i.n.h.c.h.w.WebSocket08FrameEncoder      : Encoding WebSocket Frame opCode=1 length=93
+BE     | 2025-02-18T21:21:42.967+09:00 TRACE 1 --- [undaid] [ntLoopGroup-5-4] c.c.socketio.handler.EncoderHandler      : Out message: 42/socket.io,["game:result:send",{"winner":"HUMAN","message":"인간 승리","players":[{"number":1,"nickname":"hevysite99","died":false,"inGame":true},{"number":2,"nickname":"AI-2","died":true,"inGame":true},{"number":3,"nickname":"dummyhoon1","died":true,"inGame":true},{"number":4,"nickname":"kwondhl9","died":false,"inGame":true},{"number":5,"nickname":"imjh990614","died":true,"inGame":true},{"number":6,"nickname":"AI-3","died":true,"inGame":true},{"number":7,"nickname":"enderstream00","died":false,"inGame":true},{"number":8,"nickname":"timothy.jubo","died":true,"inGame":true}]}] sessionId: 7d0cc921-0571-4c4b-9dcc-e44156c8cc2c
+BE     | 2025-02-18T21:21:42.967+09:00 TRACE 1 --- [undaid] [ntLoopGroup-5-4] i.n.h.c.h.w.WebSocket08FrameEncoder      : Encoding WebSocket Frame opCode=1 length=65
+BE     | 2025-02-18T21:21:42.967+09:00  INFO 1 --- [undaid] [pool-4-thread-1] c.s.u.s.r.service.GameResultService      : Stopped AI message scheduling for game: 2
+BE     | 2025-02-18T21:21:42.967+09:00  INFO 1 --- [undaid] [pool-4-thread-1] c.s.u.s.r.service.GameResultService      : 백엔드상 게임방 나가기 처리됩니다
+BE     | 2025-02-18T21:21:42.968+09:00 DEBUG 1 --- [undaid] [pool-4-thread-1] c.s.u.s.r.service.GameResultService      : DB에 게임 결과 저장을 시도하는 중...
+BE     | 2025-02-18T21:21:42.968+09:00 DEBUG 1 --- [undaid] [pool-4-thread-1] o.s.d.redis.core.RedisConnectionUtils    : Fetching Redis Connection from RedisConnectionFactory
+BE     | 2025-02-18T21:21:42.968+09:00 DEBUG 1 --- [undaid] [pool-4-thread-1] o.s.d.redis.core.RedisConnectionUtils    : Closing Redis Connection
+BE     | 2025-02-18T21:21:42.969+09:00 DEBUG 1 --- [undaid] [pool-4-thread-1] o.s.d.redis.core.RedisConnectionUtils    : Fetching Redis Connection from RedisConnectionFactory
+BE     | 2025-02-18T21:21:42.970+09:00 DEBUG 1 --- [undaid] [pool-4-thread-1] o.s.d.redis.core.RedisConnectionUtils    : Closing Redis Connection
+BE     | 2025-02-18T21:21:42.974+09:00 DEBUG 1 --- [undaid] [pool-4-thread-1] o.s.d.redis.core.RedisConnectionUtils    : Fetching Redis Connection from RedisConnectionFactory
+BE     | 2025-02-18T21:21:42.976+09:00 DEBUG 1 --- [undaid] [pool-4-thread-1] o.s.d.redis.core.RedisConnectionUtils    : Closing Redis Connection
+BE     | [Hibernate] 
+BE     |     insert 
+BE     |     into
+BE     |         games
+BE     |         (ended_at, human_win, play_time, room_title, started_at) 
+BE     |     values
+BE     |         (?, ?, ?, ?, ?)
+BE     | 2025-02-18T21:21:42.989+09:00 DEBUG 1 --- [undaid] [pool-4-thread-1] c.s.u.s.r.service.GameResultService      : Games 객체 성공적으로 저장
+BE     | 2025-02-18T21:21:42.989+09:00 DEBUG 1 --- [undaid] [pool-4-thread-1] o.s.d.redis.core.RedisConnectionUtils    : Fetching Redis Connection from RedisConnectionFactory
+BE     | 2025-02-18T21:21:42.995+09:00 DEBUG 1 --- [undaid] [pool-4-thread-1] o.s.d.redis.core.RedisConnectionUtils    : Closing Redis Connection
+BE     | 2025-02-18T21:21:42.995+09:00 ERROR 1 --- [undaid] [pool-4-thread-1] c.s.u.s.r.service.GameResultService      : 게임 데이터 저장 중 예상하지 못한 에러 발생: Error in execution
+BE     | 2025-02-18T21:21:42.996+09:00  INFO 1 --- [undaid] [pool-4-thread-1] c.s.u.s.r.service.GameResultService      : 게임 종료가 성공적으로 진행됐습니다.: 2
+BE     | 2025-02-18T21:21:46.305+09:00 TRACE 1 --- [undaid] [ntLoopGroup-5-1] c.c.socketio.handler.EncoderHandler      : Out message: 2 sessionId: 11c06c81-c627-40c4-be33-e43bd3b3986b
+BE     | 2025-02-18T21:21:46.305+09:00 TRACE 1 --- [undaid] [ntLoopGroup-5-1] i.n.h.c.h.w.WebSocket08FrameEncoder      : Encoding WebSocket Frame opCode=1 length=3
+BE     | 2025-02-18T21:21:46.305+09:00 TRACE 1 --- [undaid] [ntLoopGroup-5-7] c.c.socketio.handler.EncoderHandler      : Out message: 2 sessionId: 869aa11d-e700-494b-9b7a-4b857dc490ae
+BE     | 2025-02-18T21:21:46.305+09:00 TRACE 1 --- [undaid] [ntLoopGroup-5-7] i.n.h.c.h.w.WebSocket08FrameEncoder      : Encoding WebSocket Frame opCode=1 length=3
+BE     | 2025-02-18T21:21:46.305+09:00 TRACE 1 --- [undaid] [ntLoopGroup-5-8] c.c.socketio.handler.EncoderHandler      : Out message: 2 sessionId: 2a9daf19-73f0-403a-8bce-0ca58a5a35e6
+BE     | 2025-02-18T21:21:46.305+09:00 TRACE 1 --- [undaid] [ntLoopGroup-5-8] i.n.h.c.h.w.WebSocket08FrameEncoder      : Encoding WebSocket Frame opCode=1 length=3
+BE     | 2025-02-18T21:21:46.316+09:00 TRACE 1 --- [undaid] [ntLoopGroup-5-8] i.n.h.c.h.w.WebSocket08FrameDecoder      : Decoding WebSocket Frame opCode=1
+BE     | 2025-02-18T21:21:46.317+09:00 TRACE 1 --- [undaid] [ntLoopGroup-5-7] i.n.h.c.h.w.WebSocket08FrameDecoder      : Decoding WebSocket Frame opCode=1
+BE     | 2025-02-18T21:21:46.317+09:00 TRACE 1 --- [undaid] [ntLoopGroup-5-7] i.n.h.c.h.w.WebSocket08FrameDecoder      : Decoding WebSocket Frame length=1
+BE     | 2025-02-18T21:21:46.317+09:00 TRACE 1 --- [undaid] [ntLoopGroup-5-7] c.c.socketio.handler.InPacketHandler     : In message: 3 sessionId: 869aa11d-e700-494b-9b7a-4b857dc490ae
+BE     | 2025-02-18T21:21:46.316+09:00 TRACE 1 --- [undaid] [ntLoopGroup-5-1] i.n.h.c.h.w.WebSocket08FrameDecoder      : Decoding WebSocket Frame opCode=1
+BE     | 2025-02-18T21:21:46.317+09:00 TRACE 1 --- [undaid] [ntLoopGroup-5-1] i.n.h.c.h.w.WebSocket08FrameDecoder      : Decoding WebSocket Frame length=1
+BE     | 2025-02-18T21:21:46.317+09:00 TRACE 1 --- [undaid] [ntLoopGroup-5-1] c.c.socketio.handler.InPacketHandler     : In message: 3 sessionId: 11c06c81-c627-40c4-be33-e43bd3b3986b
+BE     | 2025-02-18T21:21:46.317+09:00 TRACE 1 --- [undaid] [ntLoopGroup-5-8] i.n.h.c.h.w.WebSocket08FrameDecoder      : Decoding WebSocket Frame length=1
+BE     | 2025-02-18T21:21:46.317+09:00 TRACE 1 --- [undaid] [ntLoopGroup-5-8] c.c.socketio.handler.InPacketHandler     : In message: 3 sessionId: 2a9daf19-73f0-403a-8bce-0ca58a5a35e6
+BE     | 2025-02-18T21:21:47.606+09:00 TRACE 1 --- [undaid] [ntLoopGroup-5-5] c.c.socketio.handler.EncoderHandler      : Out message: 2 sessionId: 17823dea-879e-4f33-a318-9a88c74f424e
+BE     | 2025-02-18T21:21:47.606+09:00 TRACE 1 --- [undaid] [ntLoopGroup-5-5] i.n.h.c.h.w.WebSocket08FrameEncoder      : Encoding WebSocket Frame opCode=1 length=3
+BE     | 2025-02-18T21:21:47.606+09:00 TRACE 1 --- [undaid] [ntLoopGroup-5-6] c.c.socketio.handler.EncoderHandler      : Out message: 2 sessionId: 95ee7376-849c-45b7-86fd-079c8f6520e7
+BE     | 2025-02-18T21:21:47.606+09:00 TRACE 1 --- [undaid] [ntLoopGroup-5-6] i.n.h.c.h.w.WebSocket08FrameEncoder      : Encoding WebSocket Frame opCode=1 length=3
+BE     | 2025-02-18T21:21:47.617+09:00 TRACE 1 --- [undaid] [ntLoopGroup-5-5] i.n.h.c.h.w.WebSocket08FrameDecoder      : Decoding WebSocket Frame opCode=1
+BE     | 2025-02-18T21:21:47.617+09:00 TRACE 1 --- [undaid] [ntLoopGroup-5-5] i.n.h.c.h.w.WebSocket08FrameDecoder      : Decoding WebSocket Frame length=3
+BE     | 2025-02-18T21:21:47.617+09:00 TRACE 1 --- [undaid] [ntLoopGroup-5-5] c.c.socketio.handler.InPacketHandler     : In message: 3 sessionId: 17823dea-879e-4f33-a318-9a88c74f424e
+BE     | 2025-02-18T21:21:47.618+09:00 TRACE 1 --- [undaid] [ntLoopGroup-5-6] i.n.h.c.h.w.WebSocket08FrameDecoder      : Decoding WebSocket Frame opCode=1
+BE     | 2025-02-18T21:21:47.619+09:00 TRACE 1 --- [undaid] [ntLoopGroup-5-6] i.n.h.c.h.w.WebSocket08FrameDecoder      : Decoding WebSocket Frame length=3
+BE     | 2025-02-18T21:21:47.619+09:00 TRACE 1 --- [undaid] [ntLoopGroup-5-6] c.c.socketio.handler.InPacketHandler     : In message: 3 sessionId: 95ee7376-849c-45b7-86fd-079c8f6520e7
+BE     | 2025-02-18T21:21:47.705+09:00 TRACE 1 --- [undaid] [ntLoopGroup-5-7] c.c.socketio.handler.EncoderHandler      : Out message: 2 sessionId: c7fcb88e-0687-49f3-b977-30ba6636b6af
+BE     | 2025-02-18T21:21:47.705+09:00 TRACE 1 --- [undaid] [ntLoopGroup-5-7] i.n.h.c.h.w.WebSocket08FrameEncoder      : Encoding WebSocket Frame opCode=1 length=3
+BE     | 2025-02-18T21:21:47.718+09:00 TRACE 1 --- [undaid] [ntLoopGroup-5-7] i.n.h.c.h.w.WebSocket08FrameDecoder      : Decoding WebSocket Frame opCode=1
+BE     | 2025-02-18T21:21:47.718+09:00 TRACE 1 --- [undaid] [ntLoopGroup-5-7] i.n.h.c.h.w.WebSocket08FrameDecoder      : Decoding WebSocket Frame length=3
+BE     | 2025-02-18T21:21:47.718+09:00 TRACE 1 --- [undaid] [ntLoopGroup-5-7] c.c.socketio.handler.InPacketHandler     : In message: 3 sessionId: c7fcb88e-0687-49f3-b977-30ba6636b6af
+BE     | 2025-02-18T21:21:49.405+09:00 TRACE 

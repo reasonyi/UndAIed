@@ -76,14 +76,11 @@ function GameRoom() {
 
   useEffect(() => {
     if (!socket) {
-      console.log("소켓 없음!");
       return;
     }
-    console.log("소켓 생김!");
 
     //여기서 받는 데이터는 data.아래에 바로 데이터 존재
     socket.on("room:enter:send", (data: IRoomInfo) => {
-      console.log("send 발생! data 수신:", data);
       debugger;
       if (data.currentPlayers) {
         const newUsers: IPlayer[] = data.currentPlayers.sort(
@@ -98,7 +95,6 @@ function GameRoom() {
 
     // 누군가(또는 내가) 방에서 나갔을 때 (서버에서 send ('room:leave:send', data))
     socket.on("room:leave:send", (data: IRoomInfo) => {
-      console.log("leave:send 발생! data 수신:", data);
       debugger;
       if (data.currentPlayers) {
         const newUsers: IPlayer[] = data.currentPlayers.sort(
@@ -111,7 +107,6 @@ function GameRoom() {
     });
 
     socket.on("room:chat:send", (data: IChatInfo) => {
-      console.log("chat:send 발생! data 수신:", data);
       debugger;
       if (data.message && data.nickname && roomInfo) {
         if (data.nickname === "system") {
@@ -143,7 +138,6 @@ function GameRoom() {
     });
 
     socket.on("game:init:send", (data: { gameId: number }) => {
-      console.log("게임으로 이동 이벤트 수신:", data);
       navigate(`/game/play/${data.gameId}`);
     });
 
@@ -167,10 +161,8 @@ function GameRoom() {
   const handleEnterRoom = useCallback(() => {
     // 방 입장 요청
     if (!socket || !roomIdParam) {
-      console.log("enter: socket 또는 roomIdParam이 존재하지 않습니다");
       return;
     }
-    console.log("emit 발생!");
 
     socket.emit(
       "room:enter:emit",
@@ -188,7 +180,6 @@ function GameRoom() {
           setRoomErrorMessage(
             errorMessage || "입장 도중 에러러가 발생했습니다."
           );
-          console.log(errorMessage);
           toast.error(errorMessage);
           return;
         }
@@ -199,7 +190,6 @@ function GameRoom() {
   const handleLeaveRoom = useCallback(() => {
     // 방 퇴장 요청
     if (!socket || !roomIdParam) {
-      console.log("enter: socket 또는 roomIdParam이이 존재하지 않습니다");
       return;
     }
     socket.emit(
@@ -222,7 +212,6 @@ function GameRoom() {
     (input: string) => {
       debugger;
       if (!socket || !roomIdParam) {
-        console.log("enter: socket 또는 roomIdParam이이 존재하지 않습니다");
         return;
       }
       socket.emit(
@@ -247,11 +236,9 @@ function GameRoom() {
   const handleGameStart = useCallback(() => {
     //게임 시작 요청청
     if (!socket || !roomIdParam) {
-      console.log("enter: socket 또는 roomIdParam이이 존재하지 않습니다");
       return;
     }
     //확인
-    console.log("게임 시작 버튼 누름");
     //방장 정보?
     socket.emit(
       "game:init:emit",
@@ -259,7 +246,6 @@ function GameRoom() {
       //데이터 형식 맞는지 잘 확인하기. 현재 백에서 data는 gameId임!!
       ({ success, errorMessage, data }: IGameStartDone) => {
         if (success) {
-          console.log("game:init:emit 잘 동작함");
         } else {
           //게임 시작 실패 안내내
           toast.error(errorMessage);
@@ -290,7 +276,6 @@ function GameRoom() {
     const handleUnload = () => {
       if (socket) {
         socket.emit("pre-disconnect");
-        console.log("새로고침 확인 후 실행됨");
       }
     };
 

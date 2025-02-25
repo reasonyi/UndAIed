@@ -13,7 +13,6 @@ const GoogleLoginButton2: React.FC<GoogleLoginButtonProps> = ({
   ) => {
     // 구글에서 발급해준 JWT
     const token = response.credential;
-    // console.log("Google Token: ", token);
 
     // 부모 컴포넌트나 상위 로직으로 토큰 전달
     onTokenReceive(token);

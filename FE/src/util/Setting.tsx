@@ -32,8 +32,6 @@ function Settings({
   onClose,
   isSettingsOpen,
 }: SettingProps) {
-  console.log("열림");
-
   const [isOpen, setIsOpen] = useState(false);
   const [settings, setSettings] = useRecoilState(settingsState);
   const [showIntro, setShowIntro] = useRecoilState(setShowIntroState);
@@ -119,7 +117,6 @@ function Settings({
     setIsOpen(false);
     setShowIntro(true);
     setFirst(false);
-    console.log(first, isOpen, showIntro);
   };
   return (
     <>
