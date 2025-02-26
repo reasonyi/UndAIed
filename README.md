@@ -81,9 +81,9 @@ UndAIed는 "어떻게 하면 LLM에 대한 인간 선호도 평가 데이터를 
 
 | 기능 | 화면 |
 |------|------|
-| 유저 로그인 | <video autoplay loop muted playsinline style="max-width: 100%;"><source src="exec/assets/login.mp4" type="video/mp4"></video> |
-| 튜토리얼 | <video autoplay loop muted playsinline style="max-width: 100%;"><source src="exec/assets/tutorial.mp4" type="video/mp4"></video> |
-| 게임 시작 | <video autoplay loop muted playsinline style="max-width: 100%;"><source src="exec/assets/gameStart.mp4" type="video/mp4"></video> |
+| 유저 로그인 | ![로그인](exec/assets/login.gif) |
+| 튜토리얼 | ![튜토리얼](exec/assets/tutorial.gif) |
+| 게임 시작 | ![게임 시작](exec/assets/gameStart.gif) |
 
 <br>
 <br>
@@ -92,7 +92,7 @@ UndAIed는 "어떻게 하면 LLM에 대한 인간 선호도 평가 데이터를 
 
 | 기능 | 화면 |
 |------|------|
-| 버그리포트 / 공지사항 | <video autoplay loop muted playsinline style="max-width: 100%;"><source src="exec/assets/board.mp4" type="video/mp4"></video> |
+| 버그리포트 / 공지사항 | ![게시판](exec/assets/board.gif) |
 
 <br>
 <br>
@@ -101,10 +101,10 @@ UndAIed는 "어떻게 하면 LLM에 대한 인간 선호도 평가 데이터를 
 
 | 기능 | 화면 |
 |------|------|
-| 실시간 유저 채팅 | <video autoplay loop muted playsinline style="max-width: 100%;"><source src="exec/assets/lobby-chat.mp4" type="video/mp4"></video> |
-| 실시간 대기실 목록 |<video autoplay loop muted playsinline style="max-width: 100%;"><source src="exec/assets/lobby-room-created.mp4" type="video/mp4"></video>|
-| 방만들기 |<video autoplay loop muted playsinline style="max-width: 100%;"><source src="exec/assets/room-create.mp4" type="video/mp4"></video>|
-| 게임 설정 |<video autoplay loop muted playsinline style="max-width: 100%;"><source src="exec/assets/setting.mp4" type="video/mp4"></video>|
+| 실시간 유저 채팅 | ![로비 유저 채팅](exec/assets/lobby-chat.gif) |
+| 실시간 대기실 목록 | ![로비 대기실 목록](exec/assets/lobby-room-created.gif) |
+| 방만들기 | ![방만들기](exec/assets/room-create.gif) |
+| 게임 설정 | ![게임 설정](exec/assets/setting.gif) |
 
 <br>
 <br>
@@ -113,8 +113,8 @@ UndAIed는 "어떻게 하면 LLM에 대한 인간 선호도 평가 데이터를 
 
 | 기능 | 화면 |
 |------|------|
-| 실시간 유저 입장/퇴장 |<video autoplay loop muted playsinline style="max-width: 100%;"><source src="exec/assets/room-enter.mp4" type="video/mp4"></video>|
-| 실시간 채팅 | <video autoplay loop muted playsinline style="max-width: 100%;"><source src="exec/assets/room-chat.mp4" type="video/mp4"></video> |
+| 실시간 유저 입장/퇴장 | ![대기방 유저 입장](exec/assets/room-enter.gif) |
+| 실시간 채팅 | ![대기방 채팅](exec/assets/room-chat.gif) |
 
 <br>
 <br>
@@ -123,9 +123,9 @@ UndAIed는 "어떻게 하면 LLM에 대한 인간 선호도 평가 데이터를 
 
 | 기능 | 화면 |
 |------|------|
-| 주제토론 | <video autoplay loop muted playsinline style="max-width: 100%;"><source src="exec/assets/주제토론.mp4" type="video/mp4"></video> |
-| 자유토론 | <video autoplay loop muted playsinline style="max-width: 100%;"><source src="exec/assets/자유토론.mp4" type="video/mp4"></video> |
-| 투표 | <video autoplay loop muted playsinline style="max-width: 100%;"><source src="exec/assets/투표.mp4" type="video/mp4"></video> |
+| 주제토론 | ![주제토론](exec/assets/주제토론.gif) |
+| 자유토론 | ![자유토론](exec/assets/자유토론.gif) |
+| 투표 | ![투표](exec/assets/투표.gif) |
 
 <br>
 <br>
@@ -134,9 +134,9 @@ UndAIed는 "어떻게 하면 LLM에 대한 인간 선호도 평가 데이터를 
 
 | 기능 | 화면 |
 |------|------|
-| 프로필 수정 | <video autoplay loop muted playsinline style="max-width: 100%;"><source src="exec/assets/profile-change.mp4" type="video/mp4"></video> |
-| 캐릭터 변경 | <video autoplay loop muted playsinline style="max-width: 100%;"><source src="exec/assets/character-change.mp4" type="video/mp4"></video> |
-| 전적 확인 | <video autoplay loop muted playsinline style="max-width: 100%;"><source src="exec/assets/gamerecord-check.mp4" type="video/mp4"></video> |
+| 프로필 수정 | ![프로필 수정](exec/assets/profile-change.gif) |
+| 캐릭터 변경 | ![캐릭터 변경](exec/assets/character-change.gif) |
+| 전적 확인 | ![전적 확인](exec/assets/gamerecord-check.gif) |
 
 ##
 
@@ -249,3 +249,52 @@ UndAIed는 "어떻게 하면 LLM에 대한 인간 선호도 평가 데이터를 
 ├─📂room
 ├─📂stage
 └─📂vote
+```
+
+### FrontEnd
+
+```code
+frontend
+├─📂api
+├─📂assets
+├─📂components
+├─📂hooks
+├─📂pages
+│  ├─📂Board
+│  ├─📂Friends
+│  ├─📂Game
+│  ├─📂GameMain
+│  ├─📂GameMyPage
+│  ├─📂GamePlay
+│  ├─📂GameRoom
+│  └─📂Home
+├─📂routes
+├─📂store
+├─📂types
+└─📂util
+```
+
+<br>
+<br>
+
+# 📋 프로젝트 산출물
+
+- [요구사항 명세서](https://buttoned-countess-f5d.notion.site/17ea4113f52d809b8a7cf9c92eef61f7?pvs=4)
+- [API 명세서](https://buttoned-countess-f5d.notion.site/API-182a4113f52d8045a690e75028d96181?pvs=4)
+- [ERD](https://www.erdcloud.com/d/BHo42AscKqpZWuGyc)
+- [와이어프레임](https://www.figma.com/design/3BDcFYd6wVHXrG2HJMONwI/%EC%99%80%EC%9D%B4%EC%96%B4%ED%94%84%EB%A0%88%EC%9E%84-%EC%84%A4%EA%B3%84?node-id=0-1&p=f&t=BjTtP6xt4aQNF8us-0)
+- 시스템 아키텍처 </br>
+  <img src="https://img.notionusercontent.com/s3/prod-files-secure%2Fea7e2bec-58fd-407d-ace0-0294caef4726%2Fb9918481-1d89-46dd-a7d4-f4cf98301ca7%2F%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7_2025-02-21_123547.png/size/w=2000?exp=1740545882&sig=YnNsUfiyzdr6SRnk2uUqGD4dW-RApii0RaujaqBgrVM">
+
+<br>
+<br>
+
+# 👩‍💻 팀원 역할 분배
+
+| 이유리                                                                       | 최현만                                                                        | 민선희                                                                                                 | 김윤배                                                                       | 임종훈                                                                        | 권동환                                                                        |
+| ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| <img src="https://avatars.githubusercontent.com/u/66377159?v=4" width="100"> | <img src="https://avatars.githubusercontent.com/u/175273545?v=4" width="100"> | <img src="https://github.githubassets.com/images/gravatars/gravatar-user-420.png?size=32" width="100"> | <img src="https://avatars.githubusercontent.com/u/95129943?v=4" width="100"> | <img src="https://avatars.githubusercontent.com/u/107557178?v=4" width="100"> | <img src="https://avatars.githubusercontent.com/u/145204393?v=4" width="100"> |
+| Leader & Backend                                                             | Backend                                                                       | Backend                                                                                                | Frontend                                                                     | Frontend & AI                                                                 | Infra & AI                                                                    |
+
+<br>
+<br>
