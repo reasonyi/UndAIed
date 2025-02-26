@@ -284,7 +284,7 @@ frontend
 - [ERD](https://www.erdcloud.com/d/BHo42AscKqpZWuGyc)
 - [와이어프레임](https://www.figma.com/design/3BDcFYd6wVHXrG2HJMONwI/%EC%99%80%EC%9D%B4%EC%96%B4%ED%94%84%EB%A0%88%EC%9E%84-%EC%84%A4%EA%B3%84?node-id=0-1&p=f&t=BjTtP6xt4aQNF8us-0)
 - 시스템 아키텍처 </br>
-  <img src="https://img.notionusercontent.com/s3/prod-files-secure%2Fea7e2bec-58fd-407d-ace0-0294caef4726%2Fb9918481-1d89-46dd-a7d4-f4cf98301ca7%2F%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7_2025-02-21_123547.png/size/w=2000?exp=1740545882&sig=YnNsUfiyzdr6SRnk2uUqGD4dW-RApii0RaujaqBgrVM">
+  <img src="exec/assets/시스템아키텍쳐.png">
 
 <br>
 <br>
