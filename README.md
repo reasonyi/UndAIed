@@ -231,24 +231,24 @@ UndAIed는 "어떻게 하면 LLM에 대한 인간 선호도 평가 데이터를 
 │ │ └─📂response
 │ └─📂config
 └─📂socket
-├─📂chat
-├─📂common
-│ ├─📂config
-│ ├─📂constant
-│ ├─📂exception
-│ ├─📂handler
-│ ├─📂response
-│ ├─📂service
-│ └─📂util
-├─📂infect
-├─📂init
-├─📂json
-├─📂lobby
-├─📂quit
-├─📂result
-├─📂room
-├─📂stage
-└─📂vote
+  ├─📂chat
+  ├─📂common
+  │ ├─📂config
+  │ ├─📂constant
+  │ ├─📂exception
+  │ ├─📂handler
+  │ ├─📂response
+  │ ├─📂service
+  │ └─📂util
+  ├─📂infect
+  ├─📂init
+  ├─📂json
+  ├─📂lobby
+  ├─📂quit
+  ├─📂result
+  ├─📂room
+  ├─📂stage
+  └─📂vote
 ```
 
 ### FrontEnd
